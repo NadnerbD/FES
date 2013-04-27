@@ -1,0 +1,195 @@
+<html>
+<head>
+	<style type="text/css">
+		div.comment {
+			position: relative;
+			padding: 10px;
+			border-style: solid;
+			border-bottom-style: dashed;
+			border-width: 1px;
+			border-top-width: 0px;
+			border-color: gray;
+			overflow: hidden;
+			background-color: white;
+		}
+		div.comment:first-child {
+			border-top-width: 1px;
+		}
+		div.comment:last-child {
+			border-bottom-style: solid;
+		}
+		div.comment:nth-child(2n+1) {
+			background-color: #F0F0F0;
+		}
+		div.selected {
+			box-shadow: 0 0 30px rgba(0, 0, 255, 0.3);
+		}
+		div.data {
+			position: relative;
+			margin-left: 120px;
+			border-radius: 3px;
+			border-style: solid;
+			border-color: gray;
+			border-width: 1px;
+			padding: 10px;
+			background-color: white;
+		}
+		div.author {
+			float: left;
+			background-color: #E0E0FF;
+			width: 100px;
+			height: 100px;
+		}
+		div.data div.data {
+			margin: 0px;
+		}
+		div.data div.author {
+			display: none;
+		}
+		div.comment_arrow {
+			border-bottom: 11px solid transparent;
+			border-right: 11px solid gray;
+			border-top: 11px solid transparent;
+			position: absolute;
+			top: 10px;
+			left: -11px;
+		}
+		div.comment_arrow div {
+			border-bottom: 11px solid transparent;
+			border-right: 11px solid white;
+			border-top: 11px solid transparent;
+			position: absolute;
+			top: -11px;
+			left: 1px;
+		}
+		div.metadata {
+			border-bottom: 1px solid gray;
+			font-size: 0.7em;
+			margin-bottom: 10px;
+			padding-bottom: 5px;
+		}
+		a.jump {
+			position: absolute;
+			top: -2px;
+		}
+		a.edit_button {
+			border-radius: 2px;
+			border-width: 1px;
+			border-style: solid;
+			padding-left: 3px;
+			padding-right: 3px;
+			background-color: #F0F0F0;
+			float: right;
+		}
+	</style>
+	<script type="text/javascript">
+		function init() {
+			document.addEventListener("click", handleClick);
+			window.onhashchange = highlightSelected;
+			highlightSelected();
+		}
+		function handleClick(event) {
+			// the most hilarious hack I ever did, literally copies elements from the page into the space where the quote goes
+			if(event.target.classList.contains("quote_link")) {
+				if(event.target.nextSibling.nodeName == "DIV") {
+					event.target.parentNode.removeChild(event.target.nextSibling);
+				}else{
+					var elem = document.getElementsByName(event.target.hash.substring(1));
+					if(elem.length) {
+						var quote_container = document.createElement("div");
+						quote_container.appendChild(elem[0].parentNode.cloneNode(true));
+						event.target.parentNode.insertBefore(quote_container, event.target.nextSibling);
+					}
+				}
+				event.preventDefault();
+			}
+		}
+		function highlightSelected() {
+			var elem = document.getElementsByClassName("selected");
+			for(var i = 0; i < elem.length; i++) {
+				elem[i].classList.remove("selected");
+			}
+			var jump = document.getElementsByName(window.location.hash.substring(1));
+			for(var i = 0; i < jump.length; i++) {
+				jump[i].parentNode.classList.add("selected");
+			}
+		}
+	</script>
+</head>
+<body onload="init()">
+	<div class="comment">
+		<a class="jump" name="0"></a>
+		<div class="author">
+		</div>
+		<div class="data">
+			<div class="comment_arrow"><div></div></div>
+			<div class="metadata">
+				<a href="#0">#0</a>
+				<a class="edit_button">Edit</a>
+			</div>
+			<div class="body">
+				This is some text
+				<a href="#3" class="quote_link">>>3</a>
+				and a quote.
+			</div>
+		</div>
+	</div>
+	<div class="comment">
+		<a class="jump" name="2"></a>
+		<div class="author">
+		</div>
+		<div class="data">
+			<div class="comment_arrow"><div></div></div>
+			<div class="metadata">
+				<a href="#2">#2</a>
+			</div>
+			<div class="body">
+				This is some text
+			</div>
+		</div>
+	</div>
+	<div class="comment">
+		<a class="jump" name="3"></a>
+		<div class="author">
+		</div>
+		<div class="data">
+			<div class="comment_arrow"><div></div></div>
+			<div class="metadata">
+				<a href="#3">#3</a>
+			</div>
+			<div class="body">
+				This is some text
+			</div>
+		</div>
+	</div>
+	<div class="comment">
+		<a class="jump" name="4"></a>
+		<div class="author">
+		</div>
+		<div class="data">
+			<div class="comment_arrow"><div></div></div>
+			<div class="metadata">
+				<a href="#4">#4</a>
+			</div>
+			<div class="body">
+				This is some text
+			</div>
+		</div>
+	</div>
+	<div class="comment">
+		<a class="jump" name="5"></a>
+		<div class="author">
+		</div>
+		<div class="data">
+			<div class="comment_arrow"><div></div></div>
+			<div class="metadata">
+				<a href="#5">#5</a>
+			</div>
+			<div class="body">
+				This is some text
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+

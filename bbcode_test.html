@@ -1,0 +1,248 @@
+<html>
+	<head>
+		<script type="text/javascript">
+			/*
+				Parser designed specifically to transform the BBCode variant used on FimFiction.net into a DOM tree
+				
+				steps:
+					lexing:
+						scan for tags, generate tag stream
+					parsing/generation:
+						generate DOM tree from tag stream
+				
+				lexing grammar:
+					name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube";
+					tag = "[" ("/" name) | (name [ "=" value ]) "]";
+					emote = ":" emote_name ":";
+					close_p = "\n";
+				
+				we place invalid tags back into the stream as text
+				extracting emotes poses a slight problem. where should they be extracted from?
+				second pass on text nodes seems like the best place.
+				
+				procedure for rewriting spans to trees
+				[i]a[b]b[u]c[/i]d[/b]e[/u]
+				Build tree by walking tag stream. 
+				If a tag is closed out of order, close all intervening tags, and reopen them immediately after.
+				Skip reopening if there is no child node. 
+				<i>
+					a
+					<b>
+					b
+						<u>c</u>
+					</b>
+				</i>
+				<b>
+					<u>d</u>
+				</b>
+				<u>e</u>
+			*/
+			function stringStream(string) {
+				var index = 0;
+				var next = string[index++];
+				function get() {
+					next = string[index++];
+				}
+				this.accept = function(token) {
+					if(next == token) {
+						get();
+						return true;
+					}
+					return false;
+				}
+				this.accept_not = function(tokens) {
+					var value = "";
+					while(tokens.indexOf(next) == -1 && !empty()) {
+						value += next;
+						get();
+					}
+					return value;
+				}
+				this.expect = function(token) {
+					if(next != token) {
+						throw "Expected: " + token + " Got: " + next;
+					}
+					get();
+				}
+				var empty = this.empty = function() {
+					return index > string.length;
+				}
+			}
+			
+			function tag(stream) {
+				this.close = false;
+				if(stream.accept("[")) {
+					if(stream.accept("/")) {
+						this.close = true;
+						this.name = stream.accept_not(["]"]);
+					}else{
+						this.name = stream.accept_not(["]", "="]);
+						if(stream.accept("=")) {
+							this.value = stream.accept_not(["]"]);
+						}
+					}
+					stream.expect("]");
+				}else if(stream.accept("\n")) {
+					this.close = true;
+					this.name = "p";
+				}else{
+					this.name = "text";
+					this.value = stream.accept_not(["[", "\n"]);
+				}
+				if(!(this.name in tagElementNames) && this.name != "text") {
+					// this should allow invalid tags to show up as text
+					if(this.close) {
+						this.value = "[/" + this.name + "]";
+					}else if(this.value) {
+						this.value = "[" + this.name + "=" + this.value + "]";
+					}else{
+						this.value = "[" + this.name + "]";
+					}
+					this.name = "text";
+				}
+			}
+			
+			function tagList(stream) {
+				var tags = [];
+				while(!stream.empty()) {
+					tags.push(new tag(stream));
+				}
+				return tags;
+			}
+			
+			function urlParams(url) {
+				var params = {};
+				var pairs = url.split("?")[1].split("&");
+				while(pairs.length) {
+					var pair = pairs.shift().split("=");
+					params[pair[0]] = pair[1];
+				}
+				return params;
+			}
+			
+			// Translating multiple elements to "span" causes some incorrect behavior with reopening
+			var tagElementNames = {
+				"b": "B", 
+				"i": "I",
+				"u": "U",
+				"s": "SPAN",
+				"size": "SPAN",
+				"color": "SPAN",
+				"url": "A",
+				"img": "IMG",
+				"quote": "BLOCKQUOTE",
+				"youtube": "DIV",
+				"p": "P"
+			}
+			function generateElements(tags) {
+				var top = document.createElement("div");
+				openNode(document.createElement("p"));
+				function closeNode() {
+					var lastTop = top;
+					top = top.parentElement;			
+					// if the top element was empty, remove it.
+					if(lastTop.childNodes.length == 0) {
+						top.removeChild(lastTop);
+					}
+				}
+				function closeTag(name) {
+					var closedNodes = [];
+					while(tagElementNames[name] != top.nodeName) {
+						closedNodes.push(top.cloneNode(false));
+						closeNode();
+					}
+					closeNode();
+					return closedNodes;
+				}
+				function reopenNodes(nodes) {
+					while(nodes.length > 0) {
+						openNode(nodes.pop());
+					}
+					// we should always have a top level p element for text
+					if(top.parentNode == null || top.nodeName == "BLOCKQUOTE") {
+						openNode(document.createElement("p"));
+					}
+				}
+				function openNode(node) {
+					top.appendChild(node);
+					top = top.lastChild;
+				}
+				for(var tag = tags.shift(); tag != undefined; tag = tags.shift()) {
+					if(tag.name == "text") {
+						top.appendChild(document.createTextNode(tag.value));
+					}else if(tag.name == "img") {
+						var image = document.createElement("img");
+						image.src = tags.shift().value;
+						tags.shift(); // this should be the closing img tag. We could assert this, but it's verified earlier.
+						top.appendChild(image);
+					}else if(tag.name == "youtube") {
+						// the purpose of the container is to provide an alternate link if the embed doesn't work
+						// currently it's not actually used for anything
+						var closed = closeTag("p");
+						var container = document.createElement("div");
+						var player = document.createElement("iframe");
+						player.src = "http://www.youtube.com/embed/" + urlParams(tag.value).v;
+						container.appendChild(player);
+						top.appendChild(container);
+						openNode(document.createElement("p"));
+						reopenNodes(closed);
+					}else if(tag.close) {
+						reopenNodes(closeTag(tag.name));
+					}else{ // open a new tag
+						var element = document.createElement(tagElementNames[tag.name]);
+						var closed = [];
+						if(tag.name == "url") {
+							element.href = tag.value;
+						}else if(tag.name == "color") {
+							element.style.color = tag.value;
+						}else if(tag.name == "size") {
+							element.style.fontSize = tag.value + "px";
+						}else if(tag.name == "s") {
+							element.style.textDecoration = "line-through";
+						}else if(tag.name == "quote") {
+							closed = closeTag("p");
+						}
+						openNode(element);
+						if(tag.name == "quote") {
+							openNode(document.createElement("p"));
+							reopenNodes(closed);
+						}
+					}
+				}
+				while(top.parentNode != null) {
+					closeNode();
+				}
+				return top;
+			}
+			
+			function preview(event) {
+				event.preventDefault();
+				var text = document.getElementById("input").value;
+				var target = document.getElementById("preview");
+				while(target.childNodes.length > 0) {
+					target.removeChild(target.lastChild);
+				}
+				target.appendChild(generateElements(tagList(new stringStream(text))));
+			}
+		</script>
+		<style type="text/css">
+			blockquote {
+				background-color: gray;
+			}
+		</style>
+	</head>
+	<body>
+		<form onsubmit="preview(event)">
+			<textarea rows="10" cols="80" id="input">[i]a[b]b[u]c[/i]d[/b]e[/u]
+[s]test[/s]
+[i]blah[quote]te[/i][b]st[/quote]blah[/b]
+[youtube=http://www.youtube.com/watch?v=UxPWYpcVI1c]
+[color=#F00][size=24]te[/color]st[/size]
+[s][url=http://www.google.com]te[/s]st[/url]
+[img]http://nadru.dyndns.org/Images/WinLinuxQtCC.png[/img]</textarea>
+			<input type="submit" />
+		</form>
+		<div id="preview">
+		</div>
+	</body>
+</html>
