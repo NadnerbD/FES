@@ -2,7 +2,7 @@
 	<head>
 		<script type="text/javascript">
 			/*
-				Parser designed specifically to transform the BBCode variant used on FimFiction.net into a DOM tree
+				Simple parser designed to transform BBCode into a DOM tree
 				
 				steps:
 					lexing:
@@ -39,6 +39,7 @@
 			*/
 			function stringStream(string) {
 				var index = 0;
+				var mark = 0;
 				var next = string[index++];
 				function get() {
 					next = string[index++];
@@ -50,7 +51,7 @@
 					}
 					return false;
 				}
-				this.accept_not = function(tokens) {
+				this.accept_until = function(tokens) {
 					var value = "";
 					while(tokens.indexOf(next) == -1 && !empty()) {
 						value += next;
@@ -67,45 +68,96 @@
 				var empty = this.empty = function() {
 					return index > string.length;
 				}
+				this.mark = function() {
+					mark = index - 1;
+				}
+				this.from_mark = function() {
+					return string.substring(mark, index - 1);
+				}
+				this.peek = function() {
+					return next;
+				}
+			}
+			
+			function tagName(stream) {
+				// this is some crazy hax. I wouldn't do this in a parser that could actually
+				// complain about invalid input
+				var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube"];
+				var index = 0;
+				while(true) {
+					var nextNames = [];
+					// check all names to see if they can be advanced
+					for(var tagName = 0; tagName < tagNames.length; tagName++) {
+						if(stream.peek() == tagNames[tagName][index] || index == tagNames[tagName].length) {
+							nextNames.push(tagNames[tagName]);
+						}
+					}
+					// advance the stream
+					for(var i = 0; i < nextNames.length; i++) {
+						if(stream.accept(nextNames[i][index])) {
+							break;
+						}
+					}
+					if(nextNames.length == 1 && nextNames[0].length == index) {
+						// if we've hit the end of a valid name, and it's the only one remaining..
+						return nextNames[0];
+					}else if(nextNames.length == 0) {
+						// or if we've eliminated all name candidtates
+						throw "Invalid tagName";
+					}
+					tagNames = nextNames;
+					index++;
+				}
+			}
+			
+			function emoteName(stream) {
+				// we don't have a list of these yet...
+				throw "Invalid emoteName";
 			}
 			
 			function tag(stream) {
-				this.close = false;
-				if(stream.accept("[")) {
-					if(stream.accept("/")) {
-						this.close = true;
-						this.name = stream.accept_not(["]"]);
-					}else{
-						this.name = stream.accept_not(["]", "="]);
-						if(stream.accept("=")) {
-							this.value = stream.accept_not(["]"]);
+				stream.mark();
+				try {
+					this.close = false;
+					if(stream.accept("[")) {
+						if(stream.accept("/")) {
+							this.close = true;
+							this.name = tagName(stream);
+						}else{
+							this.name = tagName(stream);
+							if(stream.accept("=")) {
+								this.value = stream.accept_until(["]"]);
+							}
 						}
-					}
-					stream.expect("]");
-				}else if(stream.accept("\n")) {
-					this.close = true;
-					this.name = "p";
-				}else{
-					this.name = "text";
-					this.value = stream.accept_not(["[", "\n"]);
-				}
-				if(!(this.name in tagElementNames) && this.name != "text") {
-					// this should allow invalid tags to show up as text
-					if(this.close) {
-						this.value = "[/" + this.name + "]";
-					}else if(this.value) {
-						this.value = "[" + this.name + "=" + this.value + "]";
+						stream.expect("]");
+					}else if(stream.accept(":")) {
+						this.name = "emote";
+						this.value = emoteName(stream);
+						stream.expect(":");
+					}else if(stream.accept("\n")) {
+						this.close = true;
+						this.name = "p";
 					}else{
-						this.value = "[" + this.name + "]";
+						this.name = "text";
+						this.value = stream.accept_until(["[", ":", "\n"]);
 					}
+				} catch (e) {
+					// failed to parse an element, return it as text
 					this.name = "text";
+					this.value = stream.from_mark();
 				}
 			}
 			
 			function tagList(stream) {
 				var tags = [];
 				while(!stream.empty()) {
-					tags.push(new tag(stream));
+					var next = new tag(stream);
+					if(next.name == "text" && tags.length > 0 && tags[tags.length - 1].name == "text") {
+						// concatenate consecutive text tags
+						tags[tags.length - 1].value += next.value;
+					}else{
+						tags.push(next);
+					}
 				}
 				return tags;
 			}
@@ -139,7 +191,7 @@
 				openNode(document.createElement("p"));
 				function closeNode() {
 					var lastTop = top;
-					top = top.parentElement;			
+					top = top.parentNode;			
 					// if the top element was empty, remove it.
 					if(lastTop.childNodes.length == 0) {
 						top.removeChild(lastTop);
@@ -153,6 +205,16 @@
 					}
 					closeNode();
 					return closedNodes;
+				}
+				function isTagOpen(name) {
+					var open = top;
+					while(open.nodeName != tagElementNames[name]) {
+						open = open.parentNode;
+						if(open == null) {
+							return false;
+						}
+					}
+					return true;
 				}
 				function reopenNodes(nodes) {
 					while(nodes.length > 0) {
@@ -172,8 +234,11 @@
 						top.appendChild(document.createTextNode(tag.value));
 					}else if(tag.name == "img") {
 						var image = document.createElement("img");
-						image.src = tags.shift().value;
-						tags.shift(); // this should be the closing img tag. We could assert this, but it's verified earlier.
+						if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "img") {
+							// TODO: figure out why this check always fails
+							image.src = tags.shift().value;
+							tags.shift();
+						}
 						top.appendChild(image);
 					}else if(tag.name == "youtube") {
 						// the purpose of the container is to provide an alternate link if the embed doesn't work
@@ -187,7 +252,9 @@
 						openNode(document.createElement("p"));
 						reopenNodes(closed);
 					}else if(tag.close) {
-						reopenNodes(closeTag(tag.name));
+						if(isTagOpen(tag.name)) {
+							reopenNodes(closeTag(tag.name));
+						}
 					}else{ // open a new tag
 						var element = document.createElement(tagElementNames[tag.name]);
 						var closed = [];
