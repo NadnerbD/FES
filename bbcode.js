@@ -156,6 +156,9 @@ function bbcode() {
 				this.name = "quote_ref";
 				this.value = integerString(stream);
 			}else if(stream.accept("\n")) {
+				if(stream.accept("\n")) {
+					this.value = "double";
+				}
 				this.close = true;
 				this.name = "p";
 			}else{
@@ -256,7 +259,6 @@ function bbcode() {
 			}else if(tag.name == "img") {
 				var image = document.createElement("img");
 				if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "img") {
-					// TODO: figure out why this check always fails
 					image.src = tags.shift().value;
 					tags.shift();
 				}
@@ -285,6 +287,9 @@ function bbcode() {
 			}else if(tag.close) {
 				if(isTagOpen(tag.name)) {
 					reopenNodes(closeTag(tag.name));
+				}
+				if(tag.name == "p" && tag.value == "double") {
+					top.className = "double";
 				}
 			}else{ // open a new tag
 				var element = document.createElement(tagElementNames[tag.name]);
