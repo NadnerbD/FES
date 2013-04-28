@@ -240,6 +240,11 @@
 							tags.shift();
 						}
 						top.appendChild(image);
+					}else if(tag.name == "emote") {
+						// emotes are really simple :)
+						var emote = document.createElement("img");
+						emote.src = "emotes/" + tag.value + ".jpg";
+						top.appendChild(emote);
 					}else if(tag.name == "youtube") {
 						// the purpose of the container is to provide an alternate link if the embed doesn't work
 						// currently it's not actually used for anything
