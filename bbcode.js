@@ -11,6 +11,7 @@
 		name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube";
 		tag = "[" ("/" name) | (name [ "=" value ]) "]";
 		emote = ":" emote_name ":";
+		quote_ref = ">>" number;
 		close_p = "\n";
 	
 	we place invalid tags back into the stream as text
@@ -75,6 +76,11 @@ function stringStream(string) {
 	this.peek = function() {
 		return next;
 	}
+	this.read = function() {
+		var ret = next;
+		get();
+		return ret;
+	}
 }
 
 function tagName(stream) {
@@ -113,6 +119,18 @@ function emoteName(stream) {
 	throw "Invalid emoteName";
 }
 
+function integerString(stream) {
+	var nums = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+	var str = "";
+	while(stream.peek() in nums) {
+		str += stream.read();
+	}
+	if(str.length == 0) {
+		throw "Invalid number";
+	}
+	return parseInt(str);
+}
+
 function tag(stream) {
 	stream.mark();
 	try {
@@ -132,12 +150,16 @@ function tag(stream) {
 			this.name = "emote";
 			this.value = emoteName(stream);
 			stream.expect(":");
+		}else if(stream.accept(">")) {
+			stream.expect(">");
+			this.name = "quote_ref";
+			this.value = integerString(stream);
 		}else if(stream.accept("\n")) {
 			this.close = true;
 			this.name = "p";
 		}else{
 			this.name = "text";
-			this.value = stream.accept_until(["[", ":", "\n"]);
+			this.value = stream.accept_until(["[", ":", ">", "\n"]);
 		}
 	} catch (e) {
 		// failed to parse an element, return it as text
@@ -243,6 +265,11 @@ function generateElements(tags) {
 			var emote = document.createElement("img");
 			emote.src = "emotes/" + tag.value + ".jpg";
 			top.appendChild(emote);
+		}else if(tag.name == "quote_ref") {
+			var ref = document.createElement("a");
+			ref.href = "#" + tag.value;
+			ref.appendChild(document.createTextNode(">>" + tag.value));
+			top.appendChild(ref);
 		}else if(tag.name == "youtube") {
 			// the purpose of the container is to provide an alternate link if the embed doesn't work
 			// currently it's not actually used for anything
