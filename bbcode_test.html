@@ -9,7 +9,8 @@
 				while(target.childNodes.length > 0) {
 					target.removeChild(target.lastChild);
 				}
-				target.appendChild(generateElements(tagList(new stringStream(text))));
+				var parser = new bbcode();
+				target.appendChild(parser.render(text));
 			}
 		</script>
 		<style type="text/css">
@@ -34,7 +35,7 @@
 [youtube =http://www.youtube.com/watch?v=UxPWYpcVI1c]
 [color=#F00][size=24]te[/color]st[/size]
 [s][url=http://www.google.com]te[/s]st[/url]
-[img]http://nadru.dyndns.org/Images/WinLinuxQtCC.png[/img]</textarea>
+[img]http://nadru.dyndns.org/Images/Backstab.png[/img]</textarea>
 			<input type="submit" />
 		</form>
 		<div id="preview">
