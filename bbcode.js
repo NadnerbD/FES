@@ -84,10 +84,7 @@ function bbcode() {
 		}
 	}
 
-	function tagName(stream) {
-		// this is some crazy hax. I wouldn't do this in a parser that could actually
-		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube"];
+	function acceptIdentifiers(stream, tagNames) {
 		var index = 0;
 		while(true) {
 			var nextNames = [];
@@ -115,9 +112,20 @@ function bbcode() {
 		}
 	}
 
+	function tagName(stream) {
+		// this is some crazy hax. I wouldn't do this in a parser that could actually
+		// complain about invalid input
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube"];
+		return acceptIdentifiers(stream, tagNames);
+	}
+
+	var emoteDict = {};
 	function emoteName(stream) {
-		// we don't have a list of these yet...
-		throw "Invalid emoteName";
+		var emoteNames = [];
+		for(key in emoteDict) {
+			emoteNames.push(key);
+		}
+		return acceptIdentifiers(stream, emoteNames);
 	}
 
 	function integerString(stream) {
@@ -266,7 +274,7 @@ function bbcode() {
 			}else if(tag.name == "emote") {
 				// emotes are really simple :)
 				var emote = document.createElement("img");
-				emote.src = "emotes/" + tag.value + ".jpg";
+				emote.src = emoteDict[tag.value];
 				top.appendChild(emote);
 			}else if(tag.name == "quote_ref") {
 				var ref = document.createElement("a");
@@ -320,5 +328,10 @@ function bbcode() {
 
 	this.render = function(str) {
 		return generateElements(tagList(new stringStream(str)));
+	}
+
+	this.registerEmotes = function(emotes) {
+		// expects an object of the form {"emotename": "emoteimagepath", ...}
+		emoteDict = emotes;
 	}
 }

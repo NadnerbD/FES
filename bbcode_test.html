@@ -10,6 +10,7 @@
 					target.removeChild(target.lastChild);
 				}
 				var parser = new bbcode();
+				parser.registerEmotes({backstab: "http://nadru.dyndns.org/Images/Backstab.png"});
 				target.appendChild(parser.render(text));
 			}
 		</script>
@@ -38,6 +39,7 @@
 [youtube =http://www.youtube.com/watch?v=UxPWYpcVI1c]
 
 [color=#F00][size=24]te[/color]st[/size]
+this is a :backstab:
 [s][url=http://www.google.com]te[/s]st[/url]
 [img]http://nadru.dyndns.org/Images/Backstab.png[/img]</textarea>
 			<input type="submit" />
