@@ -275,10 +275,12 @@ function bbcode() {
 				// emotes are really simple :)
 				var emote = document.createElement("img");
 				emote.src = emoteDict[tag.value];
+				emote.alt = ":" + tag.value + ":";
 				top.appendChild(emote);
 			}else if(tag.name == "quote_ref") {
 				var ref = document.createElement("a");
 				ref.href = "#" + tag.value;
+				ref.className = "quote_link";
 				ref.appendChild(document.createTextNode(">>" + tag.value));
 				top.appendChild(ref);
 			}else if(tag.name == "youtube") {
