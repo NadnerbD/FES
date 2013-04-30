@@ -24,6 +24,9 @@
 						emoteObject[emoteList[i][0]] = "emotes/" + emoteList[i][0] + ".png";
 					}
 					parser.registerEmotes(emoteObject);
+					for(var key in emoteObject) {
+						document.getElementById("input").value += ":" + key + ":";
+					}
 				}
 			};
 			request.open("GET", "emotes/emoticons.json", true);
@@ -54,7 +57,7 @@
 [youtube =http://www.youtube.com/watch?v=UxPWYpcVI1c]
 
 [color=#F00][size=24]te[/color]st[/size]
-this is a :backstab:
+[center]this is a :backstab:[/center]
 [s][url=http://www.google.com]te[/s]st[/url]
 [img]http://nadru.dyndns.org/Images/Backstab.png[/img]</textarea>
 			<input type="submit" />

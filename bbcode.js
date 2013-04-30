@@ -9,11 +9,13 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
 			close_p = "\n";
+
+		some standard bbcode tags that aren't supported by our target are "font", "code", "ul", and "ol"
 		
 		we place invalid tags back into the stream as text
 		extracting emotes poses a slight problem. where should they be extracted from?
@@ -115,7 +117,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -216,6 +218,7 @@ function bbcode() {
 		"img": "IMG",
 		"quote": "BLOCKQUOTE",
 		"youtube": "DIV",
+		"center": "CENTER",
 		"p": "P"
 	}
 	function generateElements(tags) {
@@ -334,6 +337,8 @@ function bbcode() {
 
 	this.registerEmotes = function(emotes) {
 		// expects an object of the form {"emotename": "emoteimagepath", ...}
-		emoteDict = emotes;
+		for(var key in emotes) {
+			emoteDict[key] = emotes[key];
+		}
 	}
 }
