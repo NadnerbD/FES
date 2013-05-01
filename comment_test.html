@@ -44,7 +44,7 @@
 			width: 180px;
 			text-align: center;
 		}
-		div.name {
+		a.name {
 			display: inline-block;
 			border-radius: 3px;
 			background-color: #88a927;
@@ -53,10 +53,9 @@
 			text-shadow: -1px -1px rgba(0, 0, 0, 0.2);
 			box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.2) inset;
 			border: 1px solid rgba(0, 0, 0, 0.2);
-		}
-		div.name a {
 			color: #fff;
 			text-decoration: none;
+			font-family: Segoe UI;
 		}
 		img.avatar {
 			height: 128px;
@@ -80,11 +79,11 @@
 			left: -11px;
 		}
 		div.comment_arrow div {
-			border-bottom: 11px solid transparent;
-			border-right: 11px solid white;
-			border-top: 11px solid transparent;
+			border-bottom: 10px solid transparent;
+			border-right: 10px solid white;
+			border-top: 10px solid transparent;
 			position: absolute;
-			top: -11px;
+			top: -10px;
 			left: 1px;
 		}
 		div.metadata {
@@ -188,9 +187,7 @@
 			var structure = {tag: "div", attrs: {className: "comment"}, children: [
 				{tag: "a", attrs: {className: "jump", name: comment.id}},
 				{tag: "div", attrs: {className: "author"}, children: [
-					{tag: "div", attrs: {className: "name"}, children: [
-						{tag: "a", attrs: {href: "user/" + author.name}, children: [author.name]}
-					]},
+					{tag: "a", attrs: {className: "name", href: "/user/" + author.name}, children: [author.name]},
 					{tag: "img", attrs: {className: "avatar", src: author.avatar}}
 				]},
 				{tag: "div", attrs: {className: "data"}, children: [
