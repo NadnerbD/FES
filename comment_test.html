@@ -184,49 +184,49 @@
 			}
 		}
 		function createComment(comment, author) {
-			// Generates a comment element
-			var commentDiv = document.createElement("div");
-			commentDiv.className = "comment";
-			var jump = document.createElement("a");
-			jump.className = "jump";
-			jump.name = comment.id;
-			commentDiv.appendChild(jump);
-			var authorDiv = document.createElement("div");
-			authorDiv.className = "author";
-			var nameDiv = document.createElement("div");
-			nameDiv.className = "name";
-			var nameLink = document.createElement("a");
-			nameLink.href = "user/" + author.name;
-			nameLink.appendChild(document.createTextNode(author.name));
-			nameDiv.appendChild(nameLink);
-			authorDiv.appendChild(nameDiv);
-			var avatar = document.createElement("img");
-			avatar.className = "avatar";
-			avatar.src = author.avatar;
-			authorDiv.appendChild(avatar);
-			commentDiv.appendChild(authorDiv);
-			var data = document.createElement("div");
-			data.className = "data";
-			var arrow = document.createElement("div");
-			arrow.className = "comment_arrow";
-			arrow.appendChild(document.createElement("div"));
-			data.appendChild(arrow);
-			var meta = document.createElement("div");
-			meta.className = "metadata";
-			var permalink = document.createElement("a");
-			permalink.href = "#" + comment.id;
-			permalink.appendChild(document.createTextNode("#" + comment.id));
-			meta.appendChild(permalink);
-			var editLink = document.createElement("a");
-			editLink.className = "edit_button";
-			editLink.appendChild(document.createTextNode("Edit"));
-			meta.appendChild(editLink);
-			data.appendChild(meta);
-			var body = parser.render(comment.data);
-			body.className = "body";
-			data.appendChild(body);
-			commentDiv.appendChild(data);
-			return commentDiv;
+			// JSONified HTML, because why not
+			var structure = {tag: "div", attrs: {className: "comment"}, children: [
+				{tag: "a", attrs: {className: "jump", name: comment.id}},
+				{tag: "div", attrs: {className: "author"}, children: [
+					{tag: "div", attrs: {className: "name"}, children: [
+						{tag: "a", attrs: {href: "user/" + author.name}, children: [author.name]}
+					]},
+					{tag: "img", attrs: {className: "avatar", src: author.avatar}}
+				]},
+				{tag: "div", attrs: {className: "data"}, children: [
+					{tag: "div", attrs: {className: "comment_arrow"}, children: [
+						{tag: "div"}
+					]},
+					{tag: "div", attrs: {className: "metadata"}, children: [
+						{tag: "a", attrs: {href: "#" + comment.id}, children: ["#" + comment.id]},
+						{tag: "a", attrs: {className: "edit_button"}, children: ["Edit"]}
+					]},
+					{node: parser.render(comment.data), attrs: {className: "body"}}
+				]}
+			]};
+			return createTree(structure);
+		}
+		function createTree(node) {
+			var tag;
+			if(node.tag) {
+				tag = document.createElement(node.tag);
+			}else if(node.node) {
+				// this method of adding existing nodes allows us to add extra attrs
+				tag = node.node;
+			}
+			for(var attr in node.attrs) {
+				tag[attr] = node.attrs[attr];
+			}
+			if(node.children) {
+				for(var i = 0; i < node.children.length; i++) {
+					if(typeof node.children[i] == "string") {
+						tag.appendChild(document.createTextNode(node.children[i]));
+					}else{
+						tag.appendChild(createTree(node.children[i]));
+					}
+				}
+			}
+			return tag;
 		}
 	</script>
 </head>
