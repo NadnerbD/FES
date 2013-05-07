@@ -178,9 +178,12 @@
 			}
 		}
 		function writeComments() {
+			// feed all the comments into a fragment so we can add them simultaneously
+			var frag = document.createDocumentFragment();
 			for(var i = 0; i < test_comments.length; i++) {
-				document.body.appendChild(createComment(test_comments[i], test_users[test_comments[i].author]));
+				frag.appendChild(createComment(test_comments[i], test_users[test_comments[i].author]));
 			}
+			document.body.appendChild(frag);
 		}
 		function createComment(comment, author) {
 			// JSONified HTML, because why not

@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -117,7 +117,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -274,6 +274,12 @@ function bbcode() {
 					tags.shift();
 				}
 				top.appendChild(image);
+			}else if(tag.name == "hr" && tag.close == false) {
+				// hr is a self-closing p-level tag
+				var closed = closeTag("p");
+				top.appendChild(document.createElement("hr"));
+				openNode(document.createElement("p"));
+				reopenNodes(closed);
 			}else if(tag.name == "emote") {
 				// emotes are really simple :)
 				var emote = document.createElement("img");
