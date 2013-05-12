@@ -107,40 +107,49 @@
 		}
 	</style>
 	<script type="text/javascript">
-		var test_users = [
-			{
-				id: 0,
+		var test_users = {
+			0: {
 				name: "Nadnerb",
 				avatar: "http://www.fimfiction-static.net/images/avatars/91255_128.jpg?1361969153"
 			}
-		];
-		var test_comments = [
-			{
-				id: 0,
-				author: 0,
+		};
+		var test_comments = {
+			0: {
+				parentId: 0,
+				authorId: 0,
+				datePosted: "",
+				replies: [],
 				data: "This is some text >>3 and a quote."
 			},
-			{
-				id: 1,
-				author: 0,
+			1: {
+				parentId: 1,
+				authorId: 0,
+				datePosted: "",
+				replies: [],
 				data: "This is some text"
 			},
-			{
-				id: 2,
-				author: 0,
+			2: {
+				parentId: 2,
+				authorId: 0,
+				datePosted: "",
+				replies: [],
 				data: "This is some text"
 			},
-			{
-				id: 3,
-				author: 0,
+			3: {
+				parentId: 3,
+				authorId: 0,
+				datePosted: "",
+				replies: [],
 				data: "This is some text"
 			},
-			{
-				id: 4,
-				author: 0,
+			4: {
+				parentId: 4,
+				authorId: 0,
+				datePosted: "",
+				replies: [],
 				data: "This is some text"
 			}
-		];
+		};
 	</script>
 	<script type="text/javascript" src="bbcode.js"></script>
 	<script type="text/javascript">
@@ -180,15 +189,16 @@
 		function writeComments() {
 			// feed all the comments into a fragment so we can add them simultaneously
 			var frag = document.createDocumentFragment();
-			for(var i = 0; i < test_comments.length; i++) {
-				frag.appendChild(createComment(test_comments[i], test_users[test_comments[i].author]));
+			for(var i in test_comments) {
+				var comment = test_comments[i];
+				frag.appendChild(createComment(i, comment, test_users[comment.authorId]));
 			}
 			document.body.appendChild(frag);
 		}
-		function createComment(comment, author) {
+		function createComment(id, comment, author) {
 			// JSONified HTML, because why not
 			var structure = {tag: "div", attrs: {className: "comment"}, children: [
-				{tag: "a", attrs: {className: "jump", name: comment.id}},
+				{tag: "a", attrs: {className: "jump", name: id}},
 				{tag: "div", attrs: {className: "author"}, children: [
 					{tag: "a", attrs: {className: "name", href: "/user/" + author.name}, children: [author.name]},
 					{tag: "img", attrs: {className: "avatar", src: author.avatar}}
@@ -198,7 +208,7 @@
 						{tag: "div"}
 					]},
 					{tag: "div", attrs: {className: "metadata"}, children: [
-						{tag: "a", attrs: {href: "#" + comment.id}, children: ["#" + comment.id]},
+						{tag: "a", attrs: {href: "#" + id}, children: ["#" + id]},
 						{tag: "a", attrs: {className: "edit_button"}, children: ["Edit"]}
 					]},
 					{node: parser.render(comment.data), attrs: {className: "body"}}
