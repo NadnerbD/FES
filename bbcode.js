@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -117,7 +117,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -214,6 +214,7 @@ function bbcode() {
 		"s": "SPAN",
 		"size": "SPAN",
 		"color": "SPAN",
+		"spoiler": "SPAN",
 		"url": "A",
 		"img": "IMG",
 		"quote": "BLOCKQUOTE",
@@ -321,6 +322,8 @@ function bbcode() {
 					element.style.fontSize = tag.value + "px";
 				}else if(tag.name == "s") {
 					element.style.textDecoration = "line-through";
+				}else if(tag.name == "spoiler") {
+					element.className = "spoiler";
 				}else if(tag.name == "quote") {
 					closed = closeTag("p");
 				}

@@ -19,3 +19,13 @@ blockquote {
 	box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1);
 	background-color: #F7F7F7;
 }
+span.spoiler {
+	background-color: #333333;
+	color: #333333;
+	text-shadow: none;
+}
+span.spoiler:hover {
+	background-color: inherit;
+	color: inherit;
+	text-shadow: inherit;
+}
