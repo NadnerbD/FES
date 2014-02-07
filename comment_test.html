@@ -26,6 +26,7 @@
 					callback();
 				}
 			};
+			request.overrideMimeType("application/json");
 			request.open("GET", "emotes/emoticons.json", true);
 			request.send(null);
 		}
@@ -41,6 +42,7 @@
 					callback();
 				}
 			};
+			request.overrideMimeType("application/json");
 			request.open("GET", "comments.json", true);
 			request.send(null);
 		}
@@ -60,6 +62,7 @@
 					callback();
 				}
 			};
+			request.overrideMimeType("application/json");
 			request.open("GET", "tracking.json", true);
 			request.send(null);
 		}
