@@ -1,111 +1,7 @@
 <html>
 <head>
-	<style type="text/css">
-		body {
-			font-family: Helvetica, Arial;
-			font-size: 16px;
-		}
-		div.comment {
-			position: relative;
-			padding: 10px;
-			border-style: solid;
-			border-bottom-style: dashed;
-			border-width: 1px;
-			border-top-width: 0px;
-			border-color: gray;
-			overflow: hidden;
-			background-color: white;
-		}
-		div.comment:first-child {
-			border-top-width: 1px;
-		}
-		div.comment:last-child {
-			border-bottom-style: solid;
-		}
-		div.comment:nth-child(2n+1) {
-			background-color: #F0F0F0;
-		}
-		div.selected {
-			box-shadow: 0 0 30px rgba(0, 0, 255, 0.3);
-		}
-		div.data {
-			position: relative;
-			margin-left: 200px;
-			border-radius: 3px;
-			border-style: solid;
-			border-color: rgba(0, 0, 0, 0.25);
-			border-width: 1px;
-			padding: 10px;
-			background-color: white;
-			font-size: 0.8em;
-		}
-		div.author {
-			float: left;
-			width: 180px;
-			text-align: center;
-		}
-		a.name {
-			display: inline-block;
-			border-radius: 3px;
-			background-color: #88a927;
-			text-align: center;
-			padding: 8px;
-			text-shadow: -1px -1px rgba(0, 0, 0, 0.2);
-			box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.2) inset;
-			border: 1px solid rgba(0, 0, 0, 0.2);
-			color: #fff;
-			text-decoration: none;
-			font-family: Segoe UI;
-		}
-		img.avatar {
-			height: 128px;
-			width: 128px;
-			margin-top: 15px;
-			border: solid 1px rgba(0, 0, 0, 0.2);
-		}
-		div.data div.data {
-			margin: 0px;
-			font-size: 1em;
-		}
-		div.data div.author {
-			display: none;
-		}
-		div.comment_arrow {
-			border-bottom: 11px solid transparent;
-			border-right: 11px solid rgba(0, 0, 0, 0.1);
-			border-top: 11px solid transparent;
-			position: absolute;
-			top: 10px;
-			left: -11px;
-		}
-		div.comment_arrow div {
-			border-bottom: 10px solid transparent;
-			border-right: 10px solid white;
-			border-top: 10px solid transparent;
-			position: absolute;
-			top: -10px;
-			left: 1px;
-		}
-		div.metadata {
-			border-bottom: 1px solid #DDDDDD;
-			font-size: 0.7em;
-			margin-bottom: 10px;
-			padding-bottom: 5px;
-		}
-		a.jump {
-			position: absolute;
-			top: -2px;
-		}
-		a.edit_button {
-			border-radius: 2px;
-			border-width: 1px;
-			border-style: solid;
-			padding-left: 3px;
-			padding-right: 3px;
-			background-color: #F0F0F0;
-			float: right;
-		}
-	</style>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<link rel="stylesheet" type="text/css" href="comments.css" />
 	<script type="text/javascript">
 		var test_users = {
 			0: {
@@ -113,48 +9,75 @@
 				avatar: "http://www.fimfiction-static.net/images/avatars/91255_128.jpg?1361969153"
 			}
 		};
-		var test_comments = {
-			0: {
-				parentId: 0,
-				authorId: 0,
-				datePosted: "",
-				replies: [],
-				data: "This is some text >>3 and a quote."
-			},
-			1: {
-				parentId: 1,
-				authorId: 0,
-				datePosted: "",
-				replies: [],
-				data: "This is some text"
-			},
-			2: {
-				parentId: 2,
-				authorId: 0,
-				datePosted: "",
-				replies: [],
-				data: "This is some text"
-			},
-			3: {
-				parentId: 3,
-				authorId: 0,
-				datePosted: "",
-				replies: [],
-				data: "This is some text"
-			},
-			4: {
-				parentId: 4,
-				authorId: 0,
-				datePosted: "",
-				replies: [],
-				data: "This is some text"
-			}
-		};
+	</script>
+	<script type="text/javascript">
+		// fetch emoticon list
+		function fetchEmotes(callback) {
+			var request = new XMLHttpRequest();
+			request.onreadystatechange = function() {
+				if(request.readyState == 4) {
+					var emoteObject = {};
+					var emoteList = JSON.parse(request.response);
+					for(var i in emoteList) {
+						emoteObject[emoteList[i][0]] = "emotes/" + emoteList[i][0] + ".png";
+					}
+					parser.registerEmotes(emoteObject);
+					emotesFetched = true;
+					callback();
+				}
+			};
+			request.open("GET", "emotes/emoticons.json", true);
+			request.send(null);
+		}
+	</script>
+	<script type="text/javascript">
+		// fetch the comment data
+		function fetchComments(callback) {
+			var request = new XMLHttpRequest();
+			request.onreadystatechange = function() {
+				if(request.readyState == 4) {
+					comments = JSON.parse(request.response);
+					commentsFetched = true;
+					callback();
+				}
+			};
+			request.open("GET", "comments.json", true);
+			request.send(null);
+		}
+	</script>
+	<script type="text/javascript">
+		// fetch the story list
+		function fetchStories(callback) {
+			var request = new XMLHttpRequest();
+			request.onreadystatechange = function() {
+				if(request.readyState == 4) {
+					storyList = JSON.parse(request.response);
+					stories = new Object();
+					for(var i in storyList) {
+						stories["story/" + storyList[i].id] = storyList[i];
+					}
+					storiesFetched = true;
+					callback();
+				}
+			};
+			request.open("GET", "tracking.json", true);
+			request.send(null);
+		}
 	</script>
 	<script type="text/javascript" src="bbcode.js"></script>
+	<link rel="stylesheet" type="text/css" href="bbcode.css" />
 	<script type="text/javascript">
 		var parser = new bbcode();
+		var commentsFetched = false;
+		var emotesFetched = false;
+		var storiesFetched = false;
 		function init() {
+			fetchEmotes(init2);
+			fetchComments(init2);
+			fetchStories(init2);
+		}
+		function init2() {
+			if(!(commentsFetched && emotesFetched && storiesFetched)) return;
 			writeComments();
 			document.addEventListener("click", handleClick);
 			window.onhashchange = highlightSelected;
@@ -189,16 +112,25 @@
 		function writeComments() {
 			// feed all the comments into a fragment so we can add them simultaneously
 			var frag = document.createDocumentFragment();
-			for(var i in test_comments) {
-				var comment = test_comments[i];
-				frag.appendChild(createComment(i, comment, test_users[comment.authorId]));
+			for(var story in comments) {
+				var storyComments = comments[story];
+				if(storyComments.length == 0) continue;
+				var header = {tag: "div", attrs: {className: "story_comments"}, children: [
+					{tag: "h2", children: [stories[story].title + " (" + storyComments.length + ")"]}
+				]};
+				var container = createTree(header);
+				for(var i in storyComments) {
+					var comment = storyComments[i];
+					container.appendChild(createComment(comment, test_users[0]));
+				}
+				frag.appendChild(container);
 			}
 			document.body.appendChild(frag);
 		}
-		function createComment(id, comment, author) {
+		function createComment(comment, author) {
 			// JSONified HTML, because why not
 			var structure = {tag: "div", attrs: {className: "comment"}, children: [
-				{tag: "a", attrs: {className: "jump", name: id}},
+				{tag: "a", attrs: {className: "jump", name: comment.id}},
 				{tag: "div", attrs: {className: "author"}, children: [
 					{tag: "a", attrs: {className: "name", href: "/user/" + author.name}, children: [author.name]},
 					{tag: "img", attrs: {className: "avatar", src: author.avatar}}
@@ -208,8 +140,7 @@
 						{tag: "div"}
 					]},
 					{tag: "div", attrs: {className: "metadata"}, children: [
-						{tag: "a", attrs: {href: "#" + id}, children: ["#" + id]},
-						{tag: "a", attrs: {className: "edit_button"}, children: ["Edit"]}
+						{tag: "a", attrs: {href: "#" + comment.id}, children: ["#" + comment.id]},
 					]},
 					{node: parser.render(comment.data), attrs: {className: "body"}}
 				]}
