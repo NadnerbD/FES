@@ -4,7 +4,7 @@
 	<link rel="stylesheet" type="text/css" href="comments.css" />
 	<script type="text/javascript">
 		var test_users = {
-			0: {
+			"Nadnerb" : {
 				name: "Nadnerb",
 				avatar: "http://www.fimfiction-static.net/images/avatars/91255_128.jpg?1361969153"
 			}
@@ -124,7 +124,7 @@
 				var container = createTree(header);
 				for(var i in storyComments) {
 					var comment = storyComments[i];
-					container.appendChild(createComment(comment, test_users[0]));
+					container.appendChild(createComment(comment, test_users[comment.author]));
 				}
 				frag.appendChild(container);
 			}
