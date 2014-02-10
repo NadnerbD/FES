@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>FimfictionEnhancementSuite@nadnerb.net</em:id>
+    <em:version>1.0</em:version>
+    <em:type>2</em:type>
+    <em:bootstrap>true</em:bootstrap>
+   
+    <!-- Target Application this extension can install into, 
+         with minimum and maximum supported versions. --> 
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>27.0</em:minVersion>
+        <em:maxVersion>27.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+   
+    <!-- Front End MetaData -->
+    <em:name>FES</em:name>
+    <em:description>Fimfiction Enhancement Suite, adds comment-related functionality</em:description>
+    <em:creator>Nadnerb</em:creator>
+    <em:homepageURL>http://www.fimfiction.net/user/Nadnerb</em:homepageURL>
+  </Description>      
+</RDF>

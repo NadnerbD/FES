@@ -3,19 +3,11 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<link rel="stylesheet" type="text/css" href="comments.css" />
 	<script type="text/javascript">
-		var test_users = {
-			"Nadnerb" : {
-				name: "Nadnerb",
-				avatar: "http://www.fimfiction-static.net/images/avatars/91255_128.jpg?1361969153"
-			}
-		};
-	</script>
-	<script type="text/javascript">
 		// fetch emoticon list
 		function fetchEmotes(callback) {
 			var request = new XMLHttpRequest();
-			request.onreadystatechange = function() {
-				if(request.readyState == 4) {
+			request.onload = function() {
+				if(request.status == 200) {
 					var emoteObject = {};
 					var emoteList = JSON.parse(request.response);
 					for(var i in emoteList) {
@@ -31,60 +23,33 @@
 			request.send(null);
 		}
 	</script>
-	<script type="text/javascript">
-		// fetch the comment data
-		function fetchComments(callback) {
-			var request = new XMLHttpRequest();
-			request.onreadystatechange = function() {
-				if(request.readyState == 4) {
-					comments = JSON.parse(request.response);
-					commentsFetched = true;
-					callback();
-				}
-			};
-			request.overrideMimeType("application/json");
-			request.open("GET", "comments.json", true);
-			request.send(null);
-		}
-	</script>
-	<script type="text/javascript">
-		// fetch the story list
-		function fetchStories(callback) {
-			var request = new XMLHttpRequest();
-			request.onreadystatechange = function() {
-				if(request.readyState == 4) {
-					storyList = JSON.parse(request.response);
-					stories = new Object();
-					for(var i in storyList) {
-						stories["story/" + storyList[i].id] = storyList[i];
-					}
-					storiesFetched = true;
-					callback();
-				}
-			};
-			request.overrideMimeType("application/json");
-			request.open("GET", "tracking.json", true);
-			request.send(null);
-		}
-	</script>
+	<script type="text/javascript" src="idb-wrapper.js"></script>
 	<script type="text/javascript" src="bbcode.js"></script>
 	<link rel="stylesheet" type="text/css" href="bbcode.css" />
 	<script type="text/javascript">
+		var db;
+		var userAvatarURLs = {};
 		var parser = new bbcode();
-		var commentsFetched = false;
-		var emotesFetched = false;
-		var storiesFetched = false;
 		function init() {
-			fetchEmotes(init2);
-			fetchComments(init2);
-			fetchStories(init2);
+			db = new FFDB("fimcomments-db", function() {
+				getUserAvatars(function() {
+					fetchEmotes(init2);
+				});
+			});
 		}
 		function init2() {
-			if(!(commentsFetched && emotesFetched && storiesFetched)) return;
 			writeComments();
 			document.addEventListener("click", handleClick);
 			window.onhashchange = highlightSelected;
 			highlightSelected();
+		}
+		function getUserAvatars(callback) {
+			db.getAll("users", function(items) {
+				for(var i in items) {
+					userAvatarURLs[items[i].name] = URL.createObjectURL(items[i].avatar);
+				}
+				callback();
+			});
 		}
 		function handleClick(event) {
 			// the most hilarious hack I ever did, literally copies elements from the page into the space where the quote goes
@@ -115,28 +80,43 @@
 		function writeComments() {
 			// feed all the comments into a fragment so we can add them simultaneously
 			var frag = document.createDocumentFragment();
-			for(var story in comments) {
-				var storyComments = comments[story];
-				if(storyComments.length == 0) continue;
+			// get all comments ordered by location
+			db.getAllOrdered("comments", "location", function(items) {
+				if(!items.length) return;
+				var locationComments = new Array();
+				var currentLocation = items[0].location;
+				for(var i in items) {
+					var comment = items[i];
+					if(comment.location != currentLocation) {
+						// write list
+						writeStoryCommentGroup(currentLocation, locationComments);
+						currentLocation = comment.location;
+						locationComments = new Array();
+					}
+					locationComments.push(comment);
+				}
+				writeStoryCommentGroup(currentLocation, locationComments);
+				document.body.appendChild(frag);
+			});
+			function writeStoryCommentGroup(location, comments) {
 				var header = {tag: "div", attrs: {className: "story_comments"}, children: [
-					{tag: "h2", children: [stories[story].title + " (" + storyComments.length + ")"]}
+					{tag: "h2", children: [location + " (" + comments.length + ")"]}
 				]};
 				var container = createTree(header);
-				for(var i in storyComments) {
-					var comment = storyComments[i];
-					container.appendChild(createComment(comment, test_users[comment.author]));
+				for(var i in comments) {
+					var comment = comments[i];
+					container.appendChild(createComment(comment, userAvatarURLs[comment.author]));
 				}
 				frag.appendChild(container);
 			}
-			document.body.appendChild(frag);
 		}
-		function createComment(comment, author) {
+		function createComment(comment, avatar) {
 			// JSONified HTML, because why not
 			var structure = {tag: "div", attrs: {className: "comment"}, children: [
 				{tag: "a", attrs: {className: "jump", name: comment.id}},
 				{tag: "div", attrs: {className: "author"}, children: [
-					{tag: "a", attrs: {className: "name", href: "/user/" + author.name}, children: [author.name]},
-					{tag: "img", attrs: {className: "avatar", src: author.avatar}}
+					{tag: "a", attrs: {className: "name", href: "/user/" + comment.author}, children: [comment.author]},
+					{tag: "img", attrs: {className: "avatar", src: avatar}}
 				]},
 				{tag: "div", attrs: {className: "data"}, children: [
 					{tag: "div", attrs: {className: "comment_arrow"}, children: [
