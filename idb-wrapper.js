@@ -73,8 +73,10 @@ function FFDB(name, callback, aid) {
 			}
 		}
 		var itemCount = 0;
+		// don't try to modify the same item multiple times within the same transaction, only one will take
+		// if doing so is necessary (why?) move the transaction line into the loop to create separate transactions for each item
+		var store = db.transaction(storeName, "readwrite").objectStore(storeName);
 		for(var newItem of data) {
-			var store = db.transaction(storeName, "readwrite").objectStore(storeName);
 			var req = store.get(newItem[store.keyPath]);
 			// the idb api allows us to perform the get and put within the same transaction
 			req.onsuccess = function(newItem, req, store) { return function(event) {
@@ -213,9 +215,9 @@ function testCommentDatabase() {
 			console.log("putitems successful");
 			db.updateItems("comments", [
 				{id: "123", author: "Nadnerb"},
-				{id: "123", date: new Date()}
+				{id: "125", date: new Date()}
 			], function() {
-				console.log("updated item 123 (twice)");
+				console.log("updated 2 items");
 				db.getItemsByIndex("comments", "location", "story1", function(items) {
 					console.log("got items with location story1");
 					for(var i in items) {

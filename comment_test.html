@@ -102,7 +102,7 @@
 			function writeStoryCommentGroup(location, comments) {
 				db.getItem("stories", location.split("/")[1], function(story) {
 					var header = {tag: "div", attrs: {className: "story_comments"}, children: [
-						{tag: "h2", children: [(story.title || location) + " (" + comments.length + ")"]}
+						{tag: "h2", children: [((story && story.title) || location) + " (" + comments.length + ")"]}
 					]};
 					var container = createTree(header);
 					for(var i in comments) {
@@ -119,7 +119,7 @@
 			var structure = {tag: "div", attrs: {className: "comment"}, children: [
 				{tag: "a", attrs: {className: "jump", name: comment.id}},
 				{tag: "div", attrs: {className: "author"}, children: [
-					{tag: "a", attrs: {className: "name", href: "/user/" + comment.author}, children: [comment.author]},
+					{tag: "a", attrs: {className: "name", href: "/user/" + comment.author.replace(" ", "+")}, children: [comment.author]},
 					{tag: "img", attrs: {className: "avatar", src: avatar}}
 				]},
 				{tag: "div", attrs: {className: "data"}, children: [
@@ -127,7 +127,8 @@
 						{tag: "div"}
 					]},
 					{tag: "div", attrs: {className: "metadata"}, children: [
-						{tag: "a", attrs: {href: "#" + comment.id}, children: ["#" + comment.id]},
+						{tag: "a", attrs: {href: "#comment/" + comment.id}, children: ["#" + comment.id]},
+						" · Chapter " + comment.chapter + " · " + comment.date.toLocaleString() + " · " + comment.ratings.up + "+ · " + comment.ratings.down + "-"
 					]},
 					{node: parser.render(comment.data), attrs: {className: "body"}}
 				]}

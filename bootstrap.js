@@ -111,7 +111,7 @@ function scrapeComments(document) {
 				author: ci.getAttribute("data-author"),
 				id: ci.getAttribute("data-comment_id"),
 				// the old format date: ci.getElementsByTagName("span")[2].title,
-				// the fix: new Date(orig.replace(/[^ ]* ([0-9]*)th of ([^ ]*) (.*)/, "\$2 \$1 \$3"));
+				// the fix: new Date(orig.replace(/[^ ]* ([0-9]*).. of ([^ ]*) (.*)/, "\$2 \$1 \$3"));
 				date: new Date(parseInt(ci.querySelector("span.time_offset").getAttribute("data-time")) * 1000),
 				data: ci.querySelector("textarea").value,
 				ratings: {
@@ -125,8 +125,9 @@ function scrapeComments(document) {
 				comment.chapter = parseInt(path[3]);
 			}else{
 				// if we're on the main page, then the comment has a chapter marker
+				// there will be no marker if there is only one chapter
 				// my god this is painful to fetch
-				comment.chapter = parseInt(ci.querySelector("div.comment_information div").childNodes[8].data.split(" ")[2]);
+				comment.chapter = parseInt(ci.querySelector("div.comment_information div").childNodes[8].data.split(" ")[2]) || 1;
 			}
 			commentList.push(comment);
 			console.log("Scraped comment " + comment.id);
