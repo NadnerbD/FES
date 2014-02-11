@@ -94,28 +94,45 @@ function scrapeComments(document) {
 	
 	console.log("Starting comment scrape of location " + commentLocation);
 	
+	// list of comment objects to be saved
 	var commentList = new Array();
-	var comments = document.getElementsByClassName("comment");
+	
+	// actually scrape the comments
+	var comments = document.querySelectorAll("div.comment");
 	for(var i = 0; i < comments.length; i++) { 
 		var ci = comments[i];
-		// the comment will only have a textarea if we can edit it
-		// if we can edit it, it is ours
+		// the comment will only have a textarea if we own it
 		if(ci.getElementsByTagName("textarea").length) {
+			var likes = ci.querySelector("span.comment_like_text").firstChild;
+			if(likes == null) likes = 0; else likes = parseInt(likes.data.replace(",", ""));
+			var dislikes = ci.querySelector("span.comment_dislike_text").firstChild;
+			if(dislikes == null) dislikes = 0; else dislikes = parseInt(dislikes.data.replace(",", ""));
 			var comment = {
 				author: ci.getAttribute("data-author"),
 				id: ci.getAttribute("data-comment_id"),
-				date: ci.getElementsByTagName("span")[2].title,
-				data: ci.getElementsByTagName("textarea")[0].value,
+				// the old format date: ci.getElementsByTagName("span")[2].title,
+				// the fix: new Date(orig.replace(/[^ ]* ([0-9]*)th of ([^ ]*) (.*)/, "\$2 \$1 \$3"));
+				date: new Date(parseInt(ci.querySelector("span.time_offset").getAttribute("data-time")) * 1000),
+				data: ci.querySelector("textarea").value,
 				ratings: {
-					up: ci.getElementsByClassName("comment_like")[0].getAttribute("data-like"),
-					down: ci.getElementsByClassName("comment_like")[1].getAttribute("data-like")
+					up: likes,
+					down: dislikes
 				},
 				location: commentLocation
 			};
+			if(path.length == 6) {
+				// we're on a chapter page
+				comment.chapter = parseInt(path[3]);
+			}else{
+				// if we're on the main page, then the comment has a chapter marker
+				// my god this is painful to fetch
+				comment.chapter = parseInt(ci.querySelector("div.comment_information div").childNodes[8].data.split(" ")[2]);
+			}
 			commentList.push(comment);
 			console.log("Scraped comment " + comment.id);
 		}
 	}
+	
 	// save our work
 	if(commentList.length) {
 		var firstAuthor = commentList[0].author;
@@ -135,6 +152,7 @@ function scrapeComments(document) {
 			});
 		}, "resource://fimfic-res/"); // this should allow our addon documents to access this database from their local scope
 	}
+	
 	// record an image in the database
 	function saveUserAvatar(name, imgSrc) {
 		console.log("Getting avatar: " + imgSrc + " for " + name);
@@ -154,8 +172,86 @@ function scrapeComments(document) {
 }
 
 function linkComments(document) {
-	var div = document.createElement("div");
-	div.style = "position:fixed; bottom: 10px; right: 10px; background-color: red; padding: 10px;";
-	div.innerHTML = "FIMFICTION DETECTED";
-	document.body.appendChild(div);
+	// addLinks only works on compact view pages
+	// we'll need to make another function to scrape story pages and non-compact lists
+	if(!document.querySelector("table.browse_stories")) return;
+	
+	var db = new FFDB("fimcomments-db", function() {
+		addLinks(document, db);
+	}, "resource://fimfic-res/");
+}
+
+function addLinks(document, db) {
+	console.log("Adding comment links");
+	
+	var stories = new Array(); // scraped story information to be saved
+	
+	var items = document.querySelectorAll("table.browse_stories tbody tr.story_item");
+	var words = 0;
+	for(var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var link = item.querySelector("a.title");
+		var info = item.querySelector("span.info");
+		var story = {
+			id: link.href.split("/")[4],
+			title: link.firstChild.data,
+			wordcount: parseInt(info.firstChild.data.split(" ")[0].replace(",", "")),
+			ratings: {
+				up: parseInt(info.querySelectorAll("img")[0].nextSibling.data.replace(",", "")),
+				down: parseInt(info.querySelectorAll("img")[1].nextSibling.data.replace(",", ""))
+			},
+			tags: {
+				category: [catLink.title for(catLink of item.querySelectorAll("a.story_category"))],
+				character: [charLink.title for(charLink of info.querySelectorAll("a"))]
+			},
+			tracking: document.URL.indexOf("tracking=1") != -1,
+			read_later: document.URL.indexOf("read_it_later") != -1
+		};
+		// cull properties we're not sure about (a story appearing in one list does not imply it is not in another)
+		if(!story.tracking) delete story.tracking;
+		if(!story.read_later) delete story.read_later;
+		// finalize data
+		stories.push(story);
+		words += story.wordcount;
+		console.log(JSON.stringify(story));
+		
+		// fetch all the comments for this story id
+		var insertDiv = item.querySelector("td.story_data");
+		db.getKeysByIndex("comments", "location", "story/" + story.id, function(insertDiv, story) { return function(keys) {
+			if(keys.length) console.log("Found " + keys.length + " comments for story/" + story.id);
+			// insert comment links
+			for(var cid of keys) {
+				var link = document.createElement("span");
+				//comment type must be set
+				link.setAttribute("class", "comment");
+				link.setAttribute("data-type", "0");
+				link.innerHTML = '<a class="comment_quote_link" href="#comment/' + 
+					cid + '" data-comment_id="' + 
+					cid + '">&gt;&gt;' + cid + 
+					'<span class="comment_id" style="display:none;">' + 
+					cid + '</span></a>';
+				link.style.marginLeft = link.style.marginRight = "5px";
+				insertDiv.appendChild(link);
+			}
+		};}(insertDiv, story));
+	}
+	
+	// store the story data
+	db.updateItems("stories", stories, function() {
+		console.log("Updated " + stories.length + " story records");
+	});
+	
+	// show the wordcount floater
+	var styleElem = document.createElement("style");
+	styleElem.innerHTML = "div#wordcount:hover { bottom:-20px; } div#wordcount { bottom:-60px; transition: bottom 0.5s ease; }";
+	document.body.appendChild(styleElem);
+	var element = document.createElement("div");
+	element.innerHTML = '\
+		<div id="wordcount" class="notification_popup" style="left:10px;display:block;padding:10px;">\
+			<span class="notification_title">' + words.toLocaleString() + ' words</span>\
+			<a id="viewStories" href="javascript:void(0);">view stored story list</a><br/>\
+			<a id="dlStories" href="javascript:void(0);">sync downloaded stories</a>\
+		</div>\
+	';
+	document.body.appendChild(element.firstElementChild);
 }

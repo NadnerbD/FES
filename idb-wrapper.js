@@ -59,7 +59,46 @@ function FFDB(name, callback, aid) {
 			req.onerror = function (i) { return function(event) {
 				console.log("error putting '" + JSON.stringify(data[i]) + "' into '" + storeName + "'");
 				countResults(event);
-			} }(i);
+			};}(i);
+		}
+	}
+	
+	// merges items with their counterparts in the database, updating only values that are present in the new item
+	this.updateItems = function(storeName, data, callback) {
+		var results = 0;
+		function countResults(event) {
+			results++;
+			if(!(results < data.length)) {
+				callback();
+			}
+		}
+		var itemCount = 0;
+		for(var newItem of data) {
+			var store = db.transaction(storeName, "readwrite").objectStore(storeName);
+			var req = store.get(newItem[store.keyPath]);
+			// the idb api allows us to perform the get and put within the same transaction
+			req.onsuccess = function(newItem, req, store) { return function(event) {
+				var subreq;
+				if(req.result) {
+					// if the item exists, merge in the values from newItem
+					for(var key in newItem) {
+						req.result[key] = newItem[key];
+					}
+					subreq = store.put(req.result);
+				}else{
+					// if not, just add newItem to the database
+					subreq = store.put(newItem);
+				}
+				subreq.onsuccess = countResults;
+				subreq.onerror = function(event) {
+					console.log("error merging '" + JSON.stringify(newItem) + "' into '" + storeName + "'");
+					countResults(event);
+				}
+			};}(newItem, req, store);
+			req.onerror = function(newItem) { return function(event) {
+				console.log("error fetching '" + JSON.stringify(newItem) + "' from '" + storeName + "' for merging");
+				countResults(event);
+			};}(newItem);
 		}
 	}
 	
@@ -95,6 +134,25 @@ function FFDB(name, callback, aid) {
 		};
 		req.onerror = function(event) {
 			console.log("error finding elements from '" + storeName + "' with '" + indexName + "' values matching '" + index + "'");
+		};
+	}
+	
+	// get the keys of items whose indexName value matches index (doesn't fetch the entire database item)
+	this.getKeysByIndex = function(storeName, indexName, index, callback) {
+		var data = new Array();
+		var storeIndex = db.transaction(storeName).objectStore(storeName).index(indexName);
+		var req = storeIndex.openKeyCursor(IDBKeyRange.only(index));
+		req.onsuccess = function(event) {
+			var cursor = req.result;
+			if(cursor) {
+				data.push(cursor.primaryKey);
+				cursor.continue();
+			}else{
+				callback(data);
+			}
+		};
+		req.onerror = function(event) {
+			console.log("error finding element keys from '" + storeName + "' with '" + indexName + "' values matching '" + index + "'");
 		};
 	}
 	
@@ -153,14 +211,26 @@ function testCommentDatabase() {
 			{id: "125", location: "story1"}
 		], function() {
 			console.log("putitems successful");
-			db.getItemsByIndex("comments", "location", "story1", function(items) {
-				console.log("got items with location story1");
-				for(var i in items) {
-					console.log(JSON.stringify(items[i]));
-				}
-				db.close();
-				indexedDB.deleteDatabase("testdb");
-				console.log("cleaned up test database");
+			db.updateItems("comments", [
+				{id: "123", author: "Nadnerb"},
+				{id: "123", date: new Date()}
+			], function() {
+				console.log("updated item 123 (twice)");
+				db.getItemsByIndex("comments", "location", "story1", function(items) {
+					console.log("got items with location story1");
+					for(var i in items) {
+						console.log(JSON.stringify(items[i]));
+					}
+					db.getKeysByIndex("comments", "location", "story2", function(keys) {
+						console.log("got keys of items with location story2");
+						for(var key of keys) {
+							console.log(key);
+						}
+						db.close();
+						indexedDB.deleteDatabase("testdb");
+						console.log("cleaned up test database");
+					});
+				});
 			});
 		});
 	});

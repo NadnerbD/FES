@@ -81,10 +81,12 @@
 			// feed all the comments into a fragment so we can add them simultaneously
 			var frag = document.createDocumentFragment();
 			// get all comments ordered by location
+			var groups, groupCount;
 			db.getAllOrdered("comments", "location", function(items) {
 				if(!items.length) return;
 				var locationComments = new Array();
 				var currentLocation = items[0].location;
+				groups = items.length;
 				for(var i in items) {
 					var comment = items[i];
 					if(comment.location != currentLocation) {
@@ -96,18 +98,20 @@
 					locationComments.push(comment);
 				}
 				writeStoryCommentGroup(currentLocation, locationComments);
-				document.body.appendChild(frag);
 			});
 			function writeStoryCommentGroup(location, comments) {
-				var header = {tag: "div", attrs: {className: "story_comments"}, children: [
-					{tag: "h2", children: [location + " (" + comments.length + ")"]}
-				]};
-				var container = createTree(header);
-				for(var i in comments) {
-					var comment = comments[i];
-					container.appendChild(createComment(comment, userAvatarURLs[comment.author]));
-				}
-				frag.appendChild(container);
+				db.getItem("stories", location.split("/")[1], function(story) {
+					var header = {tag: "div", attrs: {className: "story_comments"}, children: [
+						{tag: "h2", children: [(story.title || location) + " (" + comments.length + ")"]}
+					]};
+					var container = createTree(header);
+					for(var i in comments) {
+						var comment = comments[i];
+						container.appendChild(createComment(comment, userAvatarURLs[comment.author]));
+					}
+					frag.appendChild(container);
+					if(!(groupCount++ < groups)) document.body.appendChild(frag);
+				});
 			}
 		}
 		function createComment(comment, avatar) {
