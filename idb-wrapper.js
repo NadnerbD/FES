@@ -206,6 +206,44 @@ function FFDB(name, callback, aid) {
 }
 
 function testCommentDatabase() {
+	var runner = function() {
+		var db, result;
+		yield db = new FFDB("testdb", cb);
+		yield db.putItems("comments", [
+			{id: "123", location: "story1"},
+			{id: "124", location: "story2"},
+			{id: "125", location: "story1"}
+		], cb);
+		console.log("putitems successful");
+		yield db.updateItems("comments", [
+			{id: "123", author: "Nadnerb"},
+			{id: "125", date: new Date()}
+		], cb);
+		console.log("updated 2 items");
+		result = yield db.getItemsByIndex("comments", "location", "story1", cb);
+		console.log("got items with location story1");
+		for(var i in result) {
+			console.log(JSON.stringify(result[i]));
+		}
+		result = yield db.getKeysByIndex("comments", "location", "story2", cb);
+		console.log("got keys of items with location story2");
+		for(var key of result) {
+			console.log(key);
+		}
+		db.close();
+		indexedDB.deleteDatabase("testdb");
+		console.log("cleaned up test database");
+	}();
+	function cb(result) { 
+		try { 
+			runner.send(result);
+		}catch(e) {
+			console.log("running complete");
+		}
+	}
+	runner.next();
+	
+	/*
 	var db = new FFDB("testdb", function() {
 		db.putItems("comments", [
 			{id: "123", location: "story1"},
@@ -236,6 +274,7 @@ function testCommentDatabase() {
 			});
 		});
 	});
+	*/
 }
 
 var EXPORTED_SYMBOLS = ["FFDB"];
