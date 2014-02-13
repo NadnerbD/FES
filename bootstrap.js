@@ -1,16 +1,18 @@
 // No bullshit, just what's necessary to actually make shit work
 var console = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {}).console;
+var ioServ = Components.classes["@mozilla.org/network/io-service;1"].createInstance(Components.interfaces.nsIIOService);
+var resHandler = ioServ.getProtocolHandler("resource").QueryInterface(Components.interfaces.nsIResProtocolHandler);
+var obsServ = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
 
 function install(data, reason) {}
 
 function uninstall(data, reason) {}
 
-var obs;
+var obs; // our page load observer
+
 function startup(data, reason) {
 	console.log("FES Starting");
 	// first up, set up a resource alias for our local files
-	var ioServ = Components.classes["@mozilla.org/network/io-service;1"].createInstance(Components.interfaces.nsIIOService);
-	var resHandler = ioServ.getProtocolHandler("resource").QueryInterface(Components.interfaces.nsIResProtocolHandler);
 	var alias = ioServ.newFileURI(data.installPath);
 	if(!data.installPath.isDirectory()) {
 		alias = ioServ.newURI("jar:" + alias.spec + "!/", null, null);
@@ -26,13 +28,11 @@ function startup(data, reason) {
 function shutdown(data, reason) {
 	if(reason == APP_SHUTDOWN) return;
 	console.log("FES Shutting down");
-	// stop watching
+	// stop watching for pageloads
 	obs.unregister();
 	// unload FFDB
 	Components.utils.unload("resource://fimfic-res/idb-wrapper.js");
 	// unregister our resource handler
-	var ioServ = Components.classes["@mozilla.org/network/io-service;1"].createInstance(Components.interfaces.nsIIOService);
-	var resHandler = ioServ.getProtocolHandler("resource").QueryInterface(Components.interfaces.nsIResProtocolHandler);
 	resHandler.setSubstitution("fimfic-res", null);
 }
 
@@ -47,12 +47,10 @@ pageLoadObserver.prototype = {
 		subject.addEventListener("DOMContentLoaded", handleNewPage, false);
 	},
 	register: function() {
-		var obs = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
-		obs.addObserver(this, "content-document-global-created", false);
+		obsServ.addObserver(this, "content-document-global-created", false);
 	},
 	unregister: function() {
-		var obs = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
-		obs.removeObserver(this, "content-document-global-created", false);
+		obsServ.removeObserver(this, "content-document-global-created", false);
 	}
 };
 
@@ -65,7 +63,9 @@ var locs = [
 function handleNewPage(event) {
 	var document = event.target;
 	for(var i in locs) {
-		if(locs[i][0].exec(document.URL)) {
+		// iframes for some inexplicable reason can have the URL property of their parent
+		// document, so we must check that the document is not iframe content before proceeding
+		if(locs[i][0].exec(document.URL) && !document.defaultView.frameElement) {
 			locs[i][1](document);
 		}
 	}
@@ -76,7 +76,8 @@ function changeHeader(document) {
 	try {
 		document.getElementsByClassName("home_link")[0].children[0].children[0].src = "resource://fimfic-res/logo_fix.png";
 	} catch (e) {
-		console.log("Failed to replace header on: " + document.URL + "\n" + e.message);
+		console.log("Failed to replace header:\n" + e.message);
+		console.log(document);
 	}
 }
 
