@@ -87,6 +87,7 @@ function watchComments(document) {
 	obs.observe(clist, {childList: true});
 	// do an initial scrape
 	scrapeComments(document);
+	scrapeStories(document);
 }
 
 function scrapeComments(document) {
@@ -174,16 +175,19 @@ function scrapeComments(document) {
 }
 
 function linkComments(document) {
-	// addLinks only works on compact view pages
-	// we'll need to make another function to scrape story pages and non-compact lists
-	if(!document.querySelector("table.browse_stories")) return;
-	
-	var db = new FFDB("fimcomments-db", function() {
-		addLinks(document, db);
-	}, "resource://fimfic-res/");
+	if(document.querySelector("table.browse_stories")) {
+		// if we're in compact view, we can add links
+		var db = new FFDB("fimcomments-db", function() {
+			addLinks(document, db);
+		}, "resource://fimfic-res/");
+	}else{
+		// if we're in full-view, we can at least update our story information
+		scrapeStories(document);
+	}
 }
 
 function addLinks(document, db) {
+	// scrapes story information from the compact-view and adds links to self-comments on them
 	console.log("Adding comment links");
 	
 	var stories = new Array(); // scraped story information to be saved
@@ -197,6 +201,7 @@ function addLinks(document, db) {
 		var story = {
 			id: link.href.split("/")[4],
 			title: link.firstChild.data,
+			author: item.querySelector("td.author a").firstChild.data,
 			wordcount: parseInt(info.firstChild.data.split(" ")[0].replace(",", "")),
 			ratings: {
 				up: parseInt(info.querySelectorAll("img")[0].nextSibling.data.replace(",", "")),
@@ -256,4 +261,48 @@ function addLinks(document, db) {
 		</div>\
 	';
 	document.body.appendChild(element.firstElementChild);
+}
+
+function scrapeStories(document, observed) {
+	// scrapes information from full-size story boxes
+	// set up an observer to re-call this function if any of the stories we scrape changes it's attributes
+	if(!observed) var obs = new document.defaultView.MutationObserver(function(muts) { scrapeStories(document, true) });
+	var stories = new Array();
+	var items = document.querySelectorAll("div.story_content_box");
+	for(var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var link = item.querySelector("a.story_name");
+		var story = {
+			id: link.href.split("/")[4],
+			title: link.firstChild.data,
+			author: item.querySelector("span.author a").firstChild.data,
+			wordcount: parseInt(item.querySelector("div.word_count b").firstChild.data.replace(",", "")),
+			ratings: {
+				up: parseInt(item.querySelector("span.likes").firstChild.data.replace(",", "")),
+				down: parseInt(item.querySelector("span.dislikes").firstChild.data.replace(",", ""))
+			},
+			tags: {
+				category: [catLink.firstChild.data for(catLink of item.querySelectorAll("a.story_category"))],
+				character: [charLink.title for(charLink of item.querySelectorAll("a.character_icon"))]
+			},
+			tracking: item.querySelector("a.favourite_button_selected") != null,
+			read_later: item.querySelector("a.read_it_later_selected") != null,
+			created: new Date(item.querySelectorAll("span.date_approved span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3")),
+			updated: new Date(item.querySelectorAll("span.last_modified span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
+		};
+		console.log(JSON.stringify(story));
+		stories.push(story);
+		if(!observed) {
+			obs.observe(item.querySelector("a.favourite_button"), {attributes: true});
+			obs.observe(item.querySelector("a.read_it_later_widget"), {attributes: true});
+		}
+	}
+	if(stories.length) {
+		var db = new FFDB("fimcomments-db", function() {
+			db.updateItems("stories", stories, function() {
+				console.log("Updated " + stories.length + " story records");
+				db.close();
+			});
+		}, "resource://fimfic-res/");
+	}
 }
