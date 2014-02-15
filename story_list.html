@@ -66,6 +66,12 @@
 		tr:nth-child(2n) {
 			background-color: lightgray;
 		}
+		tr.selected {
+			background-color: #BBF;
+		}
+		tr.selected:nth-child(2n) {
+			background-color: #AAF;
+		}
 		tbody td:nth-child(3) {
 			text-align: right;
 		}
@@ -146,6 +152,7 @@
 		function init2() {
 			writeStoryTable();
 			document.addEventListener("click", handleClick);
+			document.addEventListener("mousedown", handleSelection);
 			window.onhashchange = highlightSelected;
 			highlightSelected();
 		}
@@ -212,6 +219,62 @@
 				var cat = event.target.title;
 				moveSortIndicator(cat, col, event.target.cloneNode(true));
 				sortByTag(type?"category":"character", cat, invertSort);
+			}
+		}
+		var selectedRows = [];
+		var lastSelected;
+		function handleSelection(event) {
+			if(event.target.parentNode.tagName == "TR") {
+				// table row, perform selection routine
+				var row = event.target.parentNode;
+				// check that we're not clicking the header
+				if(row.parentNode.tagName != "TBODY") return;
+				// various behaviours for modifier keys
+				if(event.shiftKey) {
+					event.preventDefault();
+					// make a range selection
+					if(!lastSelected) {
+						// if no selection has been made yet, we'll just set one
+						selectedRows.push(row);
+						row.classList.add("selected");
+						lastSelected = row;
+					}else{
+						while(selectedRows.length) {
+							selectedRows.pop().classList.remove("selected");
+						}
+						var trows = row.parentNode.children;
+						var selecting = false;
+						for(var ri = 0; ri < trows.length; ri++) {
+							var trow = trows[ri];
+							if(trow == lastSelected) selecting = !selecting;
+							if(trow == row) selecting = !selecting;
+							if(selecting || trow == lastSelected || trow == row) {
+								trow.classList.add("selected");
+								selectedRows.push(trow);
+							}
+						}
+					}
+				}else if(event.ctrlKey) {
+					event.preventDefault();
+					// toggle selection on element
+					var index = selectedRows.indexOf(row);
+					if(index == -1) {
+						selectedRows.push(row);
+						row.classList.add("selected");
+					}else{
+						selectedRows.splice(index, 1);
+						row.classList.remove("selected");
+					}
+					lastSelected = row;
+				}else{
+					// set exclusive selection
+					while(selectedRows.length) {
+						selectedRows.pop().classList.remove("selected");
+					}
+					selectedRows.push(row);
+					row.classList.add("selected");
+					lastSelected = row;
+				}
 			}
 		}
 		function highlightSelected() {
