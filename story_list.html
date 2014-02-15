@@ -190,19 +190,20 @@
 				moveSortIndicator(cat, event.target);
 				switch(cat) {
 					case "title":
-						sortByTitle(invertSort);
-						break;
 					case "author":
-						sortByAuthor(invertSort);
+						sortByAlphabeticMember(cat, invertSort);
 						break;
-					case "words":
-						sortByWords(invertSort);
-						break;
-					case "rating":
-						sortByRating(invertSort);
+					case "wordcount":
+					case "tracking":
+					case "read_later":
+					case "created":
+					case "updated":
+					// these last two are added at runtime
+					case "floatRating":
+					case "commentCount":
+						sortByNumericMember(cat, invertSort);
 						break;
 					default:
-						// TODO: created, updated, fav, ril, comments
 						break;
 				}
 			}else if(event.target.classList.contains("category") || event.target.classList.contains("character")) {
@@ -210,11 +211,7 @@
 				var col = type?document.querySelector("td#categories"):document.querySelector("td#characters");
 				var cat = event.target.title;
 				moveSortIndicator(cat, col, event.target.cloneNode(true));
-				if(type) {
-					sortByCategory(event.target.title, invertSort);
-				}else{
-					sortByCharacter(event.target.title, invertSort);
-				}
+				sortByTag(type?"category":"character", cat, invertSort);
 			}
 		}
 		function highlightSelected() {
@@ -245,63 +242,46 @@
 			table.appendChild(tb);
 		}
 		// document.querySelector("table").appendChild(document.createElement("tbody")); writeStoryTable();
-		function sortByRating(invert) {
+		function sortByNumericMember(member, invert) {
+			// sorts the table by a numeric base storyData member
+			// works for booleans and dates as well as numbers
+			// for RIL, Fav, created, and updated, we must deal with the case of an undefined value
 			sortTable(document.querySelector("table"), invert?function(a, b) {
-				return a.storyData.floatRating - b.storyData.floatRating;
+				a = a.storyData[member];
+				b = b.storyData[member];
+				if(a == undefined) a = 0;
+				if(b == undefined) b = 0;
+				return a - b;
 			}:function(b, a) {
-				return a.storyData.floatRating - b.storyData.floatRating;
+				a = a.storyData[member];
+				b = b.storyData[member];
+				if(a == undefined) a = 0;
+				if(b == undefined) b = 0;
+				return a - b;
 			});
 		}
-		function sortByWords(invert) {
+		function sortByAlphabeticMember(member, invert) {
+			// sorts the table by a alphabetic base storyData member
 			sortTable(document.querySelector("table"), invert?function(a, b) {
-				return a.storyData.wordcount - b.storyData.wordcount;
-			}:function(b, a) {
-				return a.storyData.wordcount - b.storyData.wordcount;
-			});
-		}
-		function sortByTitle(invert) {
-			sortTable(document.querySelector("table"), invert?function(a, b) {
-				a = a.storyData.title.toLowerCase();
-				b = b.storyData.title.toLowerCase();
+				a = a.storyData[member].toLowerCase();
+				b = b.storyData[member].toLowerCase();
 				return a < b ? 1 : a > b ? -1 : 0;
 			}:function(b, a) {
-				a = a.storyData.title.toLowerCase();
-				b = b.storyData.title.toLowerCase();
-				return a < b ? 1 : a > b ? -1 : 0;
-			});
-		}
-		function sortByAuthor(invert) {
-			sortTable(document.querySelector("table"), invert?function(a, b) {
-				// HAAAAAAAAAAAAAAAAAAAAAAX
-				a = (a.storyData.author?a.storyData.author:"zzzzzzz").toLowerCase();
-				b = (b.storyData.author?b.storyData.author:"zzzzzzz").toLowerCase();
-				return a < b ? 1 : a > b ? -1 : 0;
-			}:function(b, a) {
-				a = (a.storyData.author?a.storyData.author:"zzzzzzz").toLowerCase();
-				b = (b.storyData.author?b.storyData.author:"zzzzzzz").toLowerCase();
+				a = a.storyData[member].toLowerCase();
+				b = b.storyData[member].toLowerCase();
 				return a < b ? 1 : a > b ? -1 : 0;
 			});
 		}
-		function sortByCategory(cat, invert) {
+		function sortByTag(type, tag, invert) {
+			// sorts the table by one of the character or category tags
 			sortTable(document.querySelector("table"), invert?function(a, b) {
-				a = a.storyData.tags.category.indexOf(cat) != -1;
-				b = b.storyData.tags.category.indexOf(cat) != -1;
-				return a > b ? 1 : a < b ? -1 : 0;
+				a = a.storyData.tags[type].indexOf(tag) != -1;
+				b = b.storyData.tags[type].indexOf(tag) != -1;
+				return a - b;
 			}:function(b, a) {
-				a = a.storyData.tags.category.indexOf(cat) != -1;
-				b = b.storyData.tags.category.indexOf(cat) != -1;
-				return a > b ? 1 : a < b ? -1 : 0;
-			});
-		}
-		function sortByCharacter(cat, invert) {
-			sortTable(document.querySelector("table"), invert?function(a, b) {
-				a = a.storyData.tags.character.indexOf(cat) != -1;
-				b = b.storyData.tags.character.indexOf(cat) != -1;
-				return a > b ? 1 : a < b ? -1 : 0;
-			}:function(b, a) {
-				a = a.storyData.tags.character.indexOf(cat) != -1;
-				b = b.storyData.tags.character.indexOf(cat) != -1;
-				return a > b ? 1 : a < b ? -1 : 0;
+				a = a.storyData.tags[type].indexOf(tag) != -1;
+				b = b.storyData.tags[type].indexOf(tag) != -1;
+				return a - b;
 			});
 		}
 		function writeStoryTable() {
@@ -341,6 +321,7 @@
 					row.storyData = story;
 					rows.appendChild(row);
 					// we should really store the comment count in the story table, because this is slow as shit
+					row.storyData.commentCount = 0; // in case we try to sort by this immediately
 					db.getKeysByIndex("comments", "location", "story/" + story.id, function (row) { return function(keys) {
 						row.lastChild.appendChild(document.createTextNode(keys.length));
 						row.storyData.commentCount = keys.length;
@@ -400,15 +381,15 @@
 			<tr>
 				<td class="sortable" data-sort="title">Title</td>
 				<td class="sortable" data-sort="author">Author</td>
-				<td class="sortable" data-sort="words">Words</td>
-				<td class="sortable" data-sort="rating">Ratings</td>
+				<td class="sortable" data-sort="wordcount">Words</td>
+				<td class="sortable" data-sort="floatRating">Ratings</td>
 				<td id="categories">Categories</td>
 				<td id="characters">Characters</td>
 				<td class="sortable" data-sort="created">Created</td>
 				<td class="sortable" data-sort="updated">Updated</td>
-				<td class="sortable" data-sort="favourite">Fav</td>
+				<td class="sortable" data-sort="tracking">Fav</td>
 				<td class="sortable" data-sort="read_later">RIL</td>
-				<td class="sortable" data-sort="comments">C</td>
+				<td class="sortable" data-sort="commentCount">C</td>
 			</tr>
 		</thead>
 		<tbody>
