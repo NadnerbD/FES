@@ -3,6 +3,7 @@ var console = Components.utils.import("resource://gre/modules/devtools/Console.j
 var ioServ = Components.classes["@mozilla.org/network/io-service;1"].createInstance(Components.interfaces.nsIIOService);
 var resHandler = ioServ.getProtocolHandler("resource").QueryInterface(Components.interfaces.nsIResProtocolHandler);
 var obsServ = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
+var winMed = Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator);
 
 function install(data, reason) {}
 
@@ -36,8 +37,6 @@ function shutdown(data, reason) {
 	resHandler.setSubstitution("fimfic-res", null);
 }
 
-//// stuff, should be moved to modules later
-
 function pageLoadObserver() {
 	this.register();
 }
@@ -53,6 +52,8 @@ pageLoadObserver.prototype = {
 		obsServ.removeObserver(this, "content-document-global-created", false);
 	}
 };
+
+//// Actual implementation stuff, should be moved to modules later
 
 var locs = [
 	[/https?:\/\/(www\.)?fimfiction\.net\/(index\.php\?view=category)|(stories).*/, linkComments],
@@ -106,9 +107,9 @@ function scrapeComments(document) {
 		// the comment will only have a textarea if we own it
 		if(ci.getElementsByTagName("textarea").length) {
 			var likes = ci.querySelector("span.comment_like_text").firstChild;
-			if(likes == null) likes = 0; else likes = parseInt(likes.data.replace(",", ""));
+			if(likes == null) likes = 0; else likes = parseInt(likes.data.replace(/,/g, ""));
 			var dislikes = ci.querySelector("span.comment_dislike_text").firstChild;
-			if(dislikes == null) dislikes = 0; else dislikes = parseInt(dislikes.data.replace(",", ""));
+			if(dislikes == null) dislikes = 0; else dislikes = parseInt(dislikes.data.replace(/,/g, ""));
 			var comment = {
 				author: ci.getAttribute("data-author"),
 				id: ci.getAttribute("data-comment_id"),
@@ -202,10 +203,10 @@ function addLinks(document, db) {
 			id: link.href.split("/")[4],
 			title: link.firstChild.data,
 			author: item.querySelector("td.author a").firstChild.data,
-			wordcount: parseInt(info.firstChild.data.split(" ")[0].replace(",", "")),
+			wordcount: parseInt(info.firstChild.data.split(" ")[0].replace(/,/g, "")),
 			ratings: {
-				up: parseInt(info.querySelectorAll("img")[0].nextSibling.data.replace(",", "")),
-				down: parseInt(info.querySelectorAll("img")[1].nextSibling.data.replace(",", ""))
+				up: parseInt(info.querySelectorAll("img")[0].nextSibling.data.replace(/,/g, "")),
+				down: parseInt(info.querySelectorAll("img")[1].nextSibling.data.replace(/,/g, ""))
 			},
 			tags: {
 				category: [catLink.title for(catLink of item.querySelectorAll("a.story_category"))],
@@ -257,9 +258,13 @@ function addLinks(document, db) {
 		<div id="wordcount" class="notification_popup" style="left:10px;display:block;padding:10px;">\
 			<span class="notification_title">' + words.toLocaleString() + ' words</span>\
 			<a id="viewStories" href="javascript:void(0);">view stored story list</a><br/>\
-			<a id="dlStories" href="javascript:void(0);">sync downloaded stories</a>\
 		</div>\
 	';
+	// why did I do this instead of just put the resource url in the href attribute?
+	element.querySelector("a#viewStories").addEventListener("click", function(event) {
+		var win = winMed.getMostRecentWindow("navigator:browser");
+		win.gBrowser.selectedTab = win.gBrowser.addTab("resource://fimfic-res/story_list.html");
+	}, false);
 	document.body.appendChild(element.firstElementChild);
 }
 
@@ -276,10 +281,10 @@ function scrapeStories(document, observed) {
 			id: link.href.split("/")[4],
 			title: link.firstChild.data,
 			author: item.querySelector("span.author a").firstChild.data,
-			wordcount: parseInt(item.querySelector("div.word_count b").firstChild.data.replace(",", "")),
+			wordcount: parseInt(item.querySelector("div.word_count b").firstChild.data.replace(/,/g, "")),
 			ratings: {
-				up: parseInt(item.querySelector("span.likes").firstChild.data.replace(",", "")),
-				down: parseInt(item.querySelector("span.dislikes").firstChild.data.replace(",", ""))
+				up: parseInt(item.querySelector("span.likes").firstChild.data.replace(/,/g, "")),
+				down: parseInt(item.querySelector("span.dislikes").firstChild.data.replace(/,/g, ""))
 			},
 			tags: {
 				category: [catLink.firstChild.data for(catLink of item.querySelectorAll("a.story_category"))],
