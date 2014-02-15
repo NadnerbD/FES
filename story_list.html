@@ -158,7 +158,7 @@
 			});
 		}
 		var lastSort, invertSort;
-		var sortIndicator = createTree({tag: "a", attrs: {className: "sort_indicator"}, children: ["+"]});
+		var sortIndicator = createTree({tag: "a", attrs: {className: "sort_indicator"}, children: ["\u25B2"]});
 		function moveSortIndicator(cat, element, type) {
 			if(cat == lastSort) {
 				invertSort = !invertSort;
@@ -166,7 +166,7 @@
 				invertSort = false;
 			}
 			lastSort = cat;
-			sortIndicator.firstChild.data = invertSort?"-":"+";
+			sortIndicator.firstChild.data = invertSort?"\u25BC":"\u25B2";
 			while(sortIndicator.childNodes.length > 1) sortIndicator.removeChild(sortIndicator.lastChild);
 			if(type) sortIndicator.appendChild(type);
 			element.appendChild(sortIndicator);
@@ -297,12 +297,7 @@
 					var percentRating = parseInt(story.floatRating * 100);
 					var rowStruct = {tag: "tr", children: [
 						{tag: "td", children: [{tag: "a", attrs: {href: "http://fimfiction.net/story/" + story.id}, children: [story.title]}]},
-						{tag: "td", children: [
-							// this shouldn't be optional, but I was an idiot and the early version of the scraper didn't get author info
-							story.author?
-							{tag: "a", attrs: {href: "http://fimfiction.net/user/" + story.author.replace(/ /g, "+")}, children: [story.author]}
-							:""
-						]},
+						{tag: "td", children: [{tag: "a", attrs: {href: "http://fimfiction.net/user/" + story.author.replace(/ /g, "+")}, children: [story.author]}]},
 						{tag: "td", children: [story.wordcount.toLocaleString()]},
 						{tag: "td", attrs: {
 								style: "background-image: linear-gradient(to right, rgba(0, 255, 0, 0.3) " + percentRating + "%, rgba(255, 0, 0, 0.3) " + percentRating + "%);"
@@ -311,8 +306,8 @@
 						},
 						{tag: "td", children: [catTable[cat] for(cat of story.tags.category)]},
 						{tag: "td", children: [{tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}} for(cat of story.tags.character)]},
-						{tag: "td", children: story.created?story.created.toDateString():""},
-						{tag: "td", children: story.updated?story.updated.toDateString():""},
+						{tag: "td", children: story.created?story.created.toDateString().slice(4):""},
+						{tag: "td", children: story.updated?story.updated.toDateString().slice(4):""},
 						{tag: "td", children: story.tracking?"Y":""},
 						{tag: "td", children: story.read_later?"Y":""},
 						{tag: "td"} // this will contain the comment count
