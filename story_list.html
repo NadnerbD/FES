@@ -44,6 +44,11 @@
 	<script type="text/javascript" src="bbcode.js"></script>
 	<link rel="stylesheet" type="text/css" href="bbcode.css" />
 	<style type="text/css">
+		@font-face {
+			/* Font Awesome by Dave Gandy - http://fontawesome.io */
+			font-family: "FontAwesome";
+			src: url("/fontawesome-webfont.ttf");
+		}
 		table {
 			width: 100%;
 			font-size: 12px;
@@ -78,11 +83,23 @@
 		tbody td:nth-child(4) {
 			text-align: right;
 		}
-		tbody td:nth-child(9) {
+		td:nth-child(9) { /* Fav */
+			font-family: "FontAwesome";
+			font-weight: normal;
 			text-align: center;
 		}
-		tbody td:nth-child(10) {
+		td:nth-child(10) { /* RIL */
+			font-family: "FontAwesome";
+			font-weight: normal;
 			text-align: center;
+		}
+		thead td:nth-child(11) { /* Comment */
+			font-family: "FontAwesome";
+			font-weight: normal;
+			text-align: center;
+		}
+		tbody td:nth-child(11) {
+			text-align: right;
 		}
 		img.character {
 			cursor: pointer;
@@ -371,8 +388,8 @@
 						{tag: "td", children: [{tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}} for(cat of story.tags.character)]},
 						{tag: "td", children: story.created?story.created.toDateString().slice(4):""},
 						{tag: "td", children: story.updated?story.updated.toDateString().slice(4):""},
-						{tag: "td", children: story.tracking?"Y":""},
-						{tag: "td", children: story.read_later?"Y":""},
+						{tag: "td", children: story.tracking?"":""},
+						{tag: "td", children: story.read_later?"":""},
 						{tag: "td"} // this will contain the comment count
 					]};
 					var row = createTree(rowStruct);
@@ -402,7 +419,7 @@
 					]},
 					{tag: "div", attrs: {className: "metadata"}, children: [
 						{tag: "a", attrs: {href: "#comment/" + comment.id}, children: ["#" + comment.id]},
-						" � Chapter " + comment.chapter + " � " + comment.date.toLocaleString() + " � " + comment.ratings.up + "+ � " + comment.ratings.down + "-"
+						" · Chapter " + comment.chapter + " · " + comment.date.toLocaleString() + " · " + comment.ratings.up + "+ · " + comment.ratings.down + "-"
 					]},
 					{node: parser.render(comment.data), attrs: {className: "body"}}
 				]}
@@ -445,9 +462,9 @@
 				<td id="characters">Characters</td>
 				<td class="sortable" data-sort="created">Created</td>
 				<td class="sortable" data-sort="updated">Updated</td>
-				<td class="sortable" data-sort="tracking">Fav</td>
-				<td class="sortable" data-sort="read_later">RIL</td>
-				<td class="sortable" data-sort="commentCount">C</td>
+				<td class="sortable" data-sort="tracking"></td>
+				<td class="sortable" data-sort="read_later"></td>
+				<td class="sortable" data-sort="commentCount"></td>
 			</tr>
 		</thead>
 		<tbody>
