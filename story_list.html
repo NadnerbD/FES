@@ -83,6 +83,13 @@
 		tbody td:nth-child(4) {
 			text-align: right;
 		}
+		tbody td {
+			min-width: 25px;
+			max-width: 250px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
 		td:nth-child(9) { /* Fav */
 			font-family: "FontAwesome";
 			font-weight: normal;
@@ -374,13 +381,14 @@
 				for(var story of items) {
 					var cat;
 					story.floatRating = story.ratings.up / (story.ratings.up + story.ratings.down); // so we can sort by this
+					if(isNaN(story.floatRating)) story.floatRating = 0; // in case there are no ratings
 					var percentRating = parseInt(story.floatRating * 100);
 					var rowStruct = {tag: "tr", children: [
 						{tag: "td", children: [{tag: "a", attrs: {href: "http://fimfiction.net/story/" + story.id}, children: [story.title]}]},
 						{tag: "td", children: [{tag: "a", attrs: {href: "http://fimfiction.net/user/" + story.author.replace(/ /g, "+")}, children: [story.author]}]},
 						{tag: "td", children: [story.wordcount.toLocaleString()]},
 						{tag: "td", attrs: {
-								style: "background-image: linear-gradient(to right, rgba(0, 255, 0, 0.3) " + percentRating + "%, rgba(255, 0, 0, 0.3) " + percentRating + "%);"
+								style: percentRating == 0?"background-color: rgba(255, 0, 0, 0.3);":"background-image: linear-gradient(to right, rgba(0, 255, 0, 0.3) " + percentRating + "%, rgba(255, 0, 0, 0.3) " + percentRating + "%);"
 							}, 
 							children: [percentRating + "%"]
 						},

@@ -10,7 +10,10 @@ function FFDB(name, callback, aid) {
 			// access an arbitrary domain context!
 			var puri = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService).newURI(aid, null, null);
 			var principal = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager).getCodebasePrincipal(puri);
-			var req = indexedDB.openForPrincipal(principal, name);
+			// we assume we're doing this from chrome, so we need to actually get the idb object
+			var idbMan = Components.classes["@mozilla.org/dom/indexeddb/manager;1"].getService(Components.interfaces.nsIIndexedDatabaseManager);
+			idbMan.initWindowless(this);
+			var req = this.indexedDB.openForPrincipal(principal, name);
 		}else{
 			var req = indexedDB.open(name);
 		}
@@ -205,6 +208,7 @@ function FFDB(name, callback, aid) {
 	openDB(name, callback, aid);
 }
 
+/*
 function testCommentDatabase() {
 	var runner = function() {
 		var db, result;
@@ -243,7 +247,6 @@ function testCommentDatabase() {
 	}
 	runner.next();
 	
-	/*
 	var db = new FFDB("testdb", function() {
 		db.putItems("comments", [
 			{id: "123", location: "story1"},
@@ -274,7 +277,7 @@ function testCommentDatabase() {
 			});
 		});
 	});
-	*/
 }
+*/
 
 var EXPORTED_SYMBOLS = ["FFDB"];
