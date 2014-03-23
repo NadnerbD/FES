@@ -1,5 +1,12 @@
 // we like our console
-if(!console) var console = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {}).console;
+if(typeof console == "undefined") var console = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {}).console;
+
+// sometimes, if we're running from chrome, we won't have access to the indexedDB object
+if(typeof indexedDB == "undefined") {
+	var idbMan = Components.classes["@mozilla.org/dom/indexeddb/manager;1"].getService(Components.interfaces.nsIIndexedDatabaseManager);
+	idbMan.initWindowless(this);
+	indexedDB = this.indexedDB;
+}
 
 // open/create database
 function FFDB(name, callback, aid) {
@@ -10,10 +17,7 @@ function FFDB(name, callback, aid) {
 			// access an arbitrary domain context!
 			var puri = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService).newURI(aid, null, null);
 			var principal = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager).getCodebasePrincipal(puri);
-			// we assume we're doing this from chrome, so we need to actually get the idb object
-			var idbMan = Components.classes["@mozilla.org/dom/indexeddb/manager;1"].getService(Components.interfaces.nsIIndexedDatabaseManager);
-			idbMan.initWindowless(this);
-			var req = this.indexedDB.openForPrincipal(principal, name);
+			var req = indexedDB.openForPrincipal(principal, name);
 		}else{
 			var req = indexedDB.open(name);
 		}
