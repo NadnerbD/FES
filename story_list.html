@@ -143,6 +143,53 @@
 		a.alternate_universe { background-image: linear-gradient(to bottom, #8E8E8E 0%, #818181 100%); }
 		a.human { background-image: linear-gradient(to bottom, #BE895E 0%, #AB7C55 100%); }
 		a.anthro { background-image: linear-gradient(to bottom, #BE6E5E 0%, #AB6355 100%); }
+		/* Comment Overlay Styles */
+		div.comments_overlay {
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			bottom: 0px;
+			right: 0px;
+			background-color: rgba(0, 0, 0, 0.5);
+			padding: 50px;
+		}
+		div.comments_overlay h2 {
+			margin: 0px;
+			padding: 20px;
+			background-color: white;
+			border: solid gray 1px;
+		}
+		div.story_comments {
+			border-right: solid gray 1px;
+			border-left: solid gray 1px;
+			background-color: white;
+			position: absolute;
+			top: 72px;
+			left: 0px;
+			bottom: 0px;
+			right: 0px;
+			margin: 50px;
+			overflow-y: scroll;
+		}
+		div.comment {
+			border-right: none;
+			border-left: none;
+			border-top: none;
+		}
+		.close_button {
+			font-family: "FontAwesome";
+			font-weight: normal;
+			text-align: center;
+			float: right;
+			text-decoration: none;
+			color: black;
+		}
+		.close_button:before {
+			content: "";
+		}
+		.close_button:hover:before {
+			content: "";
+		}
 	</style>
 	<script type="text/javascript">
 		var db;
@@ -177,8 +224,8 @@
 			writeStoryTable();
 			document.addEventListener("click", handleClick);
 			document.addEventListener("mousedown", handleSelection);
-			window.onhashchange = highlightSelected;
-			highlightSelected();
+			window.addEventListener("hashchange", showComments);
+			showComments();
 		}
 		function getUserAvatars(callback) {
 			db.getAll("users", function(items) {
@@ -203,20 +250,7 @@
 			element.appendChild(sortIndicator);
 		}
 		function handleClick(event) {
-			// the most hilarious hack I ever did, literally copies elements from the page into the space where the quote goes
-			if(event.target.classList.contains("quote_link")) {
-				if(event.target.nextSibling.nodeName == "DIV") {
-					event.target.parentNode.removeChild(event.target.nextSibling);
-				}else{
-					var elem = document.getElementsByName(event.target.hash.substring(1));
-					if(elem.length) {
-						var quote_container = document.createElement("div");
-						quote_container.appendChild(elem[0].parentNode.cloneNode(true));
-						event.target.parentNode.insertBefore(quote_container, event.target.nextSibling);
-					}
-				}
-				event.preventDefault();
-			}else if(event.target.classList.contains("sortable")) {
+			if(event.target.classList.contains("sortable")) {
 				var cat = event.target.getAttribute("data-sort");
 				moveSortIndicator(cat, event.target);
 				switch(cat) {
@@ -299,16 +333,6 @@
 					row.classList.add("selected");
 					lastSelected = row;
 				}
-			}
-		}
-		function highlightSelected() {
-			var elem = document.getElementsByClassName("selected");
-			for(var i = 0; i < elem.length; i++) {
-				elem[i].classList.remove("selected");
-			}
-			var jump = document.getElementsByName(window.location.hash.substring(1));
-			for(var i = 0; i < jump.length; i++) {
-				jump[i].parentNode.classList.add("selected");
 			}
 		}
 		function sortTable(table, func) {
@@ -406,19 +430,63 @@
 					// we should really store the comment count in the story table, because this is slow as shit
 					row.storyData.commentCount = 0; // in case we try to sort by this immediately
 					db.getKeysByIndex("comments", "location", "story/" + story.id, function (row) { return function(keys) {
-						row.lastChild.appendChild(document.createTextNode(keys.length));
-						row.storyData.commentCount = keys.length;
+						if(keys.length > 0) {
+							var link = document.createElement("a");
+							link.appendChild(document.createTextNode(keys.length));
+							row.lastChild.appendChild(link);
+							row.storyData.commentCount = keys.length;
+							link.href = "#story_comments/" + row.storyData.id;
+						}else{
+							row.lastChild.appendChild(document.createTextNode("0"));
+						}
 					};}(row));
 				}
 				document.querySelector("tbody").appendChild(rows);
 			});
 		}
+		function showComments() {
+			var h = window.location.hash.split("/");
+			if(h[0] == "#story_comments") {
+				var storyId = h[1];
+				// blah, we have to get both the comments and the story name
+				db.getItemsByIndex("comments", "location", "story/" + storyId, function(comments) {
+					db.getItem("stories", storyId, function(story) {
+						var header = {tag: "div", attrs: {className: "comments_overlay"}, children: [
+							{tag: "h2", children: [
+								((story && story.title) || storyId) + " (" + comments.length + ")",
+								{tag: "a", attrs: {className: "close_button", href: "#"}}
+							]},
+							{tag: "div", attrs: {className: "story_comments"}}
+						]};
+						var container = createTree(header);
+						for(var comment of comments) {
+							container.lastChild.appendChild(createComment(comment, userAvatarURLs[comment.author]));
+						}
+						if(document.body.lastChild.className == "comments_overlay") {
+							document.body.lastChild.remove();
+						}
+						document.body.appendChild(container);
+					});
+				});
+			}else{
+				// hide comments if no hash
+				if(document.body.lastChild.className == "comments_overlay") {
+					document.body.lastChild.remove();
+				}
+			}
+		}
 		function createComment(comment, avatar) {
 			// JSONified HTML, because why not
+			var cbody = parser.render(comment.data);
+			// rewrite the quote links to point to fimfiction
+			var qlinks = cbody.querySelectorAll("a.quote_link");
+			for(var qlink of qlinks) {
+				qlink.href = "http://fimfiction.net/" + comment.location + "/#comment/" + qlink.href.split("#")[1];
+			}
 			var structure = {tag: "div", attrs: {className: "comment"}, children: [
 				{tag: "a", attrs: {className: "jump", name: comment.id}},
 				{tag: "div", attrs: {className: "author"}, children: [
-					{tag: "a", attrs: {className: "name", href: "/user/" + comment.author.replace(/ /g, "+")}, children: [comment.author]},
+					{tag: "a", attrs: {className: "name", href: "http://fimfiction.net/user/" + comment.author.replace(/ /g, "+")}, children: [comment.author]},
 					{tag: "img", attrs: {className: "avatar", src: avatar}}
 				]},
 				{tag: "div", attrs: {className: "data"}, children: [
@@ -426,10 +494,10 @@
 						{tag: "div"}
 					]},
 					{tag: "div", attrs: {className: "metadata"}, children: [
-						{tag: "a", attrs: {href: "#comment/" + comment.id}, children: ["#" + comment.id]},
+						{tag: "a", attrs: {href: "http://fimfiction.net/" + comment.location + "/#comment/" + comment.id}, children: ["#" + comment.id]},
 						" · Chapter " + comment.chapter + " · " + comment.date.toLocaleString() + " · " + comment.ratings.up + "+ · " + comment.ratings.down + "-"
 					]},
-					{node: parser.render(comment.data), attrs: {className: "body"}}
+					{node: cbody, attrs: {className: "body"}}
 				]}
 			]};
 			return createTree(structure);
