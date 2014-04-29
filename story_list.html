@@ -44,11 +44,35 @@
 	<script type="text/javascript" src="bbcode.js"></script>
 	<link rel="stylesheet" type="text/css" href="bbcode.css" />
 	<style type="text/css">
+		/* FontAwesome related styles */
 		@font-face {
 			/* Font Awesome by Dave Gandy - http://fontawesome.io */
 			font-family: "FontAwesome";
 			src: url("/fontawesome-webfont.ttf");
 		}
+		.fa {
+			font-family: "FontAwesome";
+			font-weight: normal;
+			text-align: center;
+		}
+		.close_button {
+			float: right;
+			text-decoration: none;
+			color: black;
+		}
+		.close_button:before {
+			content: "";
+		}
+		.close_button:hover:before {
+			content: "";
+		}
+		.thumbs_up:before {
+			content: ""
+		}
+		.thumbs_down:before {
+			content: ""
+		}
+		/* Table Styles */
 		table {
 			width: 100%;
 			font-size: 12px;
@@ -90,24 +114,10 @@
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
-		td:nth-child(9) { /* Fav */
-			font-family: "FontAwesome";
-			font-weight: normal;
-			text-align: center;
-		}
-		td:nth-child(10) { /* RIL */
-			font-family: "FontAwesome";
-			font-weight: normal;
-			text-align: center;
-		}
-		thead td:nth-child(11) { /* Comment */
-			font-family: "FontAwesome";
-			font-weight: normal;
-			text-align: center;
-		}
 		tbody td:nth-child(11) {
 			text-align: right;
 		}
+		/* Tag Styles */
 		img.character {
 			cursor: pointer;
 			margin-right: 2px;
@@ -175,20 +185,6 @@
 			border-right: none;
 			border-left: none;
 			border-top: none;
-		}
-		.close_button {
-			font-family: "FontAwesome";
-			font-weight: normal;
-			text-align: center;
-			float: right;
-			text-decoration: none;
-			color: black;
-		}
-		.close_button:before {
-			content: "";
-		}
-		.close_button:hover:before {
-			content: "";
 		}
 	</style>
 	<script type="text/javascript">
@@ -420,8 +416,8 @@
 						{tag: "td", children: [{tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}} for(cat of story.tags.character)]},
 						{tag: "td", children: story.created?story.created.toDateString().slice(4):""},
 						{tag: "td", children: story.updated?story.updated.toDateString().slice(4):""},
-						{tag: "td", children: story.tracking?"":""},
-						{tag: "td", children: story.read_later?"":""},
+						{tag: "td", attrs: {className: "fa"}, children: story.tracking?"":""},
+						{tag: "td", attrs: {className: "fa"}, children: story.read_later?"":""},
 						{tag: "td"} // this will contain the comment count
 					]};
 					var row = createTree(rowStruct);
@@ -469,7 +465,7 @@
 						var header = {tag: "div", attrs: {className: "comments_overlay"}, children: [
 							{tag: "h2", children: [
 								((story && story.title) || storyId) + " (" + comments.length + ")",
-								{tag: "a", attrs: {className: "close_button", href: "#"}}
+								{tag: "a", attrs: {className: "fa close_button", href: "#"}}
 							]},
 							{tag: "div", attrs: {className: "story_comments"}}
 						]};
@@ -510,7 +506,10 @@
 					]},
 					{tag: "div", attrs: {className: "metadata"}, children: [
 						{tag: "a", attrs: {href: "http://fimfiction.net/" + comment.location + "/#comment/" + comment.id}, children: ["#" + comment.id]},
-						" · Chapter " + comment.chapter + " · " + comment.date.toLocaleString() + " · " + comment.ratings.up + "+ · " + comment.ratings.down + "-"
+						" · Chapter " + comment.chapter + " · " + comment.date.toLocaleString() + " · " + comment.ratings.up,
+						{tag: "span", attrs: {className: "fa thumbs_up"}},
+						" · " + comment.ratings.down,
+						{tag: "span", attrs: {className: "fa thumbs_down"}}
 					]},
 					{node: cbody, attrs: {className: "body"}}
 				]}
@@ -553,9 +552,9 @@
 				<td id="characters">Characters</td>
 				<td class="sortable" data-sort="created">Created</td>
 				<td class="sortable" data-sort="updated">Updated</td>
-				<td class="sortable" data-sort="tracking"></td>
-				<td class="sortable" data-sort="read_later"></td>
-				<td class="sortable" data-sort="comment_count"></td>
+				<td class="fa sortable" data-sort="tracking"></td>
+				<td class="fa sortable" data-sort="read_later"></td>
+				<td class="fa sortable" data-sort="comment_count"></td>
 			</tr>
 		</thead>
 		<tbody>
