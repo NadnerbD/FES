@@ -144,6 +144,12 @@ function scrapeComments(document) {
 		var db = new FFDB("fimcomments-db", function() {
 			db.putItems("comments", commentList, function() {
 				console.log("Saved " + commentList.length + " comments");
+				// update the comment_count field
+				db.getKeysByIndex("comments", "location", commentLocation, function(keys) {
+					db.updateItems("stories", [{id: path[2], comment_count: keys.length}], function() {
+						console.log(commentLocation + " has " + keys.length + " comments");
+					});
+				});
 				// check that we have the user data for this comment
 				db.getItem("users", firstAuthor, function(item) {
 					if(!item) {

@@ -265,7 +265,7 @@
 					case "updated":
 					// these last two are added at runtime
 					case "floatRating":
-					case "commentCount":
+					case "comment_count":
 						sortByNumericMember(cat, invertSort);
 						break;
 					default:
@@ -426,20 +426,35 @@
 					]};
 					var row = createTree(rowStruct);
 					row.storyData = story;
-					rows.appendChild(row);
-					// we should really store the comment count in the story table, because this is slow as shit
-					row.storyData.commentCount = 0; // in case we try to sort by this immediately
-					db.getKeysByIndex("comments", "location", "story/" + story.id, function (row) { return function(keys) {
-						if(keys.length > 0) {
+					if("comment_count" in row.storyData) {
+						if(row.storyData.comment_count > 0) {
 							var link = document.createElement("a");
-							link.appendChild(document.createTextNode(keys.length));
+							link.appendChild(document.createTextNode(row.storyData.comment_count));
 							row.lastChild.appendChild(link);
-							row.storyData.commentCount = keys.length;
 							link.href = "#story_comments/" + row.storyData.id;
 						}else{
 							row.lastChild.appendChild(document.createTextNode("0"));
 						}
-					};}(row));
+					}else{
+						// the comment count hasn't been cached yet, so we must determine it
+						row.storyData.comment_count = 0; // in case we try to sort by this immediately
+						db.getKeysByIndex("comments", "location", "story/" + story.id, function (row) { return function(keys) {
+							// cache the value so we don't have to do this again
+							db.updateItems("stories", [{id: row.storyData.id, comment_count: keys.length}], function() {
+								console.log(row.storyData.title + " has " + keys.length + " comments");
+							});
+							row.storyData.comment_count = keys.length;
+							if(row.storyData.comment_count > 0) {
+								var link = document.createElement("a");
+								link.appendChild(document.createTextNode(row.storyData.comment_count));
+								row.lastChild.appendChild(link);
+								link.href = "#story_comments/" + row.storyData.id;
+							}else{
+								row.lastChild.appendChild(document.createTextNode("0"));
+							}
+						};}(row));
+					}
+					rows.appendChild(row);
 				}
 				document.querySelector("tbody").appendChild(rows);
 			});
@@ -540,7 +555,7 @@
 				<td class="sortable" data-sort="updated">Updated</td>
 				<td class="sortable" data-sort="tracking"></td>
 				<td class="sortable" data-sort="read_later"></td>
-				<td class="sortable" data-sort="commentCount"></td>
+				<td class="sortable" data-sort="comment_count"></td>
 			</tr>
 		</thead>
 		<tbody>
