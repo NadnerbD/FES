@@ -155,8 +155,6 @@ function scrapeComments(document) {
 					if(!item) {
 						// user is not saved, save user data
 						saveUserAvatar(firstAuthor, document.querySelector("div#comment_content_" + firstId + " div.avatar img").src);
-					}else{
-						db.close();
 					}
 				});
 			});
