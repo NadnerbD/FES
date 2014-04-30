@@ -398,6 +398,8 @@
 			var groups, groupCount;
 			db.getAll("stories", function(items) {
 				var rows = document.createDocumentFragment();
+				var countUpdatesRequired = 0;
+				var countUpdates = [];
 				for(var story of items) {
 					var cat;
 					story.floatRating = story.ratings.up / (story.ratings.up + story.ratings.down); // so we can sort by this
@@ -434,11 +436,17 @@
 					}else{
 						// the comment count hasn't been cached yet, so we must determine it
 						row.storyData.comment_count = 0; // in case we try to sort by this immediately
+						// record that this needs to be updated
+						countUpdatesRequired++;
 						db.getKeysByIndex("comments", "location", "story/" + story.id, function (row) { return function(keys) {
 							// cache the value so we don't have to do this again
-							db.updateItems("stories", [{id: row.storyData.id, comment_count: keys.length}], function() {
-								console.log(row.storyData.title + " has " + keys.length + " comments");
-							});
+							countUpdates.push({id: row.storyData.id, comment_count: keys.length});
+							if(countUpdatesRequired > 0 && countUpdates.length >= countUpdatesRequired) {
+								// updates batched into one transaction for speed
+								db.updateItems("stories", countUpdates, function() {
+									console.log("Updated " + countUpdatesRequired + " story entries");
+								});
+							}
 							row.storyData.comment_count = keys.length;
 							if(row.storyData.comment_count > 0) {
 								var link = document.createElement("a");
