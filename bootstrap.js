@@ -106,10 +106,11 @@ function scrapeComments(document) {
 		var ci = comments[i];
 		// the comment will only have a textarea if we own it
 		if(ci.getElementsByTagName("textarea").length) {
-			var likes = ci.querySelector("span.comment_like_text").firstChild;
-			if(likes == null) likes = 0; else likes = parseInt(likes.data.replace(/,/g, ""));
-			var dislikes = ci.querySelector("span.comment_dislike_text").firstChild;
-			if(dislikes == null) dislikes = 0; else dislikes = parseInt(dislikes.data.replace(/,/g, ""));
+			var likes, dislikes;
+			var likeSpan = ci.querySelector("span.comment_like_text");
+			if(likeSpan == null || likeSpan.firstChild == null) likes = 0; else likes = parseInt(likeSpan.firstChild.data.replace(/,/g, ""));
+			var dislikeSpan = ci.querySelector("span.comment_dislike_text");
+			if(dislikeSpan == null || dislikeSpan.firstChild == null) dislikes = 0; else dislikes = parseInt(dislikeSpan.firstChild.data.replace(/,/g, ""));
 			var comment = {
 				author: ci.getAttribute("data-author"),
 				id: ci.getAttribute("data-comment_id"),
