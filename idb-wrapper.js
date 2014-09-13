@@ -127,6 +127,18 @@ function FFDB(name, callback, aid) {
 		};
 	}
 	
+	// delete specific value
+	this.deleteItem = function(storeName, index, callback) {
+		var store = db.transaction(storeName, "readwrite").objectStore(storeName);
+		var req = store.delete(index);
+		req.onsuccess = function(event) {
+			callback();
+		};
+		req.onerror = function(event) {
+			console.log("error deleting value for '" + index + "' from '" + storeName + "'");
+		};
+	}
+	
 	// get items whose indexName value matches index
 	this.getItemsByIndex = function(storeName, indexName, index, callback) {
 		var data = new Array();
