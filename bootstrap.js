@@ -101,7 +101,7 @@ function scrapeComments(document) {
 	var commentList = new Array();
 	
 	// actually scrape the comments
-	var comments = document.querySelectorAll("div.comment");
+	var comments = document.querySelectorAll("div#story_comments div.comment");
 	for(var i = 0; i < comments.length; i++) { 
 		var ci = comments[i];
 		// the comment will only have a textarea if we own it
