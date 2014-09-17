@@ -233,29 +233,38 @@ function addLinks(document, db) {
 		db.getKeysByIndex("comments", "location", "story/" + story.id, function(insertDiv, story) { return function(keys) {
 			if(keys.length) console.log("Found " + keys.length + " comments for story/" + story.id);
 			// insert comment links
+			insertDiv.appendChild(document.createElement("br"));
 			for(var cid of keys) {
 				var link = document.createElement("span");
 				//comment type must be set
 				link.setAttribute("class", "comment");
 				link.setAttribute("data-type", "0");
-				link.innerHTML = '<a class="comment_quote_link" href="#comment/' + 
+				link.innerHTML = '<a class="comment_quote_link" href="/story/' + 
+					story.id + '#comment/' + 
 					cid + '" data-comment_id="' + 
 					cid + '">&gt;&gt;' + cid + 
 					'<span class="comment_id" style="display:none;">' + 
 					cid + '</span></a>';
 				link.style.marginLeft = link.style.marginRight = "5px";
+				link.style.fontSize = "0.7em";
 				insertDiv.appendChild(link);
 			}
 			db.getItem("stories", story.id, function(remote_story) {
-				var sigil = document.createElement("i");
+				var span = insertDiv.querySelector("span.info");
+				var imgs = span.querySelectorAll("img");
+				var up = document.createElement("i");
+				up.className = "fa fa-thumbs-up";
+				span.replaceChild(up, imgs[0]);
+				var down = document.createElement("i");
+				down.className = "fa fa-thumbs-down";
+				span.replaceChild(down, imgs[1]);
 				if(remote_story.my_rating > 0) {
-					sigil.style = "color:#83C328";
-					sigil.className = "like fa fa-thumbs-up";
+					up.style = "color:#83C328";
+					up.classList.add("like");
 				}else if(remote_story.my_rating < 0) {
-					sigil.style = "color:#C32828";
-					sigil.className = "dislike fa fa-thumbs-down";
+					down.style = "color:#C32828";
+					down.classList.add("dislike");
 				}
-				insertDiv.appendChild(sigil);
 			});
 		};}(insertDiv, story));
 	}
