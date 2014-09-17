@@ -246,6 +246,17 @@ function addLinks(document, db) {
 				link.style.marginLeft = link.style.marginRight = "5px";
 				insertDiv.appendChild(link);
 			}
+			db.getItem("stories", story.id, function(remote_story) {
+				var sigil = document.createElement("i");
+				if(remote_story.my_rating > 0) {
+					sigil.style = "color:#83C328";
+					sigil.className = "like fa fa-thumbs-up";
+				}else if(remote_story.my_rating < 0) {
+					sigil.style = "color:#C32828";
+					sigil.className = "dislike fa fa-thumbs-down";
+				}
+				insertDiv.appendChild(sigil);
+			});
 		};}(insertDiv, story));
 	}
 	
@@ -297,6 +308,7 @@ function scrapeStories(document, observed) {
 			},
 			tracking: item.querySelector("a.favourite_button_selected") != null,
 			read_later: item.querySelector("a.read_it_later_selected") != null,
+			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,
 			created: new Date(item.querySelectorAll("span.date_approved span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3")),
 			updated: new Date(item.querySelectorAll("span.last_modified span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
 		};
@@ -305,6 +317,8 @@ function scrapeStories(document, observed) {
 		if(!observed) {
 			obs.observe(item.querySelector("a.favourite_button"), {attributes: true});
 			obs.observe(item.querySelector("a.read_it_later_widget"), {attributes: true});
+			obs.observe(item.querySelector("a.like_button"), {attributes: true});
+			obs.observe(item.querySelector("a.dislike_button"), {attributes: true});
 		}
 	}
 	if(stories.length) {

@@ -101,12 +101,6 @@
 		tr.selected:nth-child(2n) {
 			background-color: #AAF;
 		}
-		tbody td:nth-child(3) {
-			text-align: right;
-		}
-		tbody td:nth-child(4) {
-			text-align: right;
-		}
 		tbody td {
 			min-width: 25px;
 			max-width: 250px;
@@ -114,8 +108,11 @@
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
-		tbody td:nth-child(11) {
-			text-align: right;
+		.like {
+			color: #83C328;
+		}
+		.dislike {
+			color: #C32828;
 		}
 		/* Tag Styles */
 		img.character {
@@ -259,6 +256,7 @@
 					case "read_later":
 					case "created":
 					case "updated":
+					case "my_rating":
 					// these last two are added at runtime
 					case "floatRating":
 					case "comment_count":
@@ -408,9 +406,9 @@
 					var rowStruct = {tag: "tr", children: [
 						{tag: "td", children: [{tag: "a", attrs: {href: "http://fimfiction.net/story/" + story.id}, children: [story.title]}]},
 						{tag: "td", children: [{tag: "a", attrs: {href: "http://fimfiction.net/user/" + story.author.replace(/ /g, "+")}, children: [story.author]}]},
-						{tag: "td", children: [story.wordcount.toLocaleString()]},
+						{tag: "td", attrs: {style: "text-align: right;"}, children: [story.wordcount.toLocaleString()]},
 						{tag: "td", attrs: {
-								style: percentRating == 0?"background-color: rgba(255, 0, 0, 0.3);":"background-image: linear-gradient(to right, rgba(0, 255, 0, 0.3) " + percentRating + "%, rgba(255, 0, 0, 0.3) " + percentRating + "%);"
+								style: percentRating == 0?"background-color: rgba(255, 0, 0, 0.3);":"background-image: linear-gradient(to right, rgba(0, 255, 0, 0.3) " + percentRating + "%, rgba(255, 0, 0, 0.3) " + percentRating + "%);text-align: right;"
 							}, 
 							children: [percentRating + "%"]
 						},
@@ -418,9 +416,13 @@
 						{tag: "td", children: [{tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}} for(cat of story.tags.character)]},
 						{tag: "td", children: story.created?story.created.toDateString().slice(4):""},
 						{tag: "td", children: story.updated?story.updated.toDateString().slice(4):""},
+						{tag: "td", 
+							attrs: {className: "fa" + (story.my_rating > 0?" like":story.my_rating < 0?" dislike":"")}, 
+							children: story.my_rating > 0?"\uf164":story.my_rating < 0?"\uf165":""
+						},
 						{tag: "td", attrs: {className: "fa"}, children: story.tracking?"":""},
 						{tag: "td", attrs: {className: "fa"}, children: story.read_later?"":""},
-						{tag: "td"} // this will contain the comment count
+						{tag: "td", attrs: {style: "text-align: right;"}} // this will contain the comment count
 					]};
 					var row = createTree(rowStruct);
 					row.storyData = story;
@@ -560,6 +562,7 @@
 				<td id="characters">Characters</td>
 				<td class="sortable" data-sort="created">Created</td>
 				<td class="sortable" data-sort="updated">Updated</td>
+				<td class="fa sortable" data-sort="my_rating"></td>
 				<td class="fa sortable" data-sort="tracking"></td>
 				<td class="fa sortable" data-sort="read_later"></td>
 				<td class="fa sortable" data-sort="comment_count"></td>
