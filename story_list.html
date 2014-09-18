@@ -246,6 +246,14 @@
 			if(event.target.classList.contains("sortable")) {
 				var cat = event.target.getAttribute("data-sort");
 				moveSortIndicator(cat, event.target);
+				if(cat == "comment") {
+					// this behavior is fairly arbitrary, but it fits what I need
+					if(invertSort) {
+						cat = "newest_comment";
+					}else{
+						cat = "oldest_comment";
+					}
+				}
 				switch(cat) {
 					case "title":
 					case "author":
@@ -257,9 +265,11 @@
 					case "created":
 					case "updated":
 					case "my_rating":
-					// these last two are added at runtime
+					// these are added at runtime
 					case "floatRating":
 					case "comment_count":
+					case "oldest_comment":
+					case "newest_comment":
 						sortByNumericMember(cat, invertSort);
 						break;
 					default:
@@ -354,14 +364,16 @@
 			sortTable(document.querySelector("table"), invert?function(a, b) {
 				a = a.storyData[member];
 				b = b.storyData[member];
-				if(a == undefined) a = 0;
-				if(b == undefined) b = 0;
+				// sort undefined, NaN and Infinity to the end, regardless of sort order
+				if(!isFinite(a)) return 1;
+				if(!isFinite(b)) return -1;
 				return a - b;
 			}:function(b, a) {
 				a = a.storyData[member];
 				b = b.storyData[member];
-				if(a == undefined) a = 0;
-				if(b == undefined) b = 0;
+				// sort undefined, NaN and Infinity to the end, regardless of sort order
+				if(!isFinite(a)) return -1;
+				if(!isFinite(b)) return 1;
 				return a - b;
 			});
 		}
@@ -426,7 +438,7 @@
 					]};
 					var row = createTree(rowStruct);
 					row.storyData = story;
-					if("comment_count" in row.storyData) {
+					if("comment_count" in row.storyData && "oldest_comment" in row.storyData) {
 						if(row.storyData.comment_count > 0) {
 							var link = document.createElement("a");
 							link.appendChild(document.createTextNode(row.storyData.comment_count));
@@ -435,21 +447,30 @@
 						}else{
 							row.lastChild.appendChild(document.createTextNode("0"));
 						}
-					}else{
+					}
+					if(!("comment_count" in row.storyData) || !("oldest_comment" in row.storyData)) {
 						// the comment count hasn't been cached yet, so we must determine it
 						row.storyData.comment_count = 0; // in case we try to sort by this immediately
 						// record that this needs to be updated
 						countUpdatesRequired++;
-						db.getKeysByIndex("comments", "location", "story/" + story.id, function (row) { return function(keys) {
+						db.getItemsByIndex("comments", "location", "story/" + story.id, function (row) { return function(items) {
 							// cache the value so we don't have to do this again
-							countUpdates.push({id: row.storyData.id, comment_count: keys.length});
+							var update = {
+								id: row.storyData.id, 
+								comment_count: items.length, 
+								oldest_comment: items.length?items[0].date:NaN, 
+								newest_comment: items.length?items[items.length - 1].date:NaN
+							};
+							countUpdates.push(update);
 							if(countUpdatesRequired > 0 && countUpdates.length >= countUpdatesRequired) {
 								// updates batched into one transaction for speed
 								db.updateItems("stories", countUpdates, function() {
 									console.log("Updated " + countUpdatesRequired + " story entries");
 								});
 							}
-							row.storyData.comment_count = keys.length;
+							row.storyData.comment_count = update.comment_count;
+							row.storyData.oldest_comment = update.oldest_comment;
+							row.storyData.newest_comment = update.newest_comment;
 							if(row.storyData.comment_count > 0) {
 								var link = document.createElement("a");
 								link.appendChild(document.createTextNode(row.storyData.comment_count));
@@ -565,7 +586,7 @@
 				<td class="fa sortable" data-sort="my_rating"></td>
 				<td class="fa sortable" data-sort="tracking"></td>
 				<td class="fa sortable" data-sort="read_later"></td>
-				<td class="fa sortable" data-sort="comment_count"></td>
+				<td class="fa sortable" data-sort="comment"></td>
 			</tr>
 		</thead>
 		<tbody>

@@ -145,10 +145,18 @@ function scrapeComments(document) {
 		var db = new FFDB("fimcomments-db", function() {
 			db.putItems("comments", commentList, function() {
 				console.log("Saved " + commentList.length + " comments");
-				// update the comment_count field
-				db.getKeysByIndex("comments", "location", commentLocation, function(keys) {
-					db.updateItems("stories", [{id: path[2], comment_count: keys.length}], function() {
-						console.log(commentLocation + " has " + keys.length + " comments");
+				// update the comment_count, oldest_comment, and newest_comment fields
+				db.getItemsByIndex("comments", "location", commentLocation, function(items) {
+					var update = {
+						id: path[2], 
+						comment_count: items.length,
+						oldest_comment: items[0].date, 
+						newest_comment: items[items.length - 1].date
+					};
+					db.updateItems("stories", [update], function() {
+						console.log(commentLocation + " has " + update.comment_count + 
+							" comments (oldest: " + update.oldest_comment + ", newest: " + update.newest_comment + ")"
+						);
 					});
 				});
 				// check that we have the user data for this comment
