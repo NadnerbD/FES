@@ -183,6 +183,19 @@
 			border-left: none;
 			border-top: none;
 		}
+		/* Statusbar Styles */
+		div#statusbar {
+			position: fixed;
+			bottom: 0px;
+			left: 0px;
+			right: 0px;
+			border: none;
+			border-top: 1px solid gray;
+			background-color: white;
+			padding: 3px;
+			font-weight: bold;
+			font-size: 12px;
+		}
 	</style>
 	<script type="text/javascript">
 		var db;
@@ -337,6 +350,12 @@
 					row.classList.add("selected");
 					lastSelected = row;
 				}
+				// afterwards, display the selection stats
+				var selectionWords = 0;
+				for(var row of selectedRows) {
+					selectionWords += row.storyData.wordcount;
+				}
+				document.getElementById("selection_info").innerHTML = selectedRows.length.toLocaleString() + " stories, " + selectionWords.toLocaleString() + " words";
 			}
 		}
 		function sortTable(table, func) {
@@ -569,6 +588,42 @@
 			}
 			return tag;
 		}
+		function makeBBCodeList() {
+			// generates a list of stories with comment links from the selection
+			// and puts it on the clipboard in a BBCode format
+			document.getElementById("copy_list_link").style.display = "none";
+			var completion = [0, selectedRows.length];
+			document.getElementById("transaction_status").innerHTML = "Generating list: " + completion[0] + "/" + completion[1];
+			var storyOutput = "";
+			function writeNextStory() {
+				var row = selectedRows[completion[0]];
+				var story = row.storyData;
+				storyOutput += "[hr]" + story.title + " "
+				if(story.my_rating == 1) {
+					storyOutput += "[color=#83C328]▲[/color]";
+				}else if(story.my_rating == -1) {
+					storyOutput += "[color=#C32828]▼[/color]";
+				}
+				storyOutput += "\n\t";
+				db.getKeysByIndex("comments", "location", "story/" + story.id, function(keys) {
+					for(var key of keys) {
+						storyOutput += "[url=http://fimfiction.net/story/" + story.id + "/#comment/" + key + "]#" + key + "[/url] ";
+					}
+					storyOutput += "\n";
+					completion[0] += 1;
+					document.getElementById("transaction_status").innerHTML = "Generating list: " + completion[0] + "/" + completion[1];
+					if(completion[0] == completion[1]) {
+						// we're done
+						document.getElementById("transaction_status").innerHTML = "";
+						document.getElementById("copy_list_link").style.display = "inline";
+						console.log(storyOutput);
+					}else{
+						writeNextStory();
+					}
+				});
+			}
+			writeNextStory();
+		}
 	</script>
 </head>
 <body onload="init()">
@@ -592,6 +647,11 @@
 		<tbody>
 		</tbody>
 	</table>
+	<div id="statusbar">
+		Selected: <span id="selection_info"></span>
+		<span style="float:right;" id="transaction_status"></span>
+		<a style="float:right;" id="copy_list_link" href="javascript:makeBBCodeList()">Copy Story List</a>
+	</div>
 </body>
 </html>
 
