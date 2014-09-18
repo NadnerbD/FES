@@ -616,7 +616,13 @@
 						// we're done
 						document.getElementById("transaction_status").innerHTML = "";
 						document.getElementById("copy_list_link").style.display = "inline";
-						console.log(storyOutput);
+						// pass the data to the extension to place on the clipboard
+						var elem = document.createElement("CopyDataElement");
+						elem.setAttribute("data", storyOutput);
+						document.documentElement.appendChild(elem);
+						var event = document.createEvent("Events");
+						event.initEvent("CopyStringEvent", true, false);
+						elem.dispatchEvent(event);
 					}else{
 						writeNextStory();
 					}
@@ -650,7 +656,7 @@
 	<div id="statusbar">
 		Selected: <span id="selection_info"></span>
 		<span style="float:right;" id="transaction_status"></span>
-		<a style="float:right;" id="copy_list_link" href="javascript:makeBBCodeList()">Copy Story List</a>
+		<a style="float:right;" id="copy_list_link" href="javascript:makeBBCodeList()">Copy Selected Stories</a>
 	</div>
 </body>
 </html>

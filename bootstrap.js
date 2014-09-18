@@ -5,6 +5,9 @@ var resHandler = ioServ.getProtocolHandler("resource").QueryInterface(Components
 var obsServ = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
 var winMed = Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator);
 
+// Also a helper for our resource page
+var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"].getService(Components.interfaces.nsIClipboardHelper);
+
 function install(data, reason) {}
 
 function uninstall(data, reason) {}
@@ -58,7 +61,8 @@ pageLoadObserver.prototype = {
 var locs = [
 	[/https?:\/\/(www\.)?fimfiction\.net\/(index\.php\?view=category)|(stories).*/, linkComments],
 	[/https?:\/\/(www\.)?fimfiction\.net\/story\/.*/, watchComments],
-	[/https?:\/\/(www\.)?fimfiction\.net.*/, changeHeader]
+	[/https?:\/\/(www\.)?fimfiction\.net.*/, changeHeader],
+	[/resource:\/\/fimfic-res\/story_list\.html/, setupCopyListener]
 ];
 	
 function handleNewPage(event) {
@@ -70,6 +74,13 @@ function handleNewPage(event) {
 			locs[i][1](document);
 		}
 	}
+}
+
+function setupCopyListener(document) {
+	document.addEventListener("CopyStringEvent", function(e) {
+		clipboardHelper.copyString(e.target.getAttribute("data"));
+		e.target.parentElement.removeChild(e.target);
+	}, false, true);
 }
 
 function changeHeader(document) {
