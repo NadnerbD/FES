@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -117,7 +117,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -217,6 +217,7 @@ function bbcode() {
 		"smcaps": "SPAN",
 		"spoiler": "SPAN",
 		"url": "A",
+		"site_url": "A",
 		"img": "IMG",
 		"quote": "BLOCKQUOTE",
 		"youtube": "DIV",
@@ -317,6 +318,8 @@ function bbcode() {
 				var closed = [];
 				if(tag.name == "url") {
 					element.href = tag.value;
+				}else if(tag.name == "site_url") {
+					element.href = localSite + tag.value;
 				}else if(tag.name == "color") {
 					element.style.color = tag.value;
 				}else if(tag.name == "size") {
@@ -361,5 +364,11 @@ function bbcode() {
 		for(var key in emotes) {
 			emoteDict[key] = emotes[key];
 		}
+	}
+
+	// prefix for site_url tags, since this is generally used to generate off-site data
+	var localSite = "";
+	this.setLocalSite = function(site) {
+		localSite = site;
 	}
 }

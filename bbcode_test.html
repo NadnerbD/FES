@@ -15,8 +15,6 @@
 				}
 				target.appendChild(parser.render(text));
 			}
-		</script>
-		<script type="text/javascript">
 			// fetch emoticon list
 			var request = new XMLHttpRequest();
 			request.onreadystatechange = function() {
@@ -34,6 +32,9 @@
 			};
 			request.open("GET", "emotes/emoticons.json", true);
 			request.send(null);
+			// the site doesn't actually allow site_urls that don't start at the root /
+			// or urls that don't start with https?:// we don't validate that
+			parser.setLocalSite("http://fimfiction.net");
 		</script>
 	</head>
 	<body>
@@ -49,6 +50,7 @@
 [color=#F00][size=24]te[/color]st[/size]
 [center]this is a :backstab:[/center]
 [s][url=http://www.google.com]te[/s]st[/url]
+[site_url=/user/Nadnerb]test[/site_url]
 [img]http://nadru.dyndns.org/Images/Backstab.png[/img][hr]</textarea>
 			<input type="submit" />
 		</form>
