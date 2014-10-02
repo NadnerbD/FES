@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -117,7 +117,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -214,6 +214,7 @@ function bbcode() {
 		"s": "SPAN",
 		"size": "SPAN",
 		"color": "SPAN",
+		"smcaps": "SPAN",
 		"spoiler": "SPAN",
 		"url": "A",
 		"img": "IMG",
@@ -227,7 +228,7 @@ function bbcode() {
 		openNode(document.createElement("p"));
 		function closeNode() {
 			var lastTop = top;
-			top = top.parentNode;			
+			top = top.parentNode;
 			// if the top element was empty, remove it.
 			if(lastTop.childNodes.length == 0) {
 				top.removeChild(lastTop);
@@ -319,9 +320,16 @@ function bbcode() {
 				}else if(tag.name == "color") {
 					element.style.color = tag.value;
 				}else if(tag.name == "size") {
-					element.style.fontSize = tag.value + "px";
+					// default size value is px, but can be supplied in em
+					if(endsWith(tag.value, "em")) {
+						element.style.fontSize = tag.value;
+					}else{
+						element.style.fontSize = tag.value + "px";
+					}
 				}else if(tag.name == "s") {
 					element.style.textDecoration = "line-through";
+				}else if(tag.name == "smcaps") {
+					element.style.fontVariant = "small-caps";
 				}else if(tag.name == "spoiler") {
 					element.className = "spoiler";
 				}else if(tag.name == "quote") {
@@ -338,6 +346,10 @@ function bbcode() {
 			closeNode();
 		}
 		return top;
+	}
+
+	function endsWith(str, suffix) {
+		return str.indexOf(suffix, str.length - suffix.length) !== -1;
 	}
 
 	this.render = function(str) {
