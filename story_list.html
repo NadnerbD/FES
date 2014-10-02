@@ -21,8 +21,6 @@
 			request.open("GET", "emotes/emoticons.json", true);
 			request.send(null);
 		}
-	</script>
-	<script type="text/javascript">
 		// fetch character list
 		function fetchChars(callback) {
 			var request = new XMLHttpRequest();
@@ -217,6 +215,7 @@
 		};
 		var userAvatarURLs = {};
 		var parser = new bbcode();
+		parser.setLocalSite("http://fimfiction.net");
 		function init() {
 			db = new FFDB("fimcomments-db", function() {
 				getUserAvatars(function() {
@@ -607,7 +606,7 @@
 				storyOutput += "\n\t";
 				db.getKeysByIndex("comments", "location", "story/" + story.id, function(keys) {
 					for(var key of keys) {
-						storyOutput += "[url=http://fimfiction.net/story/" + story.id + "/#comment/" + key + "]#" + key + "[/url] ";
+						storyOutput += "[site_url=/story/" + story.id + "/#comment/" + key + "]#" + key + "[/site_url] ";
 					}
 					storyOutput += "\n";
 					completion[0] += 1;
