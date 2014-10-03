@@ -5,9 +5,6 @@ var resHandler = ioServ.getProtocolHandler("resource").QueryInterface(Components
 var obsServ = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
 var winMed = Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator);
 
-// Also a helper for our resource page
-var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"].getService(Components.interfaces.nsIClipboardHelper);
-
 function install(data, reason) {}
 
 function uninstall(data, reason) {}
@@ -62,7 +59,7 @@ var locs = [
 	[/https?:\/\/(www\.)?fimfiction\.net\/(index\.php\?view=category)|(stories).*/, linkComments],
 	[/https?:\/\/(www\.)?fimfiction\.net\/story\/.*/, watchComments],
 	[/https?:\/\/(www\.)?fimfiction\.net.*/, changeHeader],
-	[/resource:\/\/fimfic-res\/story_list\.html/, setupCopyListener]
+	[/resource:\/\/fimfic-res\/story_list\.html/, setupMessageListener]
 ];
 	
 function handleNewPage(event) {
@@ -76,10 +73,27 @@ function handleNewPage(event) {
 	}
 }
 
-function setupCopyListener(document) {
-	document.addEventListener("CopyStringEvent", function(e) {
-		clipboardHelper.copyString(e.target.getAttribute("data"));
-		e.target.parentElement.removeChild(e.target);
+function setupMessageListener(document) {
+	// listen for postMessage events directed at the window
+	document.defaultView.addEventListener("message", function(e) {
+		// ensure that the message actually came from our window
+		if(e.origin != "resource://fimfic-res") return;
+		switch(e.data.request) {
+			case "CopyString":
+				var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"].getService(Components.interfaces.nsIClipboardHelper);
+				clipboardHelper.copyString(e.data.string);
+			break;
+			case "PickFolder":
+				var filePicker = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
+				filePicker.init(e.source, e.data.title, filePicker.modeGetFolder);
+				filePicker.open(function() {
+					e.source.postMessage({request: "PickedFolder", title: e.data.title, folder: filePicker.file.path}, "resource://fimfic-res");
+				});
+			break;
+			default:
+				// do nothing
+			break;
+		}
 	}, false, true);
 }
 

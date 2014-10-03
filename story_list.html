@@ -616,18 +616,23 @@
 						document.getElementById("transaction_status").innerHTML = "";
 						document.getElementById("copy_list_link").style.display = "inline";
 						// pass the data to the extension to place on the clipboard
-						var elem = document.createElement("CopyDataElement");
-						elem.setAttribute("data", storyOutput);
-						document.documentElement.appendChild(elem);
-						var event = document.createEvent("Events");
-						event.initEvent("CopyStringEvent", true, false);
-						elem.dispatchEvent(event);
+						postMessage({request: "CopyString", string: storyOutput}, "*");
 					}else{
 						writeNextStory();
 					}
 				});
 			}
 			writeNextStory();
+		}
+		function pickFolder() {
+			function picked(e) {
+				if(e.data.request == "PickedFolder") {
+					console.log(e.data.folder);
+					removeEventListener("message", picked, false);
+				}
+			}
+			addEventListener("message", picked, false);
+			postMessage({request: "PickFolder", title: "test"}, "*");
 		}
 	</script>
 </head>
