@@ -230,6 +230,7 @@
 			document.addEventListener("click", handleClick);
 			document.addEventListener("mousedown", handleSelection);
 			window.addEventListener("hashchange", showComments);
+			// hash may exist when page is loaded, so manually run showComments
 			showComments();
 		}
 		function getUserAvatars(callback) {
@@ -504,6 +505,12 @@
 				document.querySelector("tbody").appendChild(rows);
 			});
 		}
+		function closeComments() {
+			// curse my perpetual perfectionism, I could have just set href to "#-" to prevent scrolling
+			// instead, let's clean up the url bar
+			history.pushState("", document.title, window.location.pathname);
+			showComments();
+		}
 		function showComments() {
 			var h = window.location.hash.split("/");
 			if(h[0] == "#story_comments") {
@@ -514,7 +521,7 @@
 						var header = {tag: "div", attrs: {className: "comments_overlay"}, children: [
 							{tag: "h2", children: [
 								((story && story.title) || storyId) + " (" + comments.length + ")",
-								{tag: "a", attrs: {className: "fa close_button", href: "#"}}
+								{tag: "a", attrs: {className: "fa close_button", href: "javascript:closeComments()"}}
 							]},
 							{tag: "div", attrs: {className: "story_comments"}}
 						]};

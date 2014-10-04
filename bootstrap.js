@@ -87,7 +87,12 @@ function setupMessageListener(document) {
 				var filePicker = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
 				filePicker.init(e.source, e.data.title, filePicker.modeGetFolder);
 				filePicker.open(function() {
-					e.source.postMessage({request: "PickedFolder", title: e.data.title, folder: filePicker.file.path}, "resource://fimfic-res");
+					e.source.postMessage({
+						request: "PickedFolder",
+						title: e.data.title,
+						// file can be null if the user didn't actually pick a file
+						folder: filePicker.file ? filePicker.file.path : null
+					}, "resource://fimfic-res");
 				});
 			break;
 			default:
