@@ -149,7 +149,7 @@
 		a.human { background-image: linear-gradient(to bottom, #BE895E 0%, #AB7C55 100%); }
 		a.anthro { background-image: linear-gradient(to bottom, #BE6E5E 0%, #AB6355 100%); }
 		/* Comment Overlay Styles */
-		div.comments_overlay {
+		div.overlay {
 			position: fixed;
 			top: 0px;
 			left: 0px;
@@ -158,13 +158,47 @@
 			background-color: rgba(0, 0, 0, 0.5);
 			padding: 50px;
 		}
-		div.comments_overlay h2 {
+		div.overlay h2 {
 			margin: 0px;
 			padding: 20px;
 			background-color: white;
 			border: solid gray 1px;
 		}
+		div.overlay ul {
+			margin: 0px;
+		}
+		div.overlay li {
+			position: relative;
+			left: -50px;
+			top: 17px;
+			z-index: 10;
+			background-color: lightgray;
+			display: inline-block;
+			border: solid 1px gray;
+			border-bottom: none;
+			border-radius: 10px 10px 0px 0px;
+			padding: 12px;
+			padding-top: 5px;
+			padding-bottom: 0px;
+			font-weight: normal;
+			margin-right: 5px;
+		}
+		div.overlay li.selected_tab {
+			padding-bottom: 1px;
+		}
+		div.profile_tab {
+			border: solid 1px gray;
+			background-color: lightgray;
+			padding: 1em;
+			position: absolute;
+			top: 72px;
+			left: 0px;
+			bottom: 0px;
+			right: 0px;
+			margin: 50px;
+		}
 		div.story_comments {
+			border-bottom: solid gray 1px;
 			border-right: solid gray 1px;
 			border-left: solid gray 1px;
 			background-color: white;
@@ -176,10 +210,13 @@
 			margin: 50px;
 			overflow-y: scroll;
 		}
-		div.comment {
+		div.story_comments div.comment {
 			border-right: none;
 			border-left: none;
 			border-top: none;
+		}
+		div.story_comments div.comment:last-child {
+			border-bottom: none;
 		}
 		/* Statusbar Styles */
 		div#statusbar {
@@ -229,9 +266,9 @@
 			writeStoryTable();
 			document.addEventListener("click", handleClick);
 			document.addEventListener("mousedown", handleSelection);
-			window.addEventListener("hashchange", showComments);
-			// hash may exist when page is loaded, so manually run showComments
-			showComments();
+			window.addEventListener("hashchange", showOverlay);
+			// hash may exist when page is loaded, so manually run showOverlay
+			showOverlay();
 		}
 		function getUserAvatars(callback) {
 			db.getAll("users", function(items) {
@@ -505,23 +542,27 @@
 				document.querySelector("tbody").appendChild(rows);
 			});
 		}
-		function closeComments() {
-			// curse my perpetual perfectionism, I could have just set href to "#-" to prevent scrolling
-			// instead, let's clean up the url bar
+		function closeOverlay() {
+			// remove any hash from the url bar
 			history.pushState("", document.title, window.location.pathname);
-			showComments();
+			showOverlay();
 		}
-		function showComments() {
+		function showOverlay() {
+			// remove existing overlays
+			if(document.body.lastChild.className == "overlay") {
+				document.body.lastChild.remove();
+			}
+			// see what we need to show
 			var h = window.location.hash.split("/");
 			if(h[0] == "#story_comments") {
 				var storyId = h[1];
 				// blah, we have to get both the comments and the story name
 				db.getItemsByIndex("comments", "location", "story/" + storyId, function(comments) {
 					db.getItem("stories", storyId, function(story) {
-						var header = {tag: "div", attrs: {className: "comments_overlay"}, children: [
+						var header = {tag: "div", attrs: {className: "overlay"}, children: [
 							{tag: "h2", children: [
 								((story && story.title) || storyId) + " (" + comments.length + ")",
-								{tag: "a", attrs: {className: "fa close_button", href: "javascript:closeComments()"}}
+								{tag: "a", attrs: {className: "fa close_button", href: "javascript:closeOverlay()"}}
 							]},
 							{tag: "div", attrs: {className: "story_comments"}}
 						]};
@@ -529,17 +570,60 @@
 						for(var comment of comments) {
 							container.lastChild.appendChild(createComment(comment, userAvatarURLs[comment.author]));
 						}
-						if(document.body.lastChild.className == "comments_overlay") {
-							document.body.lastChild.remove();
-						}
 						document.body.appendChild(container);
 					});
 				});
-			}else{
-				// hide comments if no hash
-				if(document.body.lastChild.className == "comments_overlay") {
-					document.body.lastChild.remove();
-				}
+			}else if(h[0] == "#sync_interface") {
+				var profiles = [{name: "Profile 1", selected: true}, {name: "+"}];
+				var structure = {tag: "div", attrs: {className: "overlay"}, children: [
+					{tag: "h2", children: [
+						{tag: "a", attrs: {className: "fa close_button", href: "javascript:closeOverlay()"}},
+						{tag: "ul", children: [
+							for (tab of profiles) {tag: "li", attrs: {className: tab.selected?"selected_tab":""}, children: [tab.name]}
+						]}
+					]},
+					{tag: "div", attrs: {className: "profile_tab"}, children: [
+						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Destination Folder:"]},
+							{tag: "input", attrs: {style: "float: right; margin-top: -1px;", type: "button", value: "...", onclick: pickFolder}},
+							{tag: "span", attrs: {style:"display:block; overflow:hidden;"}, children: [
+								{tag: "input", attrs: {style: "width: 100%;", type: "text", title: "Destination Folder", placeholder: "...", disabled: "disabled"}}
+							]}
+						]},
+						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Source Folder:"]},
+							{tag: "input", attrs: {style: "float: right; margin-top: -1px;", type: "button", value: "...", onclick: pickFolder}},
+							{tag: "span", attrs: {style:"display:block; overflow:hidden;"}, children: [
+								{tag: "input", attrs: {style: "width: 100%;", type: "text", title: "Source Folder", placeholder: "...", disabled: "disabled"}}
+							]}
+						]},
+						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Files to Sync:"]}, 
+							{tag: "select", children: [
+								{tag: "option", children: ["Selected"]},
+								{tag: "option", children: ["Tracking"]},
+								{tag: "option", children: ["ReadItLater"]},
+								{tag: "option", children: ["Upvotes"]},
+								{tag: "option", children: ["Downvotes"]}
+							]}
+						]},
+						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Download Type:"]},
+							{tag: "select", children: [
+								{tag: "option", children: ["txt"]},
+								{tag: "option", children: ["html"]},
+								{tag: "option", children: ["epub"]}
+							]}
+						]},
+						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+							{tag: "input", attrs: {type: "checkbox"}}, " Delete duplicates"
+						]},
+						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+							{tag: "input", attrs: {type: "checkbox"}}, " Keep old versions"
+						]}
+					]}
+				]};
+				document.body.appendChild(createTree(structure));
 			}
 		}
 		function createComment(comment, avatar) {
@@ -631,15 +715,16 @@
 			}
 			writeNextStory();
 		}
-		function pickFolder() {
+		function pickFolder(event) {
+			var outputElem = event.target.nextSibling.firstChild;
 			function picked(e) {
 				if(e.data.request == "PickedFolder") {
-					console.log(e.data.folder);
 					removeEventListener("message", picked, false);
+					outputElem.value = e.data.folder;
 				}
 			}
 			addEventListener("message", picked, false);
-			postMessage({request: "PickFolder", title: "test"}, "*");
+			postMessage({request: "PickFolder", title: outputElem.title}, "*");
 		}
 	</script>
 </head>
@@ -668,6 +753,7 @@
 		Selected: <span id="selection_info"></span>
 		<span style="float:right;" id="transaction_status"></span>
 		<a style="float:right;" id="copy_list_link" href="javascript:makeBBCodeList()">Copy Selected Stories</a>
+		<a style="float:right;margin-right:1em;" href="#sync_interface">Sync Stories</a>
 	</div>
 </body>
 </html>
