@@ -159,6 +159,8 @@
 			padding: 50px;
 		}
 		div.overlay h2 {
+			height: 25px;
+			overflow-y: hidden;
 			margin: 0px;
 			padding: 20px;
 			background-color: white;
@@ -168,6 +170,8 @@
 			margin: 0px;
 		}
 		div.overlay li {
+			height: 28px;
+			overflow-y: hidden;
 			position: relative;
 			left: -50px;
 			top: 17px;
@@ -185,13 +189,16 @@
 		}
 		div.overlay li.selected_tab {
 			padding-bottom: 1px;
+			top: 16px;
 		}
 		div.profile_tab {
-			border: solid 1px gray;
+			border-bottom: solid gray 1px;
+			border-right: solid gray 1px;
+			border-left: solid gray 1px;
 			background-color: lightgray;
 			padding: 1em;
 			position: absolute;
-			top: 72px;
+			top: 67px;
 			left: 0px;
 			bottom: 0px;
 			right: 0px;
@@ -203,7 +210,7 @@
 			border-left: solid gray 1px;
 			background-color: white;
 			position: absolute;
-			top: 72px;
+			top: 67px;
 			left: 0px;
 			bottom: 0px;
 			right: 0px;
@@ -574,13 +581,80 @@
 					});
 				});
 			}else if(h[0] == "#sync_interface") {
-				var profiles = [{name: "Profile 1", selected: true}, {name: "+"}];
+				// fetch profile data, and create it if neccessary
+				var profiles = JSON.parse(localStorage.getItem("profiles"));
+				if(profiles == null) {
+					profiles = [{name: "Profile 1"}];
+					var selectedProfileIndex = 0;
+				}else{
+					var selectedProfileIndex = parseInt(localStorage.getItem("selectedProfileIndex"));
+				}
+				profiles[selectedProfileIndex].selected = true;
+				// the profile editing functions
+				// might move elsewhere to avoid spaghettification
+				function saveProfileInfo() {
+					localStorage.setItem("profiles", JSON.stringify(profiles));
+					localStorage.setItem("selectedProfileIndex", selectedProfileIndex);
+				}
+				function bindTabClick(tabProfile) {
+					return function(event) {
+						if(event.target.classList.contains("selected_tab")) {
+							// edit the name of the tab
+							var str = event.target.firstChild.data;
+							event.target.removeChild(event.target.firstChild);
+							var entry = document.createElement("input");
+							entry.value = str;
+							event.target.appendChild(entry);
+							// select and focus the edit widget
+							entry.selectionStart = 0;
+							entry.selectionEnd = entry.value.length;
+							// post edit saving
+							function saveField(field) {
+								tabProfile.name = field.value;
+								var parent = field.parentNode;
+								parent.removeChild(field);
+								parent.appendChild(document.createTextNode(tabProfile.name));
+								saveProfileInfo();
+							}
+							entry.addEventListener("keypress", function(event) {
+								if(event.key == "Enter") {
+									saveField(event.target);
+								}
+							}, false);
+							entry.addEventListener("blur", function(event) {
+								saveField(event.target);
+							}, false);
+							entry.focus();
+						}else if(tabProfile.addTab) {
+							// add a new tab
+							selectedProfileIndex = profiles.length;
+							profiles.push({name: "Profile " + (profiles.length + 1)});
+							rewriteTabList();
+						}else{
+							// select the tab
+							selectedProfileIndex = event.target.profileIndex;
+							rewriteTabList();
+						}
+					};
+				}
+				function rewriteTabList() {
+					var parent = tabList.parentNode;
+					parent.removeChild(tabList);
+					tabList = createTabList();
+					parent.appendChild(tabList);
+					saveProfileInfo();
+				}
+				function createTabList() {
+					return createTree({tag: "ul", children: [
+						for (tab of profiles.concat({name: "+", addTab: true})) {tag: "li", attrs: {className: profiles.indexOf(tab) == selectedProfileIndex?"selected_tab":"", profileIndex: profiles.indexOf(tab), onclick: bindTabClick(tab)}, children: [tab.name]}
+					]});
+				}
+				// display the interface
+				var tabList = createTabList();
 				var structure = {tag: "div", attrs: {className: "overlay"}, children: [
 					{tag: "h2", children: [
 						{tag: "a", attrs: {className: "fa close_button", href: "javascript:closeOverlay()"}},
-						{tag: "ul", children: [
-							for (tab of profiles) {tag: "li", attrs: {className: tab.selected?"selected_tab":""}, children: [tab.name]}
-						]}
+						{node: tabList}
 					]},
 					{tag: "div", attrs: {className: "profile_tab"}, children: [
 						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
