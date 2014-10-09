@@ -57,6 +57,7 @@
 			float: right;
 			text-decoration: none;
 			color: black;
+			margin-left: 10px;
 		}
 		.close_button:before {
 			content: "";
@@ -160,7 +161,6 @@
 		}
 		div.overlay h2 {
 			height: 25px;
-			overflow-y: hidden;
 			margin: 0px;
 			padding: 20px;
 			background-color: white;
@@ -186,10 +186,13 @@
 			padding-bottom: 0px;
 			font-weight: normal;
 			margin-right: 5px;
+			cursor: pointer;
 		}
 		div.overlay li.selected_tab {
 			padding-bottom: 1px;
 			top: 16px;
+			/* we show the text cursor for the active tab only */
+			cursor: auto;
 		}
 		div.profile_tab {
 			border-bottom: solid gray 1px;
@@ -589,7 +592,6 @@
 				}else{
 					var selectedProfileIndex = parseInt(localStorage.getItem("selectedProfileIndex"));
 				}
-				profiles[selectedProfileIndex].selected = true;
 				// the profile editing functions
 				// might move elsewhere to avoid spaghettification
 				function saveProfileInfo() {
@@ -601,10 +603,9 @@
 						if(event.target.classList.contains("selected_tab")) {
 							// edit the name of the tab
 							var str = event.target.firstChild.data;
-							event.target.removeChild(event.target.firstChild);
 							var entry = document.createElement("input");
 							entry.value = str;
-							event.target.appendChild(entry);
+							event.target.replaceChild(entry, event.target.firstChild);
 							// select and focus the edit widget
 							entry.selectionStart = 0;
 							entry.selectionEnd = entry.value.length;
@@ -612,8 +613,7 @@
 							function saveField(field) {
 								tabProfile.name = field.value;
 								var parent = field.parentNode;
-								parent.removeChild(field);
-								parent.appendChild(document.createTextNode(tabProfile.name));
+								parent.replaceChild(document.createTextNode(tabProfile.name), field);
 								saveProfileInfo();
 							}
 							entry.addEventListener("keypress", function(event) {
@@ -644,9 +644,28 @@
 					parent.appendChild(tabList);
 					saveProfileInfo();
 				}
+				function deleteProfileTab(event) {
+					profiles.splice(event.target.parentNode.profileIndex, 1);
+					if(selectedProfileIndex >= profiles.length) {
+						selectedProfileIndex = profiles.length - 1;
+					}
+					rewriteTabList();
+					// prevent the tab selection function from being called too
+					event.stopPropagation();
+				}
 				function createTabList() {
 					return createTree({tag: "ul", children: [
-						for (tab of profiles.concat({name: "+", addTab: true})) {tag: "li", attrs: {className: profiles.indexOf(tab) == selectedProfileIndex?"selected_tab":"", profileIndex: profiles.indexOf(tab), onclick: bindTabClick(tab)}, children: [tab.name]}
+						for (tab of profiles.concat({name: "+", addTab: true})) {
+							tag: "li",
+							attrs: {
+								className: profiles.indexOf(tab) == selectedProfileIndex?"selected_tab":"",
+								profileIndex: profiles.indexOf(tab),
+								onclick: bindTabClick(tab)
+							},
+							children: [
+								tab.name
+							].concat(profiles.length > 1 && !tab.addTab?{tag: "a", attrs: {className: "fa close_button", onclick: deleteProfileTab, href: "javascript:void(0);"}}:[])
+						}
 					]});
 				}
 				// display the interface
