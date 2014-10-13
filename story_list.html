@@ -170,29 +170,36 @@
 			margin: 0px;
 		}
 		div.overlay li {
-			height: 28px;
+			height: 22px;
 			overflow-y: hidden;
 			position: relative;
 			left: -50px;
-			top: 17px;
+			top: 19px;
 			z-index: 10;
-			background-color: lightgray;
+			background-color: #C3C3C3;
 			display: inline-block;
 			border: solid 1px gray;
 			border-bottom: none;
 			border-radius: 10px 10px 0px 0px;
-			padding: 12px;
-			padding-top: 5px;
+			padding-top: 2px;
+			padding-left: 5px;
+			padding-right: 5px;
 			padding-bottom: 0px;
-			font-weight: normal;
+			font-weight: bold;
+			font-size: 16px;
 			margin-right: 5px;
 			cursor: pointer;
 		}
 		div.overlay li.selected_tab {
-			padding-bottom: 1px;
-			top: 16px;
+			top: 20px;
+			height: 23px;
+			background-color: lightgray;
 			/* we show the text cursor for the active tab only */
 			cursor: auto;
+		}
+		div.overlay li a {
+			position: relative;
+			top: 2px;
 		}
 		div.profile_tab {
 			border-bottom: solid gray 1px;
@@ -709,10 +716,12 @@
 							]}
 						]},
 						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
-							{tag: "input", attrs: {type: "checkbox"}}, " Delete duplicates"
+							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Delete duplicates:"]},
+							{tag: "input", attrs: {type: "checkbox"}}
 						]},
 						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
-							{tag: "input", attrs: {type: "checkbox"}}, " Keep old versions"
+							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Keep old versions:"]},
+							{tag: "input", attrs: {type: "checkbox"}}
 						]}
 					]}
 				]};
