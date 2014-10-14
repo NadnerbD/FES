@@ -592,9 +592,17 @@
 				});
 			}else if(h[0] == "#sync_interface") {
 				// fetch profile data, and create it if neccessary
+				var defaultProfileSettings = JSON.stringify([
+					{name: "Destination Folder", type: "FilePath", value: ""},
+					{name: "Source Folder", type: "FilePath", value: ""},
+					{name: "Files to Sync", type: "select", value: 0, options: ["Selected", "Tracking", "ReadItLater", "Upvotes", "Downvotes"]},
+					{name: "Download Type", type: "select", value: 0, options: ["txt", "html", "epub"]},
+					{name: "Delete Duplicates", type: "bool", value: false},
+					{name: "Keep Old Versions", type: "bool", value: false}
+				]);
 				var profiles = JSON.parse(localStorage.getItem("profiles"));
 				if(profiles == null) {
-					profiles = [{name: "Profile 1"}];
+					profiles = [{name: "Profile 1", settings: JSON.parse(defaultProfileSettings)}];
 					var selectedProfileIndex = 0;
 				}else{
 					var selectedProfileIndex = parseInt(localStorage.getItem("selectedProfileIndex"));
@@ -635,7 +643,7 @@
 						}else if(tabProfile.addTab) {
 							// add a new tab
 							selectedProfileIndex = profiles.length;
-							profiles.push({name: "Profile " + (profiles.length + 1)});
+							profiles.push({name: "Profile " + (profiles.length + 1), settings: JSON.parse(defaultProfileSettings)});
 							rewriteTabList();
 						}else{
 							// select the tab
@@ -645,10 +653,10 @@
 					};
 				}
 				function rewriteTabList() {
-					var parent = tabList.parentNode;
-					parent.removeChild(tabList);
-					tabList = createTabList();
-					parent.appendChild(tabList);
+					tabList.parentNode.replaceChild(newTabList = createTabList(), tabList);
+					tabList = newTabList;
+					settingControls.parentNode.replaceChild(newSettingControls = createSettingControls(), settingControls);
+					settingControls = newSettingControls;
 					saveProfileInfo();
 				}
 				function deleteProfileTab(event) {
@@ -660,9 +668,57 @@
 					// prevent the tab selection function from being called too
 					event.stopPropagation();
 				}
+				function createSettingControls() {
+					// we also need to rewrite all the info in the info window
+					var struct = [];
+					for(var setting of profiles[selectedProfileIndex].settings) {
+						switch(setting.type) {
+							case "FilePath":
+								function changeFilePath(setting) {
+									return function(event) {
+										setting.value = event.target.value;
+										saveProfileInfo();
+									};
+								}
+								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]},
+									{tag: "input", attrs: {style: "float: right; margin-top: -1px;", type: "button", value: "...", onclick: pickFolder}},
+									{tag: "span", attrs: {style:"display:block; overflow:hidden;"}, children: [
+										{tag: "input", attrs: {style: "width: 100%;", type: "text", title: "Destination Folder", onchange: changeFilePath(setting), value: setting.value, placeholder: "...", disabled: "disabled"}}
+									]}
+								]});
+								break;
+							case "select":
+								function changeSelect(setting) {
+									return function(event) {
+										setting.value = event.target.value;
+										saveProfileInfo();
+									};
+								}
+								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]}, 
+									{tag: "select", attrs: {value: setting.value, onchange: changeSelect(setting)}, children: [for (option of setting.options) {tag: "option", children: [option]}]}
+								]});
+								break;
+							case "bool":
+								function changeBool(setting) {
+									return function(event) {
+										setting.value = event.target.checked;
+										saveProfileInfo();
+									};
+								}
+								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]},
+									{tag: "input", attrs: {type: "checkbox", checked: setting.vaue, onchange: changeBool(setting)}}
+								]});
+								break;
+						}
+					}
+					return createTree({tag: "div", attrs: {className: "profile_tab"}, children: struct});
+				}
 				function createTabList() {
 					return createTree({tag: "ul", children: [
-						for (tab of profiles.concat({name: "+", addTab: true})) {
+						for (tab of profiles) {
 							tag: "li",
 							attrs: {
 								className: profiles.indexOf(tab) == selectedProfileIndex?"selected_tab":"",
@@ -671,59 +727,28 @@
 							},
 							children: [
 								tab.name
-							].concat(profiles.length > 1 && !tab.addTab?{tag: "a", attrs: {className: "fa close_button", onclick: deleteProfileTab, href: "javascript:void(0);"}}:[])
+							].concat(profiles.length > 1?{tag: "a", attrs: {className: "fa close_button", onclick: deleteProfileTab, href: "javascript:void(0);"}}:[])
 						}
-					]});
+					].concat(
+						{
+							tag: "li",
+							attrs: {
+								className: "fa",
+								onclick: bindTabClick({addTab: true})
+							},
+							children: ["\uf067"]
+						}
+					)});
 				}
 				// display the interface
 				var tabList = createTabList();
+				var settingControls = createSettingControls();
 				var structure = {tag: "div", attrs: {className: "overlay"}, children: [
 					{tag: "h2", children: [
 						{tag: "a", attrs: {className: "fa close_button", href: "javascript:closeOverlay()"}},
 						{node: tabList}
 					]},
-					{tag: "div", attrs: {className: "profile_tab"}, children: [
-						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
-							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Destination Folder:"]},
-							{tag: "input", attrs: {style: "float: right; margin-top: -1px;", type: "button", value: "...", onclick: pickFolder}},
-							{tag: "span", attrs: {style:"display:block; overflow:hidden;"}, children: [
-								{tag: "input", attrs: {style: "width: 100%;", type: "text", title: "Destination Folder", placeholder: "...", disabled: "disabled"}}
-							]}
-						]},
-						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
-							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Source Folder:"]},
-							{tag: "input", attrs: {style: "float: right; margin-top: -1px;", type: "button", value: "...", onclick: pickFolder}},
-							{tag: "span", attrs: {style:"display:block; overflow:hidden;"}, children: [
-								{tag: "input", attrs: {style: "width: 100%;", type: "text", title: "Source Folder", placeholder: "...", disabled: "disabled"}}
-							]}
-						]},
-						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
-							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Files to Sync:"]}, 
-							{tag: "select", children: [
-								{tag: "option", children: ["Selected"]},
-								{tag: "option", children: ["Tracking"]},
-								{tag: "option", children: ["ReadItLater"]},
-								{tag: "option", children: ["Upvotes"]},
-								{tag: "option", children: ["Downvotes"]}
-							]}
-						]},
-						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
-							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Download Type:"]},
-							{tag: "select", children: [
-								{tag: "option", children: ["txt"]},
-								{tag: "option", children: ["html"]},
-								{tag: "option", children: ["epub"]}
-							]}
-						]},
-						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
-							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Delete duplicates:"]},
-							{tag: "input", attrs: {type: "checkbox"}}
-						]},
-						{tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
-							{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: ["Keep old versions:"]},
-							{tag: "input", attrs: {type: "checkbox"}}
-						]}
-					]}
+					{node: settingControls}
 				]};
 				document.body.appendChild(createTree(structure));
 			}
