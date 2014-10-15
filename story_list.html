@@ -78,6 +78,7 @@
 			font-weight: bold;
 			border-collapse: collapse;
 			border: solid darkgray 1px;
+			margin-bottom: 30px;
 		}
 		thead td {
 			background-color: lightgray;
@@ -137,6 +138,7 @@
 			box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.4) inset;
 			text-shadow: -1px -1px rgba(0, 0, 0, 0.2);
 		}
+		a.sex { background-image: linear-gradient(to bottom, #992584 0%, #821F70 100%); }
 		a.romance { background-image: linear-gradient(to bottom, #7C40BB 0%, #7139AA 100%); }
 		a.tragedy { background-image: linear-gradient(to bottom, #EBA42D 0%, #D49528 100%); }
 		a.sad { background-image: linear-gradient(to bottom, #E3628D 0%, #CE5980 100%); }
@@ -254,6 +256,7 @@
 		var charTable = {};
 		//l2 = [{tag: "a", attrs: {title: cat, className: "category " + cat.toLowerCase().replace(/ /g, "_")}, children: [cat.slice(0, 2)]} for(cat of l)]
 		var catTable = {
+			"Sex": {tag: "a", attrs: {title: "Sex", className: "category sex"}, children: ["Se"]}, 
 			"Romance": {tag: "a", attrs: {title: "Romance", className: "category romance"}, children: ["Ro"]}, 
 			"Tragedy": {tag: "a", attrs: {title: "Tragedy", className: "category tragedy"}, children: ["Tr"]}, 
 			"Sad": {tag: "a", attrs: {title: "Sad", className: "category sad"}, children: ["Sa"]}, 

@@ -56,7 +56,8 @@ pageLoadObserver.prototype = {
 //// Actual implementation stuff, should be moved to modules later
 
 var locs = [
-	[/https?:\/\/(www\.)?fimfiction\.net\/(index\.php\?view=category)|(stories).*/, linkComments],
+	// story-card elements can appear in a lot of places
+	[/https?:\/\/(www\.)?fimfiction\.net\/(index\.php\?view=category)|(stories)|(bookshelf)|(user).*/, linkComments],
 	[/https?:\/\/(www\.)?fimfiction\.net\/story\/.*/, watchComments],
 	[/https?:\/\/(www\.)?fimfiction\.net.*/, changeHeader],
 	[/resource:\/\/fimfic-res\/story_list\.html/, setupMessageListener]
@@ -219,7 +220,7 @@ function scrapeComments(document) {
 }
 
 function linkComments(document) {
-	if(document.querySelector("table.browse_stories")) {
+	if(document.querySelector("ul.story-card-list")) {
 		// if we're in compact view, we can add links
 		var db = new FFDB("fimcomments-db", function() {
 			addLinks(document, db);
@@ -236,27 +237,28 @@ function addLinks(document, db) {
 	
 	var stories = new Array(); // scraped story information to be saved
 	
-	var items = document.querySelectorAll("table.browse_stories tbody tr.story_item");
+	var items = document.querySelectorAll("div.story-card");
 	var words = 0;
 	for(var i = 0; i < items.length; i++) {
 		var item = items[i];
-		var link = item.querySelector("a.title");
+		var link = item.querySelector("a.story_link");
 		var info = item.querySelector("span.info");
 		var story = {
-			id: link.href.split("/")[4],
+			id: /\/story\/([0-9]*)/.exec(link.href)[1],
 			title: link.firstChild.data,
-			author: item.querySelector("td.author a").firstChild.data,
+			author: item.querySelector("span.by a").firstChild.data,
 			wordcount: parseInt(info.firstChild.data.split(" ")[0].replace(/,/g, "")),
 			ratings: {
-				up: parseInt(info.querySelectorAll("img")[0].nextSibling.data.replace(/,/g, "")),
-				down: parseInt(info.querySelectorAll("img")[1].nextSibling.data.replace(/,/g, ""))
+				up: parseInt(item.querySelector("i.fa-thumbs-up").nextSibling.data.replace(/,/g, "")),
+				down: parseInt(item.querySelector("i.fa-thumbs-down").nextSibling.data.replace(/,/g, ""))
 			},
 			tags: {
 				category: [catLink.title for(catLink of item.querySelectorAll("a.story_category"))],
-				character: [charLink.title for(charLink of info.querySelectorAll("a"))]
+				character: [charLink.title for(charLink of item.querySelectorAll("div.character-icons a"))]
 			},
-			tracking: document.URL.indexOf("tracking=1") != -1,
-			read_later: document.URL.indexOf("read_it_later") != -1
+			// we check to see if the bookshelf id is in our bookshelf menu
+			tracking: document.querySelector("div.menu_list.bookshelves li[data-id='" + (/.*\/bookshelf\/([0-9]*)\/favourites/.exec(document.URL)||[0, 0])[1] + "']") != null,
+			read_later: document.querySelector("div.menu_list.bookshelves li[data-id='" + (/.*\/bookshelf\/([0-9]*)\/read-it-later/.exec(document.URL)||[0, 0])[1] + "']") != null
 		};
 		// cull properties we're not sure about (a story appearing in one list does not imply it is not in another)
 		if(!story.tracking) delete story.tracking;
@@ -267,11 +269,9 @@ function addLinks(document, db) {
 		console.log(JSON.stringify(story));
 		
 		// fetch all the comments for this story id
-		var insertDiv = item.querySelector("td.story_data");
 		db.getKeysByIndex("comments", "location", "story/" + story.id, function(insertDiv, story) { return function(keys) {
 			if(keys.length) console.log("Found " + keys.length + " comments for story/" + story.id);
 			// insert comment links
-			insertDiv.appendChild(document.createElement("br"));
 			for(var cid of keys) {
 				var link = document.createElement("span");
 				//comment type must be set
@@ -288,14 +288,8 @@ function addLinks(document, db) {
 				insertDiv.appendChild(link);
 			}
 			db.getItem("stories", story.id, function(remote_story) {
-				var span = insertDiv.querySelector("span.info");
-				var imgs = span.querySelectorAll("img");
-				var up = document.createElement("i");
-				up.className = "fa fa-thumbs-up";
-				span.replaceChild(up, imgs[0]);
-				var down = document.createElement("i");
-				down.className = "fa fa-thumbs-down";
-				span.replaceChild(down, imgs[1]);
+				var up = insertDiv.querySelector("i.fa-thumbs-up");
+				var down = insertDiv.querySelector("i.fa-thumbs-down");
 				if(remote_story.my_rating > 0) {
 					up.style = "color:#83C328";
 					up.classList.add("like");
@@ -304,7 +298,7 @@ function addLinks(document, db) {
 					down.classList.add("dislike");
 				}
 			});
-		};}(insertDiv, story));
+		};}(item, story));
 	}
 	
 	// store the story data
@@ -336,7 +330,7 @@ function scrapeStories(document, observed) {
 	// set up an observer to re-call this function if any of the stories we scrape changes it's attributes
 	if(!observed) var obs = new document.defaultView.MutationObserver(function(muts) { scrapeStories(document, true) });
 	var stories = new Array();
-	var items = document.querySelectorAll("div.story_content_box");
+	var items = document.querySelectorAll("div.story_container");
 	for(var i = 0; i < items.length; i++) {
 		var item = items[i];
 		var link = item.querySelector("a.story_name");
@@ -353,8 +347,9 @@ function scrapeStories(document, observed) {
 				category: [catLink.firstChild.data for(catLink of item.querySelectorAll("a.story_category"))],
 				character: [charLink.title for(charLink of item.querySelectorAll("a.character_icon"))]
 			},
-			tracking: item.querySelector("a.favourite_button_selected") != null,
-			read_later: item.querySelector("a.read_it_later_selected") != null,
+			// I should probably come up with a new schema for this, but for now, it's pretty easy to band-aid to use the new default bookshelves
+			tracking: item.querySelector("li.bookshelf.selected[title='Favourites']") != null,
+			read_later: item.querySelector("li.bookshelf.selected[title='Read It Later']") != null,
 			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,
 			created: new Date(item.querySelectorAll("span.date_approved span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3")),
 			updated: new Date(item.querySelectorAll("span.last_modified span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
@@ -362,8 +357,8 @@ function scrapeStories(document, observed) {
 		console.log(JSON.stringify(story));
 		stories.push(story);
 		if(!observed) {
-			obs.observe(item.querySelector("a.favourite_button"), {attributes: true});
-			obs.observe(item.querySelector("a.read_it_later_widget"), {attributes: true});
+			obs.observe(item.querySelector("li.bookshelf[title='Favourites']"), {attributes: true});
+			obs.observe(item.querySelector("li.bookshelf[title='Read It Later']"), {attributes: true});
 			obs.observe(item.querySelector("a.like_button"), {attributes: true});
 			obs.observe(item.querySelector("a.dislike_button"), {attributes: true});
 		}
