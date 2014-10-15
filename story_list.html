@@ -613,6 +613,7 @@
 				// the profile editing functions
 				// might move elsewhere to avoid spaghettification
 				function saveProfileInfo() {
+					console.log(JSON.stringify(profiles));
 					localStorage.setItem("profiles", JSON.stringify(profiles));
 					localStorage.setItem("selectedProfileIndex", selectedProfileIndex);
 				}
@@ -678,16 +679,17 @@
 						switch(setting.type) {
 							case "FilePath":
 								function changeFilePath(setting) {
-									return function(event) {
-										setting.value = event.target.value;
+									return function(value) {
+										document.querySelector("input[title='" + setting.name + "']").value = value;
+										setting.value = value;
 										saveProfileInfo();
 									};
 								}
 								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
 									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]},
-									{tag: "input", attrs: {style: "float: right; margin-top: -1px;", type: "button", value: "...", onclick: pickFolder}},
+									{tag: "input", attrs: {style: "float: right; margin-top: -1px;", type: "button", value: "...", onclick: pickFolder(setting.name, changeFilePath(setting))}},
 									{tag: "span", attrs: {style:"display:block; overflow:hidden;"}, children: [
-										{tag: "input", attrs: {style: "width: 100%;", type: "text", title: "Destination Folder", onchange: changeFilePath(setting), value: setting.value, placeholder: "...", disabled: "disabled"}}
+										{tag: "input", attrs: {style: "width: 100%;", type: "text", title: setting.name, value: setting.value, placeholder: "...", disabled: "disabled"}}
 									]}
 								]});
 								break;
@@ -700,7 +702,7 @@
 								}
 								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
 									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]}, 
-									{tag: "select", attrs: {value: setting.value, onchange: changeSelect(setting)}, children: [for (option of setting.options) {tag: "option", children: [option]}]}
+									{tag: "select", attrs: {onchange: changeSelect(setting)}, children: [for (option of setting.options) option==setting.value?{tag: "option", attrs: {selected: "selected"}, children: [option]}:{tag: "option", children: [option]}]}
 								]});
 								break;
 							case "bool":
@@ -712,7 +714,7 @@
 								}
 								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
 									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]},
-									{tag: "input", attrs: {type: "checkbox", checked: setting.vaue, onchange: changeBool(setting)}}
+									{tag: "input", attrs: {type: "checkbox", checked: setting.value?"checked":"", onchange: changeBool(setting)}}
 								]});
 								break;
 						}
@@ -845,16 +847,17 @@
 			}
 			writeNextStory();
 		}
-		function pickFolder(event) {
-			var outputElem = event.target.nextSibling.firstChild;
-			function picked(e) {
-				if(e.data.request == "PickedFolder") {
-					removeEventListener("message", picked, false);
-					outputElem.value = e.data.folder;
+		function pickFolder(title, callback) {
+			return function() {
+				function picked(e) {
+					if(e.data.request == "PickedFolder") {
+						removeEventListener("message", picked, false);
+						callback(e.data.folder);
+					}
 				}
-			}
-			addEventListener("message", picked, false);
-			postMessage({request: "PickFolder", title: outputElem.title}, "*");
+				addEventListener("message", picked, false);
+				postMessage({request: "PickFolder", title: title}, "*");
+			};
 		}
 	</script>
 </head>
