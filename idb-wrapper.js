@@ -2,11 +2,7 @@
 if(typeof console == "undefined") var console = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {}).console;
 
 // sometimes, if we're running from chrome, we won't have access to the indexedDB object
-if(typeof indexedDB == "undefined") {
-	var idbMan = Components.classes["@mozilla.org/dom/indexeddb/manager;1"].getService(Components.interfaces.nsIIndexedDatabaseManager);
-	idbMan.initWindowless(this);
-	indexedDB = this.indexedDB;
-}
+if(typeof indexedDB == "undefined") Components.utils.importGlobalProperties(["indexedDB"]);
 
 // open/create database
 function FFDB(name, callback, aid) {
