@@ -598,8 +598,8 @@
 				var defaultProfileSettings = JSON.stringify([
 					{name: "Destination Folder", type: "FilePath", value: ""},
 					{name: "Source Folder", type: "FilePath", value: ""},
-					{name: "Files to Sync", type: "select", value: 0, options: ["Selected", "Tracking", "ReadItLater", "Upvotes", "Downvotes"]},
-					{name: "Download Type", type: "select", value: 0, options: ["txt", "html", "epub"]},
+					{name: "Files to Sync", type: "select", value: "Selected", options: ["Selected", "Tracking", "ReadItLater", "Upvotes", "Downvotes"]},
+					{name: "Download Type", type: "select", value: "html", options: ["txt", "html", "epub"]},
 					{name: "Delete Duplicates", type: "bool", value: false},
 					{name: "Keep Old Versions", type: "bool", value: false}
 				]);
@@ -613,7 +613,7 @@
 				// the profile editing functions
 				// might move elsewhere to avoid spaghettification
 				function saveProfileInfo() {
-					console.log(JSON.stringify(profiles));
+					//console.log(JSON.stringify(profiles));
 					localStorage.setItem("profiles", JSON.stringify(profiles));
 					localStorage.setItem("selectedProfileIndex", selectedProfileIndex);
 				}
@@ -672,6 +672,61 @@
 					// prevent the tab selection function from being called too
 					event.stopPropagation();
 				}
+				function performSync() {
+					// reformat the settings structure so it's easy to use
+					var s = profiles[selectedProfileIndex].settings.reduce(function(o, i) {o[i.name.toLowerCase().replace(/ /g, "_")] = i.value; return o}, {});
+					// generate file list based on files_to_sync and download_type settings
+					var files = [];
+					// it might be better to query the database for some of these
+					function sanitizeFilname(fn) {
+						// TODO: we're going to need to do something about stories that share titles
+						// Also, I couldn't find a standard interface for stripping invalid characters from a filename
+						// so this is windows-specific, probably incomplete filename sanitization
+						return fn.replace(/[\\\/:\*\?"<>|]/g, "_");
+					}
+					function generateDownloadUrl(id) {
+						/* Example URLs
+						txt: https://www.fimfiction.net/download_story.php?story=221415
+						html: https://www.fimfiction.net/download_story.php?story=221415&html
+						epub: https://www.fimfiction.net/download_epub.php?story=221415
+						
+						AAAARGH download_epub returns a completely different Content-Disposition filename
+						formatted in title.toLowerCase().replace(/ /g, "-") style
+						*/
+						switch(s.download_type) {
+							case "txt":
+								return "https://www.fimfiction.net/download_story.php?story=" + id;
+							case "html":
+								return "https://www.fimfiction.net/download_story.php?story=" + id + "&html";
+							case "epub":
+								return "https://www.fimfiction.net/download_epub.php?story=" + id;
+						}
+					}
+					function syncObjectFromStoryData(sd) {
+						return {name: sanitizeFilname(sd.title) + "." + s.download_type, url: generateDownloadUrl(sd.id), modified: sd.udpated};
+					}
+					switch(s.files_to_sync) {
+						case "Selected":
+							for(var row of selectedRows) {
+								files.push(syncObjectFromStoryData(row.storyData));
+							}
+							break;
+						default:
+							console.log("Unimplemented sync type");
+							return;
+							break;
+					}
+					// set up a listener to receive status messages about the operation
+					addEventListener("message", function listener(e) {
+						if(e.data.request == "SyncStatusLog") {
+							removeEventListener("message", listener, false);
+							console.log(e.data.msg);
+						}
+					}, false);
+					// send off our result
+					console.log("Checking for updates to " + files.length + " stories");
+					postMessage({request: "SyncFolders", files: files, dest: s.destination_folder, source: s.source_folder, deleteFromSource: s.delete_duplicates, keepOld: s.keep_old_versions}, "*");
+				}
 				function createSettingControls() {
 					// we also need to rewrite all the info in the info window
 					var struct = [];
@@ -719,7 +774,9 @@
 								break;
 						}
 					}
-					return createTree({tag: "div", attrs: {className: "profile_tab"}, children: struct});
+					return createTree({tag: "div", attrs: {className: "profile_tab"}, children: struct.concat(
+						{tag: "input", attrs: {type: "button", value: "Sync", onclick: performSync}}
+					)});
 				}
 				function createTabList() {
 					return createTree({tag: "ul", children: [
