@@ -751,7 +751,7 @@
 					// set up a listener to receive status messages about the operation
 					addEventListener("message", function listener(e) {
 						if(e.data.request == "SyncStatusLog") {
-							if(e.data.msg == "Sync Complete") {
+							if(e.data.msg == "Sync Complete" || e.data.msg instanceof Error) {
 								removeEventListener("message", listener, false);
 							}
 							console.log(e.data.msg);
