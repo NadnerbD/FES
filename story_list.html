@@ -703,12 +703,44 @@
 						}
 					}
 					function syncObjectFromStoryData(sd) {
-						return {name: sanitizeFilname(sd.title) + "." + s.download_type, url: generateDownloadUrl(sd.id), modified: sd.udpated};
+						return {name: sanitizeFilname(sd.title) + "." + s.download_type, url: generateDownloadUrl(sd.id), modified: sd.updated};
 					}
 					switch(s.files_to_sync) {
 						case "Selected":
 							for(var row of selectedRows) {
 								files.push(syncObjectFromStoryData(row.storyData));
+							}
+							break;
+						case "Tracking":
+							for(var row of document.querySelector("table").tBodies[0].children) {
+								var sd = row.storyData;
+								if(sd.tracking) {
+									files.push(syncObjectFromStoryData(sd));
+								}
+							}
+							break;
+						case "ReadItLater":
+							for(var row of document.querySelector("table").tBodies[0].children) {
+								var sd = row.storyData;
+								if(sd.read_later) {
+									files.push(syncObjectFromStoryData(sd));
+								}
+							}
+							break;
+						case "Upvotes":
+							for(var row of document.querySelector("table").tBodies[0].children) {
+								var sd = row.storyData;
+								if(sd.my_rating > 0) {
+									files.push(syncObjectFromStoryData(sd));
+								}
+							}
+							break;
+						case "Downvotes":
+							for(var row of document.querySelector("table").tBodies[0].children) {
+								var sd = row.storyData;
+								if(sd.my_rating < 0) {
+									files.push(syncObjectFromStoryData(sd));
+								}
 							}
 							break;
 						default:
@@ -719,7 +751,9 @@
 					// set up a listener to receive status messages about the operation
 					addEventListener("message", function listener(e) {
 						if(e.data.request == "SyncStatusLog") {
-							removeEventListener("message", listener, false);
+							if(e.data.msg == "Sync Complete") {
+								removeEventListener("message", listener, false);
+							}
 							console.log(e.data.msg);
 						}
 					}, false);
