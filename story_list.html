@@ -657,6 +657,7 @@
 					};
 				}
 				function rewriteTabList() {
+					var newTabList, newSettingControls;
 					tabList.parentNode.replaceChild(newTabList = createTabList(), tabList);
 					tabList = newTabList;
 					settingControls.parentNode.replaceChild(newSettingControls = createSettingControls(), settingControls);
@@ -748,17 +749,24 @@
 							return;
 							break;
 					}
+					// replace the settingControls with the status log
+					var statusLog = createTree({tag: "div", attrs: {className: "profile_tab", style: "overflow-y: scroll;"}});
+					settingControls.parentNode.replaceChild(statusLog, settingControls);
+					settingControls = statusLog;
+					function log(msg) {
+						statusLog.appendChild(createTree({tag: "div", children: [msg]}));
+					}
 					// set up a listener to receive status messages about the operation
 					addEventListener("message", function listener(e) {
 						if(e.data.request == "SyncStatusLog") {
 							if(e.data.msg == "Sync Complete" || e.data.msg instanceof Error) {
 								removeEventListener("message", listener, false);
 							}
-							console.log(e.data.msg);
+							log(e.data.msg.toString());
 						}
 					}, false);
 					// send off our result
-					console.log("Checking for updates to " + files.length + " stories");
+					log("Checking for updates to " + files.length + " stories");
 					postMessage({request: "SyncFolders", files: files, dest: s.destination_folder, source: s.source_folder, deleteFromSource: s.delete_duplicates, keepOld: s.keep_old_versions}, "*");
 				}
 				function createSettingControls() {
