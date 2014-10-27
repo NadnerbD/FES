@@ -57,6 +57,7 @@
 			float: right;
 			text-decoration: none;
 			color: black;
+			margin-left: 10px;
 		}
 		.close_button:before {
 			content: "";
@@ -152,7 +153,7 @@
 		a.human { background-image: linear-gradient(to bottom, #BE895E 0%, #AB7C55 100%); }
 		a.anthro { background-image: linear-gradient(to bottom, #BE6E5E 0%, #AB6355 100%); }
 		/* Comment Overlay Styles */
-		div.comments_overlay {
+		div.overlay {
 			position: fixed;
 			top: 0px;
 			left: 0px;
@@ -161,28 +162,81 @@
 			background-color: rgba(0, 0, 0, 0.5);
 			padding: 50px;
 		}
-		div.comments_overlay h2 {
+		div.overlay h2 {
+			height: 25px;
 			margin: 0px;
 			padding: 20px;
 			background-color: white;
 			border: solid gray 1px;
 		}
+		div.overlay ul {
+			margin: 0px;
+		}
+		div.overlay li {
+			height: 22px;
+			overflow-y: hidden;
+			position: relative;
+			left: -50px;
+			top: 19px;
+			z-index: 10;
+			background-color: #C3C3C3;
+			display: inline-block;
+			border: solid 1px gray;
+			border-bottom: none;
+			border-radius: 10px 10px 0px 0px;
+			padding-top: 2px;
+			padding-left: 5px;
+			padding-right: 5px;
+			padding-bottom: 0px;
+			font-weight: bold;
+			font-size: 16px;
+			margin-right: 5px;
+			cursor: pointer;
+		}
+		div.overlay li.selected_tab {
+			top: 20px;
+			height: 23px;
+			background-color: lightgray;
+			/* we show the text cursor for the active tab only */
+			cursor: auto;
+		}
+		div.overlay li a {
+			position: relative;
+			top: 2px;
+		}
+		div.profile_tab {
+			border-bottom: solid gray 1px;
+			border-right: solid gray 1px;
+			border-left: solid gray 1px;
+			background-color: lightgray;
+			padding: 1em;
+			position: absolute;
+			top: 67px;
+			left: 0px;
+			bottom: 0px;
+			right: 0px;
+			margin: 50px;
+		}
 		div.story_comments {
+			border-bottom: solid gray 1px;
 			border-right: solid gray 1px;
 			border-left: solid gray 1px;
 			background-color: white;
 			position: absolute;
-			top: 72px;
+			top: 67px;
 			left: 0px;
 			bottom: 0px;
 			right: 0px;
 			margin: 50px;
 			overflow-y: scroll;
 		}
-		div.comment {
+		div.story_comments div.comment {
 			border-right: none;
 			border-left: none;
 			border-top: none;
+		}
+		div.story_comments div.comment:last-child {
+			border-bottom: none;
 		}
 		/* Statusbar Styles */
 		div#statusbar {
@@ -234,9 +288,9 @@
 			writeStoryTable();
 			document.addEventListener("click", handleClick);
 			document.addEventListener("mousedown", handleSelection);
-			window.addEventListener("hashchange", showComments);
-			// hash may exist when page is loaded, so manually run showComments
-			showComments();
+			window.addEventListener("hashchange", showOverlay);
+			// hash may exist when page is loaded, so manually run showOverlay
+			showOverlay();
 		}
 		function getUserAvatars(callback) {
 			db.getAll("users", function(items) {
@@ -510,23 +564,27 @@
 				document.querySelector("tbody").appendChild(rows);
 			});
 		}
-		function closeComments() {
-			// curse my perpetual perfectionism, I could have just set href to "#-" to prevent scrolling
-			// instead, let's clean up the url bar
+		function closeOverlay() {
+			// remove any hash from the url bar
 			history.pushState("", document.title, window.location.pathname);
-			showComments();
+			showOverlay();
 		}
-		function showComments() {
+		function showOverlay() {
+			// remove existing overlays
+			if(document.body.lastChild.className == "overlay") {
+				document.body.lastChild.remove();
+			}
+			// see what we need to show
 			var h = window.location.hash.split("/");
 			if(h[0] == "#story_comments") {
 				var storyId = h[1];
 				// blah, we have to get both the comments and the story name
 				db.getItemsByIndex("comments", "location", "story/" + storyId, function(comments) {
 					db.getItem("stories", storyId, function(story) {
-						var header = {tag: "div", attrs: {className: "comments_overlay"}, children: [
+						var header = {tag: "div", attrs: {className: "overlay"}, children: [
 							{tag: "h2", children: [
 								((story && story.title) || storyId) + " (" + comments.length + ")",
-								{tag: "a", attrs: {className: "fa close_button", href: "javascript:closeComments()"}}
+								{tag: "a", attrs: {className: "fa close_button", href: "javascript:closeOverlay()"}}
 							]},
 							{tag: "div", attrs: {className: "story_comments"}}
 						]};
@@ -534,17 +592,271 @@
 						for(var comment of comments) {
 							container.lastChild.appendChild(createComment(comment, userAvatarURLs[comment.author]));
 						}
-						if(document.body.lastChild.className == "comments_overlay") {
-							document.body.lastChild.remove();
-						}
 						document.body.appendChild(container);
 					});
 				});
-			}else{
-				// hide comments if no hash
-				if(document.body.lastChild.className == "comments_overlay") {
-					document.body.lastChild.remove();
+			}else if(h[0] == "#sync_interface") {
+				// fetch profile data, and create it if neccessary
+				var defaultProfileSettings = JSON.stringify([
+					{name: "Destination Folder", type: "FilePath", value: ""},
+					{name: "Source Folder", type: "FilePath", value: ""},
+					{name: "Files to Sync", type: "select", value: "Selected", options: ["Selected", "Tracking", "ReadItLater", "Upvotes", "Downvotes"]},
+					{name: "Download Type", type: "select", value: "html", options: ["txt", "html", "epub"]},
+					{name: "Delete Duplicates", type: "bool", value: false},
+					{name: "Keep Old Versions", type: "bool", value: false}
+				]);
+				var profiles = JSON.parse(localStorage.getItem("profiles"));
+				if(profiles == null) {
+					profiles = [{name: "Profile 1", settings: JSON.parse(defaultProfileSettings)}];
+					var selectedProfileIndex = 0;
+				}else{
+					var selectedProfileIndex = parseInt(localStorage.getItem("selectedProfileIndex"));
 				}
+				// the profile editing functions
+				// might move elsewhere to avoid spaghettification
+				function saveProfileInfo() {
+					//console.log(JSON.stringify(profiles));
+					localStorage.setItem("profiles", JSON.stringify(profiles));
+					localStorage.setItem("selectedProfileIndex", selectedProfileIndex);
+				}
+				function bindTabClick(tabProfile) {
+					return function(event) {
+						if(event.target.classList.contains("selected_tab")) {
+							// edit the name of the tab
+							var str = event.target.firstChild.data;
+							var entry = document.createElement("input");
+							entry.value = str;
+							event.target.replaceChild(entry, event.target.firstChild);
+							// select and focus the edit widget
+							entry.selectionStart = 0;
+							entry.selectionEnd = entry.value.length;
+							// post edit saving
+							function saveField(field) {
+								tabProfile.name = field.value;
+								var parent = field.parentNode;
+								parent.replaceChild(document.createTextNode(tabProfile.name), field);
+								saveProfileInfo();
+							}
+							entry.addEventListener("keypress", function(event) {
+								if(event.key == "Enter") {
+									saveField(event.target);
+								}
+							}, false);
+							entry.addEventListener("blur", function(event) {
+								saveField(event.target);
+							}, false);
+							entry.focus();
+						}else if(tabProfile.addTab) {
+							// add a new tab
+							selectedProfileIndex = profiles.length;
+							profiles.push({name: "Profile " + (profiles.length + 1), settings: JSON.parse(defaultProfileSettings)});
+							rewriteTabList();
+						}else{
+							// select the tab
+							selectedProfileIndex = event.target.profileIndex;
+							rewriteTabList();
+						}
+					};
+				}
+				function rewriteTabList() {
+					var newTabList, newSettingControls;
+					tabList.parentNode.replaceChild(newTabList = createTabList(), tabList);
+					tabList = newTabList;
+					settingControls.parentNode.replaceChild(newSettingControls = createSettingControls(), settingControls);
+					settingControls = newSettingControls;
+					saveProfileInfo();
+				}
+				function deleteProfileTab(event) {
+					profiles.splice(event.target.parentNode.profileIndex, 1);
+					if(selectedProfileIndex >= profiles.length) {
+						selectedProfileIndex = profiles.length - 1;
+					}
+					rewriteTabList();
+					// prevent the tab selection function from being called too
+					event.stopPropagation();
+				}
+				function performSync() {
+					// reformat the settings structure so it's easy to use
+					var s = profiles[selectedProfileIndex].settings.reduce(function(o, i) {o[i.name.toLowerCase().replace(/ /g, "_")] = i.value; return o}, {});
+					// generate file list based on files_to_sync and download_type settings
+					var files = [];
+					// it might be better to query the database for some of these
+					function sanitizeFilname(fn) {
+						// TODO: we're going to need to do something about stories that share titles
+						// Also, I couldn't find a standard interface for stripping invalid characters from a filename
+						// so this is windows-specific, probably incomplete filename sanitization
+						return fn.replace(/[\\\/:\*\?"<>|]/g, "_");
+					}
+					function generateDownloadUrl(id) {
+						/* Example URLs
+						txt: https://www.fimfiction.net/download_story.php?story=221415
+						html: https://www.fimfiction.net/download_story.php?story=221415&html
+						epub: https://www.fimfiction.net/download_epub.php?story=221415
+						
+						AAAARGH download_epub returns a completely different Content-Disposition filename
+						formatted in title.toLowerCase().replace(/ /g, "-") style
+						*/
+						switch(s.download_type) {
+							case "txt":
+								return "https://www.fimfiction.net/download_story.php?story=" + id;
+							case "html":
+								return "https://www.fimfiction.net/download_story.php?story=" + id + "&html";
+							case "epub":
+								return "https://www.fimfiction.net/download_epub.php?story=" + id;
+						}
+					}
+					function syncObjectFromStoryData(sd) {
+						return {name: sanitizeFilname(sd.title) + "." + s.download_type, url: generateDownloadUrl(sd.id), modified: sd.updated};
+					}
+					switch(s.files_to_sync) {
+						case "Selected":
+							for(var row of selectedRows) {
+								files.push(syncObjectFromStoryData(row.storyData));
+							}
+							break;
+						case "Tracking":
+							for(var row of document.querySelector("table").tBodies[0].children) {
+								var sd = row.storyData;
+								if(sd.tracking) {
+									files.push(syncObjectFromStoryData(sd));
+								}
+							}
+							break;
+						case "ReadItLater":
+							for(var row of document.querySelector("table").tBodies[0].children) {
+								var sd = row.storyData;
+								if(sd.read_later) {
+									files.push(syncObjectFromStoryData(sd));
+								}
+							}
+							break;
+						case "Upvotes":
+							for(var row of document.querySelector("table").tBodies[0].children) {
+								var sd = row.storyData;
+								if(sd.my_rating > 0) {
+									files.push(syncObjectFromStoryData(sd));
+								}
+							}
+							break;
+						case "Downvotes":
+							for(var row of document.querySelector("table").tBodies[0].children) {
+								var sd = row.storyData;
+								if(sd.my_rating < 0) {
+									files.push(syncObjectFromStoryData(sd));
+								}
+							}
+							break;
+						default:
+							console.log("Unimplemented sync type");
+							return;
+							break;
+					}
+					// replace the settingControls with the status log
+					var statusLog = createTree({tag: "div", attrs: {className: "profile_tab", style: "overflow-y: scroll;"}});
+					settingControls.parentNode.replaceChild(statusLog, settingControls);
+					settingControls = statusLog;
+					function log(msg) {
+						statusLog.appendChild(createTree({tag: "div", children: [msg]}));
+					}
+					// set up a listener to receive status messages about the operation
+					addEventListener("message", function listener(e) {
+						if(e.data.request == "SyncStatusLog") {
+							if(e.data.msg == "Sync Complete" || e.data.msg instanceof Error) {
+								removeEventListener("message", listener, false);
+							}
+							log(e.data.msg.toString());
+						}
+					}, false);
+					// send off our result
+					log("Checking for updates to " + files.length + " stories");
+					postMessage({request: "SyncFolders", files: files, dest: s.destination_folder, source: s.source_folder, deleteFromSource: s.delete_duplicates, keepOld: s.keep_old_versions}, "*");
+				}
+				function createSettingControls() {
+					// we also need to rewrite all the info in the info window
+					var struct = [];
+					for(var setting of profiles[selectedProfileIndex].settings) {
+						switch(setting.type) {
+							case "FilePath":
+								function changeFilePath(setting) {
+									return function(value) {
+										document.querySelector("input[title='" + setting.name + "']").value = value;
+										setting.value = value;
+										saveProfileInfo();
+									};
+								}
+								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]},
+									{tag: "input", attrs: {style: "float: right; margin-top: -1px;", type: "button", value: "...", onclick: pickFolder(setting.name, changeFilePath(setting))}},
+									{tag: "span", attrs: {style:"display:block; overflow:hidden;"}, children: [
+										{tag: "input", attrs: {style: "width: 100%;", type: "text", title: setting.name, value: setting.value, placeholder: "...", disabled: "disabled"}}
+									]}
+								]});
+								break;
+							case "select":
+								function changeSelect(setting) {
+									return function(event) {
+										setting.value = event.target.value;
+										saveProfileInfo();
+									};
+								}
+								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]}, 
+									{tag: "select", attrs: {onchange: changeSelect(setting)}, children: [for (option of setting.options) option==setting.value?{tag: "option", attrs: {selected: "selected"}, children: [option]}:{tag: "option", children: [option]}]}
+								]});
+								break;
+							case "bool":
+								function changeBool(setting) {
+									return function(event) {
+										setting.value = event.target.checked;
+										saveProfileInfo();
+									};
+								}
+								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
+									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]},
+									{tag: "input", attrs: {type: "checkbox", checked: setting.value?"checked":"", onchange: changeBool(setting)}}
+								]});
+								break;
+						}
+					}
+					return createTree({tag: "div", attrs: {className: "profile_tab"}, children: struct.concat(
+						{tag: "input", attrs: {type: "button", value: "Sync", onclick: performSync}}
+					)});
+				}
+				function createTabList() {
+					return createTree({tag: "ul", children: [
+						for (tab of profiles) {
+							tag: "li",
+							attrs: {
+								className: profiles.indexOf(tab) == selectedProfileIndex?"selected_tab":"",
+								profileIndex: profiles.indexOf(tab),
+								onclick: bindTabClick(tab)
+							},
+							children: [
+								tab.name
+							].concat(profiles.length > 1?{tag: "a", attrs: {className: "fa close_button", onclick: deleteProfileTab, href: "javascript:void(0);"}}:[])
+						}
+					].concat(
+						{
+							tag: "li",
+							attrs: {
+								className: "fa",
+								onclick: bindTabClick({addTab: true})
+							},
+							children: ["\uf067"]
+						}
+					)});
+				}
+				// display the interface
+				var tabList = createTabList();
+				var settingControls = createSettingControls();
+				var structure = {tag: "div", attrs: {className: "overlay"}, children: [
+					{tag: "h2", children: [
+						{tag: "a", attrs: {className: "fa close_button", href: "javascript:closeOverlay()"}},
+						{node: tabList}
+					]},
+					{node: settingControls}
+				]};
+				document.body.appendChild(createTree(structure));
 			}
 		}
 		function createComment(comment, avatar) {
@@ -636,15 +948,17 @@
 			}
 			writeNextStory();
 		}
-		function pickFolder() {
-			function picked(e) {
-				if(e.data.request == "PickedFolder") {
-					console.log(e.data.folder);
-					removeEventListener("message", picked, false);
+		function pickFolder(title, callback) {
+			return function() {
+				function picked(e) {
+					if(e.data.request == "PickedFolder") {
+						removeEventListener("message", picked, false);
+						callback(e.data.folder);
+					}
 				}
-			}
-			addEventListener("message", picked, false);
-			postMessage({request: "PickFolder", title: "test"}, "*");
+				addEventListener("message", picked, false);
+				postMessage({request: "PickFolder", title: title}, "*");
+			};
 		}
 	</script>
 </head>
@@ -673,6 +987,7 @@
 		Selected: <span id="selection_info"></span>
 		<span style="float:right;" id="transaction_status"></span>
 		<a style="float:right;" id="copy_list_link" href="javascript:makeBBCodeList()">Copy Selected Stories</a>
+		<a style="float:right;margin-right:1em;" href="#sync_interface">Sync Stories</a>
 	</div>
 </body>
 </html>

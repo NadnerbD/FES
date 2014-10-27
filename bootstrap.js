@@ -19,8 +19,9 @@ function startup(data, reason) {
 		alias = ioServ.newURI("jar:" + alias.spec + "!/", null, null);
 	}
 	resHandler.setSubstitution("fimfic-res", alias);
-	// import FFDB
+	// import our local modules (This is done here because we need our alias first)
 	Components.utils.import("resource://fimfic-res/idb-wrapper.js");
+	Components.utils.import("resource://fimfic-res/sync-download.js");
 	// we'll user the observer service MONITOR EVERYTHING
 	// specifically, watch for pageloads across the whole application
 	obs = new pageLoadObserver();
@@ -31,8 +32,9 @@ function shutdown(data, reason) {
 	console.log("FES Shutting down");
 	// stop watching for pageloads
 	obs.unregister();
-	// unload FFDB
+	// unload our local modules
 	Components.utils.unload("resource://fimfic-res/idb-wrapper.js");
+	Components.utils.unload("resource://fimfic-res/sync-download.js");
 	// unregister our resource handler
 	resHandler.setSubstitution("fimfic-res", null);
 }
@@ -96,6 +98,13 @@ function setupMessageListener(document) {
 					}, "resource://fimfic-res");
 				});
 			break;
+			case "SyncFolders":
+				syncDirectories(e.data.files, e.data.dest, e.data.source, e.data.deleteFromSource, e.data.keepOld, function(logStr) {
+					e.source.postMessage({
+						request: "SyncStatusLog",
+						msg: logStr
+					}, "resource://fimfic-res");
+				});
 			default:
 				// do nothing
 			break;
