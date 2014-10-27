@@ -138,6 +138,7 @@
 			text-shadow: -1px -1px rgba(0, 0, 0, 0.2);
 		}
 		a.sex { background-image: linear-gradient(to bottom, #992584 0%, #821F70 100%); }
+		a.gore { background-image: linear-gradient(to bottom, #742828 0%, #622222 100%); }
 		a.romance { background-image: linear-gradient(to bottom, #7C40BB 0%, #7139AA 100%); }
 		a.tragedy { background-image: linear-gradient(to bottom, #EBA42D 0%, #D49528 100%); }
 		a.sad { background-image: linear-gradient(to bottom, #E3628D 0%, #CE5980 100%); }
@@ -203,6 +204,7 @@
 		//l2 = [{tag: "a", attrs: {title: cat, className: "category " + cat.toLowerCase().replace(/ /g, "_")}, children: [cat.slice(0, 2)]} for(cat of l)]
 		var catTable = {
 			"Sex": {tag: "a", attrs: {title: "Sex", className: "category sex"}, children: ["Se"]}, 
+			"Gore": {tag: "a", attrs: {title: "Gore", className: "category gore"}, children: ["Go"]}, 
 			"Romance": {tag: "a", attrs: {title: "Romance", className: "category romance"}, children: ["Ro"]}, 
 			"Tragedy": {tag: "a", attrs: {title: "Tragedy", className: "category tragedy"}, children: ["Tr"]}, 
 			"Sad": {tag: "a", attrs: {title: "Sad", className: "category sad"}, children: ["Sa"]}, 
