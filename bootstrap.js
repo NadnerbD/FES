@@ -170,8 +170,13 @@ function scrapeComments(document) {
 			}else{
 				// if we're on the main page, then the comment has a chapter marker
 				// there will be no marker if there is only one chapter
-				// my god this is painful to fetch
-				comment.chapter = parseInt(ci.querySelector("div.comment_information div").childNodes[8].data.split(" ")[2]) || 1;
+				// we can extract the chapter number from the url
+				var infoLinks = ci.querySelectorAll("div.comment_information a");
+				if(infoLinks.length >= 3 && !infoLinks[2].classList.contains("comment_callbacks")) {
+					comment.chapter = parseInt(infoLinks[2].href.split("/")[5]);
+				}else{
+					comment.chapter = 1;
+				}
 			}
 			commentList.push(comment);
 			console.log("Scraped comment " + comment.id);
