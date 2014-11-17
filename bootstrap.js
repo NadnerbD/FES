@@ -339,7 +339,9 @@ function scrapeStories(document, observed) {
 	// set up an observer to re-call this function if any of the stories we scrape changes it's attributes
 	if(!observed) var obs = new document.defaultView.MutationObserver(function(muts) { scrapeStories(document, true) });
 	var stories = new Array();
-	var items = document.querySelectorAll("div.story_container");
+	// this is now present on chapter pages, we must be a little more specific
+	// chapter pages precede the story_container with a chapter-header, among other things
+	var items = document.querySelectorAll("div.story_container:first-child");
 	for(var i = 0; i < items.length; i++) {
 		var item = items[i];
 		var link = item.querySelector("a.story_name");
