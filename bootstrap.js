@@ -171,15 +171,18 @@ function scrapeComments(document) {
 				// if we're on the main page, then the comment has a chapter marker
 				// there will be no marker if there is only one chapter
 				// we can extract the chapter number from the url
-				var infoLinks = ci.querySelectorAll("div.comment_information a");
-				if(infoLinks.length >= 3 && !infoLinks[2].classList.contains("comment_callbacks")) {
+				var infoLinks = ci.querySelectorAll("div.comment_information div:first-child > a");
+				if(infoLinks.length == 3) {
 					comment.chapter = parseInt(infoLinks[2].href.split("/")[5]);
 				}else{
 					comment.chapter = 1;
 				}
 			}
-			commentList.push(comment);
-			console.log("Scraped comment " + comment.id);
+			if(comment.id != "0") {
+				// for the love of god stop scraping the comment preview
+				commentList.push(comment);
+				console.log("Scraped comment " + comment.id);
+			}
 		}
 	}
 	
@@ -271,8 +274,8 @@ function addLinks(document, db) {
 				character: [charLink.title for(charLink of item.querySelectorAll("div.character-icons a"))]
 			},
 			// we check to see if the bookshelf id is in our bookshelf menu
-			tracking: document.querySelector("div.menu_list.bookshelves li[data-id='" + (/.*\/bookshelf\/([0-9]*)\/favourites/.exec(document.URL)||[0, 0])[1] + "']") != null,
-			read_later: document.querySelector("div.menu_list.bookshelves li[data-id='" + (/.*\/bookshelf\/([0-9]*)\/read-it-later/.exec(document.URL)||[0, 0])[1] + "']") != null
+			tracking: document.querySelector(".bookshelves li a[href='\/bookshelf\/" + (/.*\/bookshelf\/([0-9]*\/favourites)/.exec(document.URL)||[0, 0])[1] + "']") != null,
+			read_later: document.querySelector(".bookshelves li a[href='\/bookshelf\/" + (/.*\/bookshelf\/([0-9]*\/read-it-later)/.exec(document.URL)||[0, 0])[1] + "']") != null
 		};
 		// cull properties we're not sure about (a story appearing in one list does not imply it is not in another)
 		if(!story.tracking) delete story.tracking;
@@ -353,7 +356,7 @@ function scrapeStories(document, observed) {
 		var story = {
 			id: link.href.split("/")[4],
 			title: link.firstChild.data,
-			author: item.querySelector("span.author a").firstChild.data,
+			author: item.querySelector(".author a").firstChild.data,
 			wordcount: parseInt(item.querySelector("div.word_count b").firstChild.data.replace(/,/g, "")),
 			ratings: {
 				up: parseInt(item.querySelector("span.likes").firstChild.data.replace(/,/g, "")),
@@ -388,3 +391,4 @@ function scrapeStories(document, observed) {
 		}, "resource://fimfic-res/");
 	}
 }
+
