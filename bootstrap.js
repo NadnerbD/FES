@@ -4,6 +4,8 @@ var ioServ = Components.classes["@mozilla.org/network/io-service;1"].createInsta
 var resHandler = ioServ.getProtocolHandler("resource").QueryInterface(Components.interfaces.nsIResProtocolHandler);
 var obsServ = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
 var winMed = Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator);
+Components.utils.import("resource://gre/modules/osfile.jsm");
+Components.utils.importGlobalProperties(["TextEncoder", "TextDecoder"]);
 
 function install(data, reason) {}
 
@@ -97,6 +99,46 @@ function setupMessageListener(document) {
 						folder: filePicker.file ? filePicker.file.path : null
 					}, "resource://fimfic-res");
 				});
+			break;
+			case "PickFile":
+				var filePicker = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
+				filePicker.init(e.source, e.data.title, [filePicker.modeOpen, filePicker.modeSave][e.data.saveFile]);
+				filePicker.appendFilters(filePicker.filterAll);
+				if(e.data.fileType) {
+					filePicker.appendFilter(e.data.fileType.title, e.data.fileType.filter);
+				}
+				filePicker.open(function() {
+					e.source.postMessage({
+						request: "PickedFile",
+						title: e.data.title,
+						// file can be null if the user didn't actually pick a file
+						filePath: filePicker.file ? filePicker.file.path : null
+					}, "resource://fimfic-res");
+				});
+			break;
+			case "WriteFile":
+				var encoder = new TextEncoder();
+				var dataArray = encoder.encode(e.data.data);
+				OS.File.writeAtomic(e.data.name, dataArray, {tmpPath: e.data.name + ".tmp"}).then(
+					function () {
+						e.source.postMessage({
+							request: "FileWritten",
+							name: e.data.name
+						}, "resource://fimfic-res");
+					}
+				);
+			break;
+			case "ReadFile":
+				OS.File.read(e.data.name).then(
+					function (dataArray) {
+						var decoder = new TextDecoder();
+						e.source.postMessage({
+							request: "FileRead",
+							name: e.data.name,
+							data: decoder.decode(dataArray)
+						}, "resource://fimfic-res");
+					}
+				);
 			break;
 			case "SyncFolders":
 				syncDirectories(e.data.files, e.data.dest, e.data.source, e.data.deleteFromSource, e.data.keepOld, function(logStr) {
