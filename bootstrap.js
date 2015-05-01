@@ -412,9 +412,13 @@ function scrapeStories(document, observed) {
 			tracking: item.querySelector("li.bookshelf.selected[title='Favourites']") != null,
 			read_later: item.querySelector("li.bookshelf.selected[title='Read It Later']") != null,
 			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,
-			created: new Date(item.querySelectorAll("span.date_approved span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3")),
 			updated: new Date(item.querySelectorAll("span.last_modified span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
 		};
+		var creationSpans = item.querySelectorAll("span.date_approved span");
+		if(creationSpans.length) {
+			// It's possible to view stories that have not yet been approved; These will have no "creation date"
+			story.created = new Date(creationSpans[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"));
+		}
 		console.log(JSON.stringify(story));
 		stories.push(story);
 		if(!observed) {
