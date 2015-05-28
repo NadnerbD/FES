@@ -13,17 +13,23 @@ function FFDB(name, callback, aid) {
 			// access an arbitrary domain context!
 			var puri = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService).newURI(aid, null, null);
 			var principal = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager).getCodebasePrincipal(puri);
-			var req = indexedDB.openForPrincipal(principal, name);
+			var req = indexedDB.openForPrincipal(principal, name, 2);
 		}else{
-			var req = indexedDB.open(name);
+			var req = indexedDB.open(name, 2);
 		}
 		req.onupgradeneeded = function(event) {
 			var db = req.result;
-			var commentStore = db.createObjectStore("comments", {keyPath: "id"});
-			commentStore.createIndex("location", "location", {unique: false});
-			var storyStore = db.createObjectStore("stories", {keyPath: "id"});
-			var userStore = db.createObjectStore("users", {keyPath: "name"});
-			console.log("initialized fimfiction-comments-db with name: " + db.name);
+			if(event.oldVersion < 1) {
+				var commentStore = db.createObjectStore("comments", {keyPath: "id"});
+				commentStore.createIndex("location", "location", {unique: false});
+				var storyStore = db.createObjectStore("stories", {keyPath: "id"});
+				var userStore = db.createObjectStore("users", {keyPath: "name"});
+				console.log("initialized fimfiction-comments-db with name: " + db.name);
+			}
+			if(event.oldVersion < 2) {
+				var shelfStore = db.createObjectStore("bookshelves", {keyPath: "id"});
+				console.log("upgraded (to version 2) fimfiction-comments-db with name: " + db.name);
+			}
 		};
 		req.onsuccess = function(event) {
 			db = req.result;

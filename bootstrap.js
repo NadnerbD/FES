@@ -288,6 +288,38 @@ function linkComments(document) {
 		// if we're in full-view, we can at least update our story information
 		scrapeStories(document);
 	}
+	getBookshelves(document);
+}
+
+function getBookshelves(document) {
+	var links = document.querySelectorAll("nav ul.bookshelves > li > a[href]");
+	var shelves = [];
+	for(var link of links) {
+		var shelf = {
+			name: link.childNodes[1].data,
+			id: link.href.split("/")[4],
+			icon_type: link.childNodes[0].getAttribute("data-icon-type")
+		};
+		if(shelf.icon_type == "font-awesome") {
+			for(var faclass of link.childNodes[0].classList) {
+				if(faclass.substring(0, 3) == "fa-") {
+					shelf.icon_data = faclass;
+					break;
+				}
+			}
+		}else if(shelf.icon_type == "pony-emoji") {
+			shelf.icon_data = link.childNodes[0].childNodes[0].childNodes[0].data;
+		}else{
+			console.log("Unrecognised icon type: " + shelf.icon_type);
+		}
+		shelves.push(shelf);
+	}
+	console.log(shelves);
+	var db = new FFDB("fimcomments-db", function() {
+		db.putItems("bookshelves", shelves, function() {
+			console.log("Updated bookshelf list");
+		});
+	}, "resource://fimfic-res/");
 }
 
 function addLinks(document, db) {
