@@ -315,13 +315,14 @@ function addLinks(document, db) {
 				category: [catLink.title for(catLink of item.querySelectorAll("a.story_category"))],
 				character: [charLink.title for(charLink of item.querySelectorAll("div.character-icons a"))]
 			},
-			// we check to see if the bookshelf id is in our bookshelf menu
-			tracking: document.querySelector(".bookshelves li a[href='\/bookshelf\/" + (/.*\/bookshelf\/([0-9]*\/favourites)/.exec(document.URL)||[0, 0])[1] + "']") != null,
-			read_later: document.querySelector(".bookshelves li a[href='\/bookshelf\/" + (/.*\/bookshelf\/([0-9]*\/read-it-later)/.exec(document.URL)||[0, 0])[1] + "']") != null
+			bookshelves: {}
 		};
-		// cull properties we're not sure about (a story appearing in one list does not imply it is not in another)
-		if(!story.tracking) delete story.tracking;
-		if(!story.read_later) delete story.read_later;
+		// if we're viewing a bookshelf page, add the relevant bookshelf property to the story
+		var shelfInfo = /.*\/bookshelf\/([0-9]*)\/([^?]*).*/.exec(document.URL)
+		if(shelfInfo && document.querySelector(".bookshelves li a[href='\/bookshelf\/" + shelfInfo[1] + "\/" + shelfInfo[2] + "']")) {
+			// we check to see if the bookshelf id is in our bookshelf menu
+			story.bookshelves[shelfInfo[1]] = true;
+		}
 		// finalize data
 		stories.push(story);
 		words += story.wordcount;
@@ -408,12 +409,16 @@ function scrapeStories(document, observed) {
 				category: [catLink.firstChild.data for(catLink of item.querySelectorAll("a.story_category"))],
 				character: [charLink.title for(charLink of item.querySelectorAll("a.character_icon"))]
 			},
-			// I should probably come up with a new schema for this, but for now, it's pretty easy to band-aid to use the new default bookshelves
-			tracking: item.querySelector("li.bookshelf.selected[title='Favourites']") != null,
-			read_later: item.querySelector("li.bookshelf.selected[title='Read It Later']") != null,
+			bookshelves: {},
 			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,
 			updated: new Date(item.querySelectorAll("span.last_modified span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
 		};
+		// add bookshelf properties
+		for(var shelf of item.querySelectorAll("li.bookshelf")) {
+			if(!shelf.classList.contains("show-bookshelves-popup")) {
+				story.bookshelves[shelf.getAttribute("data-bookshelf")] = shelf.classList.contains("selected");
+			}
+		}
 		var creationSpans = item.querySelectorAll("span.date_approved span");
 		if(creationSpans.length) {
 			// It's possible to view stories that have not yet been approved; These will have no "creation date"
@@ -422,8 +427,9 @@ function scrapeStories(document, observed) {
 		console.log(JSON.stringify(story));
 		stories.push(story);
 		if(!observed) {
-			obs.observe(item.querySelector("li.bookshelf[title='Favourites']"), {attributes: true});
-			obs.observe(item.querySelector("li.bookshelf[title='Read It Later']"), {attributes: true});
+			for(var shelf of item.querySelectorAll("li.bookshelf")) {
+				obs.observe(shelf, {attributes: true});
+			}
 			obs.observe(item.querySelector("a.like_button"), {attributes: true});
 			obs.observe(item.querySelector("a.dislike_button"), {attributes: true});
 		}

@@ -86,9 +86,16 @@ function FFDB(name, callback, aid) {
 				var subreq;
 				if(req.result) {
 					// if the item exists, merge in the values from newItem
-					for(var key in newItem) {
-						req.result[key] = newItem[key];
+					function recursiveMerge(source, dest) {
+						for(var key in source) {
+							if(source[key].constructor == Object && dest[key].constructor == Object) {
+								recursiveMerge(source[key], dest[key]);
+							}else{
+								dest[key] = source[key];
+							}
+						}
 					}
+					recursiveMerge(newItem, req.result);
 					subreq = store.put(req.result);
 				}else{
 					// if not, just add newItem to the database
