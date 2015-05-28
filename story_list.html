@@ -53,6 +53,15 @@
 			font-weight: normal;
 			text-align: center;
 		}
+		@font-face {
+			font-family: "PonyEmoji";
+			src: url("/ponyemoji.ttf");
+		}
+		.pe {
+			font-family: "PonyEmoji";
+			font-weight: normal;
+			text-align: center;
+		}
 		.close_button {
 			float: right;
 			text-decoration: none;
@@ -278,8 +287,10 @@
 		function init() {
 			db = new FFDB("fimcomments-db", function() {
 				getUserAvatars(function() {
-					fetchChars(function() {
-						fetchEmotes(init2);
+					getBookshelves(function() {
+						fetchChars(function() {
+							fetchEmotes(init2);
+						});
 					});
 				});
 			});
@@ -291,6 +302,16 @@
 			window.addEventListener("hashchange", showOverlay);
 			// hash may exist when page is loaded, so manually run showOverlay
 			showOverlay();
+		}
+		function getBookshelves(callback) {
+			db.getAll("bookshelves", function(items) {
+				bookshelf_info = items;
+				var header = document.getElementById("bookshelves");
+				for(var shelf of items) {
+					header.appendChild(createTree({tag: "span", attrs: {className: ["fa", "pe"][["font-awesome", "pony-emoji"].indexOf(shelf.icon_type)]}, children: [shelf.icon_data]}));
+				}
+				callback();
+			});
 		}
 		function getUserAvatars(callback) {
 			db.getAll("users", function(items) {
@@ -510,8 +531,16 @@
 							attrs: {className: "fa" + (story.my_rating > 0?" like":story.my_rating < 0?" dislike":"")}, 
 							children: story.my_rating > 0?"\uf164":story.my_rating < 0?"\uf165":""
 						},
-						{tag: "td", attrs: {className: "fa"}, children: story.tracking?"":""},
-						{tag: "td", attrs: {className: "fa"}, children: story.read_later?"":""},
+						{tag: "td", children: [
+								{tag: "span",
+									attrs: {
+										className: ["fa", "pe"][["font-awesome", "pony-emoji"].indexOf(shelf.icon_type)],
+										style: story.bookshelves && story.bookshelves[shelf.id]?"":"color: rgba(0, 0, 0, 0.1)"
+									},
+									children: [shelf.icon_data]
+								} for(shelf of bookshelf_info)
+							]
+						},
 						{tag: "td", attrs: {style: "text-align: right;"}} // this will contain the comment count
 					]};
 					var row = createTree(rowStruct);
@@ -1065,8 +1094,7 @@
 				<td class="sortable" data-sort="created">Created</td>
 				<td class="sortable" data-sort="updated">Updated</td>
 				<td class="fa sortable" data-sort="my_rating"></td>
-				<td class="fa sortable" data-sort="tracking"></td>
-				<td class="fa sortable" data-sort="read_later"></td>
+				<td id="bookshelves"></td>
 				<td class="fa sortable" data-sort="comment"></td>
 			</tr>
 		</thead>

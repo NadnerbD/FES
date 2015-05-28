@@ -301,12 +301,7 @@ function getBookshelves(document) {
 			icon_type: link.childNodes[0].getAttribute("data-icon-type")
 		};
 		if(shelf.icon_type == "font-awesome") {
-			for(var faclass of link.childNodes[0].classList) {
-				if(faclass.substring(0, 3) == "fa-") {
-					shelf.icon_data = faclass;
-					break;
-				}
-			}
+			shelf.icon_data = document.defaultView.getComputedStyle(link.childNodes[0], ":before").content;
 		}else if(shelf.icon_type == "pony-emoji") {
 			shelf.icon_data = link.childNodes[0].childNodes[0].childNodes[0].data;
 		}else{
