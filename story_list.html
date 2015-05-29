@@ -52,7 +52,6 @@
 			font-family: "FontAwesome";
 			font-weight: normal;
 			text-align: center;
-			margin: 3px;
 		}
 		@font-face {
 			font-family: "PonyEmoji";
@@ -62,7 +61,6 @@
 			font-family: "PonyEmoji";
 			font-weight: normal;
 			text-align: center;
-			margin: 3px;
 		}
 		.close_button {
 			float: right;
@@ -127,6 +125,7 @@
 		}
 		.bookshelf {
 			cursor: pointer;
+			margin: 3px;
 		}
 		/* Tag Styles */
 		img.character {
@@ -188,10 +187,9 @@
 		}
 		div.overlay li {
 			height: 22px;
-			overflow-y: hidden;
 			position: relative;
 			left: -50px;
-			top: 19px;
+			top: 20px;
 			z-index: 10;
 			background-color: #C3C3C3;
 			display: inline-block;
@@ -206,17 +204,13 @@
 			font-size: 16px;
 			margin-right: 5px;
 			cursor: pointer;
+			vertical-align: top;
 		}
 		div.overlay li.selected_tab {
-			top: 20px;
 			height: 23px;
 			background-color: lightgray;
 			/* we show the text cursor for the active tab only */
 			cursor: auto;
-		}
-		div.overlay li a {
-			position: relative;
-			top: 2px;
 		}
 		div.profile_tab {
 			border-bottom: solid gray 1px;
@@ -702,7 +696,7 @@
 							rewriteTabList();
 						}else{
 							// select the tab
-							selectedProfileIndex = event.target.profileIndex;
+							selectedProfileIndex = parseInt(event.target.getAttribute("profileIndex"));
 							rewriteTabList();
 						}
 					};
@@ -716,7 +710,7 @@
 					saveProfileInfo();
 				}
 				function deleteProfileTab(event) {
-					profiles.splice(event.target.parentNode.profileIndex, 1);
+					profiles.splice(parseInt(event.target.parentNode.getAttribute("profileIndex")), 1);
 					if(selectedProfileIndex >= profiles.length) {
 						selectedProfileIndex = profiles.length - 1;
 					}
