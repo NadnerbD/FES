@@ -52,6 +52,7 @@
 			font-family: "FontAwesome";
 			font-weight: normal;
 			text-align: center;
+			margin: 3px;
 		}
 		@font-face {
 			font-family: "PonyEmoji";
@@ -61,6 +62,7 @@
 			font-family: "PonyEmoji";
 			font-weight: normal;
 			text-align: center;
+			margin: 3px;
 		}
 		.close_button {
 			float: right;
@@ -122,6 +124,9 @@
 		}
 		.dislike {
 			color: #C32828;
+		}
+		.bookshelf {
+			cursor: pointer;
 		}
 		/* Tag Styles */
 		img.character {
@@ -307,9 +312,6 @@
 			db.getAll("bookshelves", function(items) {
 				bookshelf_info = items;
 				var header = document.getElementById("bookshelves");
-				for(var shelf of items) {
-					header.appendChild(createTree({tag: "span", attrs: {className: ["fa", "pe"][["font-awesome", "pony-emoji"].indexOf(shelf.icon_type)]}, children: [shelf.icon_data]}));
-				}
 				callback();
 			});
 		}
@@ -374,6 +376,9 @@
 				var cat = event.target.title;
 				moveSortIndicator(cat, col, event.target.cloneNode(true));
 				sortByTag(type?"category":"character", cat, invertSort);
+			}else if(event.target.classList.contains("bookshelf")) {
+				moveSortIndicator(event.target.title, document.querySelector("td#bookshelves"), event.target.cloneNode(true));
+				sortByShelf(event.target.getAttribute("shelf_id"), invertSort);
 			}
 		}
 		var selectedRows = [];
@@ -500,6 +505,18 @@
 				return a - b;
 			});
 		}
+		function sortByShelf(shelf, invert) {
+			// sorts the table by whether it is in a selected bookshelf
+			sortTable(document.querySelector("table"), invert?function(a, b) {
+				a = a.storyData.bookshelves[shelf] == true;
+				b = b.storyData.bookshelves[shelf] == true;
+				return a - b;
+			}:function(b, a) {
+				a = a.storyData.bookshelves[shelf] == true;
+				b = b.storyData.bookshelves[shelf] == true;
+				return a - b;
+			});
+		}
 		function writeStoryTable() {
 			// feed all the comments into a fragment so we can add them simultaneously
 			var frag = document.createDocumentFragment();
@@ -534,8 +551,10 @@
 						{tag: "td", children: [
 								{tag: "span",
 									attrs: {
-										className: ["fa", "pe"][["font-awesome", "pony-emoji"].indexOf(shelf.icon_type)],
-										style: story.bookshelves && story.bookshelves[shelf.id]?"":"color: rgba(0, 0, 0, 0.1)"
+										className: ["fa", "pe"][["font-awesome", "pony-emoji"].indexOf(shelf.icon_type)] + " bookshelf",
+										style: story.bookshelves && story.bookshelves[shelf.id]?"":"color: rgba(0, 0, 0, 0.1)",
+										title: shelf.name,
+										shelf_id: shelf.id
 									},
 									children: [shelf.icon_data]
 								} for(shelf of bookshelf_info)
@@ -927,7 +946,11 @@
 				tag = node.node;
 			}
 			for(var attr in node.attrs) {
-				tag[attr] = node.attrs[attr];
+				if(attr in tag) {
+					tag[attr] = node.attrs[attr];
+				}else{
+					tag.setAttribute(attr, node.attrs[attr]);
+				}
 			}
 			if(node.children) {
 				for(var i = 0; i < node.children.length; i++) {
@@ -1094,7 +1117,7 @@
 				<td class="sortable" data-sort="created">Created</td>
 				<td class="sortable" data-sort="updated">Updated</td>
 				<td class="fa sortable" data-sort="my_rating"></td>
-				<td id="bookshelves"></td>
+				<td id="bookshelves">Bookshelves</td>
 				<td class="fa sortable" data-sort="comment"></td>
 			</tr>
 		</thead>

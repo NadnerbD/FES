@@ -301,7 +301,7 @@ function getBookshelves(document) {
 			icon_type: link.childNodes[0].getAttribute("data-icon-type")
 		};
 		if(shelf.icon_type == "font-awesome") {
-			shelf.icon_data = document.defaultView.getComputedStyle(link.childNodes[0], ":before").content;
+			shelf.icon_data = JSON.parse(document.defaultView.getComputedStyle(link.childNodes[0], ":before").content);
 		}else if(shelf.icon_type == "pony-emoji") {
 			shelf.icon_data = link.childNodes[0].childNodes[0].childNodes[0].data;
 		}else{
@@ -309,7 +309,7 @@ function getBookshelves(document) {
 		}
 		shelves.push(shelf);
 	}
-	console.log(shelves);
+	console.log(JSON.stringify(shelves));
 	var db = new FFDB("fimcomments-db", function() {
 		db.putItems("bookshelves", shelves, function() {
 			console.log("Updated bookshelf list");
@@ -417,9 +417,13 @@ function scrapeStories(document, observed) {
 	// set up an observer to re-call this function if any of the stories we scrape changes it's attributes
 	if(!observed) var obs = new document.defaultView.MutationObserver(function(muts) { scrapeStories(document, true) });
 	var stories = new Array();
-	// this is now present on chapter pages, we must be a little more specific
-	// chapter pages precede the story_container with a chapter-header, among other things
-	var items = document.querySelectorAll("div.story_container:first-child");
+	var items = document.querySelectorAll("div.story_container");
+	// the story_container element is now present on chapter pages
+	// if we're on one we need to abort because important info we want is not present
+	if(!items.length || items[0].querySelector("span.last_modified") == null) {
+		console.log("Aborting story scrape, chapter page");
+		return;
+	}
 	for(var i = 0; i < items.length; i++) {
 		var item = items[i];
 		var link = item.querySelector("a.story_name");
