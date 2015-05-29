@@ -648,7 +648,8 @@
 				var defaultProfileSettings = JSON.stringify([
 					{name: "Destination Folder", type: "FilePath", value: ""},
 					{name: "Source Folder", type: "FilePath", value: ""},
-					{name: "Files to Sync", type: "select", value: "Selected", options: ["Selected", "Tracking", "ReadItLater", "Upvotes", "Downvotes"]},
+					{name: "Files to Sync", type: "select", value: "Selected", options: ["Selected", "Bookshelf", "Upvotes", "Downvotes"]},
+					{name: "Bookshelf", type: "select", value: "", options: [shelf.name for(shelf of bookshelf_info)]},
 					{name: "Download Type", type: "select", value: "html", options: ["txt", "html", "epub"]},
 					{name: "Delete Duplicates", type: "bool", value: false},
 					{name: "Keep Old Versions", type: "bool", value: false}
@@ -762,18 +763,16 @@
 								files.push(syncObjectFromStoryData(row.storyData));
 							}
 							break;
-						case "Tracking":
-							for(var row of document.querySelector("table").tBodies[0].children) {
-								var sd = row.storyData;
-								if(sd.tracking) {
-									files.push(syncObjectFromStoryData(sd));
+						case "Bookshelf":
+							var shelfId = "";
+							for(var shelf of bookshelf_info) {
+								if(s.bookshelf == shelf.name) {
+									shelfId = shelf.id;
 								}
 							}
-							break;
-						case "ReadItLater":
 							for(var row of document.querySelector("table").tBodies[0].children) {
 								var sd = row.storyData;
-								if(sd.read_later) {
+								if(sd.bookshelves[shelfId] == true) {
 									files.push(syncObjectFromStoryData(sd));
 								}
 							}
