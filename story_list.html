@@ -151,20 +151,27 @@
 			box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.4) inset;
 			text-shadow: -1px -1px rgba(0, 0, 0, 0.2);
 		}
-		a.sex { background-image: linear-gradient(to bottom, #992584 0%, #821F70 100%); }
-		a.gore { background-image: linear-gradient(to bottom, #742828 0%, #622222 100%); }
-		a.romance { background-image: linear-gradient(to bottom, #7C40BB 0%, #7139AA 100%); }
-		a.tragedy { background-image: linear-gradient(to bottom, #EBA42D 0%, #D49528 100%); }
-		a.sad { background-image: linear-gradient(to bottom, #E3628D 0%, #CE5980 100%); }
-		a.dark { background-image: linear-gradient(to bottom, #9F2424 0%, #902121 100%); }
-		a.comedy { background-image: linear-gradient(to bottom, #D4AE00 0%, #BF9D00 100%); }
-		a.random { background-image: linear-gradient(to bottom, #4279D8 0%, #3B6EC3 100%); }
-		a.crossover { background-image: linear-gradient(to bottom, #4AC1A8 0%, #43AE98 100%); }
-		a.adventure { background-image: linear-gradient(to bottom, #48D354 0%, #41BE4C 100%); }
-		a.slice_of_life { background-image: linear-gradient(to bottom, #424CD9 0%, #3B45C4 100%); }
-		a.alternate_universe { background-image: linear-gradient(to bottom, #8E8E8E 0%, #818181 100%); }
-		a.human { background-image: linear-gradient(to bottom, #BE895E 0%, #AB7C55 100%); }
-		a.anthro { background-image: linear-gradient(to bottom, #BE6E5E 0%, #AB6355 100%); }
+		a.sex { background-image: linear-gradient(to bottom, rgb(153, 37, 132) 0%, rgb(130, 31, 112) 100%); }
+		a.gore { background-image: linear-gradient(to bottom, rgb(116, 40, 40) 0%, rgb(99, 34, 34) 100%); }
+		a.second_person { background-image: linear-gradient(to bottom, rgb(2, 161, 219) 0%, rgb(2, 137, 186) 100%); }
+		a.adventure { background-image: linear-gradient(to bottom, rgb(69, 201, 80) 0%, rgb(59, 171, 68) 100%); }
+		a.alternate_universe { background-image: linear-gradient(to bottom, rgb(136, 136, 136) 0%, rgb(116, 116, 116) 100%); }
+		a.anthro { background-image: linear-gradient(to bottom, rgb(181, 105, 90) 0%, rgb(154, 89, 77) 100%); }
+		a.comedy { background-image: linear-gradient(to bottom, rgb(245, 156, 0) 0%, rgb(208, 133, 0) 100%); }
+		a.crossover { background-image: linear-gradient(to bottom, rgb(71, 184, 160) 0%, rgb(60, 156, 136) 100%); }
+		a.dark { background-image: linear-gradient(to bottom, rgb(185, 55, 55) 0%, rgb(157, 47, 47) 100%); }
+		a.drama { background-image: linear-gradient(to bottom, rgb(236, 80, 202) 0%, rgb(201, 68, 172) 100%); }
+		a.equestria_girls { background-image: linear-gradient(to bottom, rgb(77, 50, 129) 0%, rgb(65, 43, 110) 100%); }
+		a.horror { background-image: linear-gradient(to bottom, rgb(109, 35, 47) 0%, rgb(93, 30, 40) 100%); }
+		a.human { background-image: linear-gradient(to bottom, rgb(181, 131, 90) 0%, rgb(154, 111, 77) 100%); }
+		a.mystery { background-image: linear-gradient(to bottom, rgb(68, 68, 68) 0%, rgb(58, 58, 58) 100%); }
+		a.random { background-image: linear-gradient(to bottom, rgb(63, 116, 206) 0%, rgb(54, 99, 175) 100%); }
+		a.romance { background-image: linear-gradient(to bottom, rgb(151, 75, 255) 0%, rgb(128, 64, 217) 100%); }
+		a.sad { background-image: linear-gradient(to bottom, rgb(189, 66, 167) 0%, rgb(161, 56, 142) 100%); }
+		a.scifi { background-image: linear-gradient(to bottom, rgb(93, 99, 165) 0%, rgb(79, 84, 140) 100%); }
+		a.slice_of_life { background-image: linear-gradient(to bottom, rgb(75, 134, 255) 0%, rgb(64, 114, 217) 100%); }
+		a.thriller { background-image: linear-gradient(to bottom, rgb(214, 43, 43) 0%, rgb(182, 37, 37) 100%); }
+		a.tragedy { background-image: linear-gradient(to bottom, rgb(255, 181, 75) 0%, rgb(217, 154, 64) 100%); }
 		/* Comment Overlay Styles */
 		div.overlay {
 			position: fixed;
@@ -265,20 +272,27 @@
 		var charTable = {};
 		//l2 = [{tag: "a", attrs: {title: cat, className: "category " + cat.toLowerCase().replace(/ /g, "_")}, children: [cat.slice(0, 2)]} for(cat of l)]
 		var catTable = {
-			"Sex": {tag: "a", attrs: {title: "Sex", className: "category sex"}, children: ["Se"]}, 
-			"Gore": {tag: "a", attrs: {title: "Gore", className: "category gore"}, children: ["Go"]}, 
-			"Romance": {tag: "a", attrs: {title: "Romance", className: "category romance"}, children: ["Ro"]}, 
-			"Tragedy": {tag: "a", attrs: {title: "Tragedy", className: "category tragedy"}, children: ["Tr"]}, 
-			"Sad": {tag: "a", attrs: {title: "Sad", className: "category sad"}, children: ["Sa"]}, 
-			"Dark": {tag: "a", attrs: {title: "Dark", className: "category dark"}, children: ["Da"]}, 
-			"Comedy": {tag: "a", attrs: {title: "Comedy", className: "category comedy"}, children: ["Co"]}, 
-			"Random": {tag: "a", attrs: {title: "Random", className: "category random"}, children: ["Ra"]}, 
-			"Crossover": {tag: "a", attrs: {title: "Crossover", className: "category crossover"}, children: ["Cr"]}, 
-			"Adventure": {tag: "a", attrs: {title: "Adventure", className: "category adventure"}, children: ["Ad"]}, 
-			"Slice of Life": {tag: "a", attrs: {title: "Slice of Life", className: "category slice_of_life"}, children: ["Sl"]}, 
-			"Alternate Universe": {tag: "a", attrs: {title: "Alternate Universe", className: "category alternate_universe"}, children: ["Al"]}, 
-			"Human": {tag: "a", attrs: {title: "Human", className: "category human"}, children: ["Hu"]}, 
-			"Anthro": {tag: "a", attrs: {title: "Anthro", className: "category anthro"}, children: ["An"]}
+			"Sex": {tag: "a", attrs: {title: "Sex", className: "category sex"}, children: ["Se"]},
+			"Gore": {tag: "a", attrs: {title: "Gore", className: "category gore"}, children: ["Go"]},
+			"2nd Person": {tag: "a", attrs: {title: "2nd Person", className: "category second_person"}, children: ["2n"]},
+			"Adventure": {tag: "a", attrs: {title: "Adventure", className: "category adventure"}, children: ["Ad"]},
+			"Alternate Universe": {tag: "a", attrs: {title: "Alternate Universe", className: "category alternate_universe"}, children: ["Al"]},
+			"Anthro": {tag: "a", attrs: {title: "Anthro", className: "category anthro"}, children: ["An"]},
+			"Comedy": {tag: "a", attrs: {title: "Comedy", className: "category comedy"}, children: ["Co"]},
+			"Crossover": {tag: "a", attrs: {title: "Crossover", className: "category crossover"}, children: ["Cr"]},
+			"Dark": {tag: "a", attrs: {title: "Dark", className: "category dark"}, children: ["Da"]},
+			"Drama": {tag: "a", attrs: {title: "Drama", className: "category drama"}, children: ["Dr"]},
+			"Equestria Girls": {tag: "a", attrs: {title: "Equestria Girls", className: "category equestria_girls"}, children: ["Eq"]},
+			"Horror": {tag: "a", attrs: {title: "Horror", className: "category horror"}, children: ["Ho"]},
+			"Human": {tag: "a", attrs: {title: "Human", className: "category human"}, children: ["Hu"]},
+			"Mystery": {tag: "a", attrs: {title: "Mystery", className: "category mystery"}, children: ["My"]},
+			"Random": {tag: "a", attrs: {title: "Random", className: "category random"}, children: ["Ra"]},
+			"Romance": {tag: "a", attrs: {title: "Romance", className: "category romance"}, children: ["Ro"]},
+			"Sad": {tag: "a", attrs: {title: "Sad", className: "category sad"}, children: ["Sa"]},
+			"Sci-Fi": {tag: "a", attrs: {title: "Sci-Fi", className: "category scifi"}, children: ["Sc"]},
+			"Slice of Life": {tag: "a", attrs: {title: "Slice of Life", className: "category slice_of_life"}, children: ["Sl"]},
+			"Thriller": {tag: "a", attrs: {title: "Thriller", className: "category thriller"}, children: ["Th"]},
+			"Tragedy": {tag: "a", attrs: {title: "Tragedy", className: "category tragedy"}, children: ["Tr"]},
 		};
 		var userAvatarURLs = {};
 		var parser = new bbcode();

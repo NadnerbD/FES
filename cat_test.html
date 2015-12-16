@@ -1,0 +1,85 @@
+<html>
+	<head>
+	<link rel="stylesheet" type="text/css" href="comments.css" />
+	<style>
+		a.category {
+			cursor: pointer;
+			display: inline-block;
+			font-size: 0.7em;
+			padding: 2px 2px;
+			margin-right: 2px;
+			vertical-align: middle;
+			color: white;
+			background-color: darkgray;
+			border: solid 1px rgba(0, 0, 0, 0.2);
+			box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.4) inset;
+			text-shadow: -1px -1px rgba(0, 0, 0, 0.2);
+		}
+		a.sex { background-image: linear-gradient(to bottom, #992584 0%, #821F70 100%); }
+		a.gore { background-image: linear-gradient(to bottom, #742828 0%, #622222 100%); }
+		a.romance { background-image: linear-gradient(to bottom, #7C40BB 0%, #7139AA 100%); }
+		a.tragedy { background-image: linear-gradient(to bottom, #EBA42D 0%, #D49528 100%); }
+		a.sad { background-image: linear-gradient(to bottom, #E3628D 0%, #CE5980 100%); }
+		a.dark { background-image: linear-gradient(to bottom, #9F2424 0%, #902121 100%); }
+		a.comedy { background-image: linear-gradient(to bottom, #D4AE00 0%, #BF9D00 100%); }
+		a.random { background-image: linear-gradient(to bottom, #4279D8 0%, #3B6EC3 100%); }
+		a.crossover { background-image: linear-gradient(to bottom, #4AC1A8 0%, #43AE98 100%); }
+		a.adventure { background-image: linear-gradient(to bottom, #48D354 0%, #41BE4C 100%); }
+		a.slice_of_life { background-image: linear-gradient(to bottom, #424CD9 0%, #3B45C4 100%); }
+		a.alternate_universe { background-image: linear-gradient(to bottom, #8E8E8E 0%, #818181 100%); }
+		a.human { background-image: linear-gradient(to bottom, #BE895E 0%, #AB7C55 100%); }
+		a.anthro { background-image: linear-gradient(to bottom, #BE6E5E 0%, #AB6355 100%); }
+	</style>
+	<script>
+		var catTable = {
+			"Sex": {tag: "a", attrs: {title: "Sex", className: "category sex"}, children: ["Se"]}, 
+			"Gore": {tag: "a", attrs: {title: "Gore", className: "category gore"}, children: ["Go"]}, 
+			"Romance": {tag: "a", attrs: {title: "Romance", className: "category romance"}, children: ["Ro"]}, 
+			"Tragedy": {tag: "a", attrs: {title: "Tragedy", className: "category tragedy"}, children: ["Tr"]}, 
+			"Sad": {tag: "a", attrs: {title: "Sad", className: "category sad"}, children: ["Sa"]}, 
+			"Dark": {tag: "a", attrs: {title: "Dark", className: "category dark"}, children: ["Da"]}, 
+			"Comedy": {tag: "a", attrs: {title: "Comedy", className: "category comedy"}, children: ["Co"]}, 
+			"Random": {tag: "a", attrs: {title: "Random", className: "category random"}, children: ["Ra"]}, 
+			"Crossover": {tag: "a", attrs: {title: "Crossover", className: "category crossover"}, children: ["Cr"]}, 
+			"Adventure": {tag: "a", attrs: {title: "Adventure", className: "category adventure"}, children: ["Ad"]}, 
+			"Slice of Life": {tag: "a", attrs: {title: "Slice of Life", className: "category slice_of_life"}, children: ["Sl"]}, 
+			"Alternate Universe": {tag: "a", attrs: {title: "Alternate Universe", className: "category alternate_universe"}, children: ["Al"]}, 
+			"Human": {tag: "a", attrs: {title: "Human", className: "category human"}, children: ["Hu"]}, 
+			"Anthro": {tag: "a", attrs: {title: "Anthro", className: "category anthro"}, children: ["An"]}
+		};
+		function createTree(node) {
+			var tag;
+			if(node.tag) {
+				tag = document.createElement(node.tag);
+			}else if(node.node) {
+				// this method of adding existing nodes allows us to add extra attrs
+				tag = node.node;
+			}
+			for(var attr in node.attrs) {
+				if(attr in tag) {
+					tag[attr] = node.attrs[attr];
+				}else{
+					tag.setAttribute(attr, node.attrs[attr]);
+				}
+			}
+			if(node.children) {
+				for(var i = 0; i < node.children.length; i++) {
+					if(typeof node.children[i] == "string") {
+						tag.appendChild(document.createTextNode(node.children[i]));
+					}else{
+						tag.appendChild(createTree(node.children[i]));
+					}
+				}
+			}
+			return tag;
+		}
+		function init() {
+			for(var cat in catTable) {
+				document.body.appendChild(createTree(catTable[cat]));
+			}
+		}
+	</script>
+	</head>
+	<body onload="init()">
+	</body>
+</html>
