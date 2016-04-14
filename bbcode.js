@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -117,7 +117,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -222,7 +222,8 @@ function bbcode() {
 		"quote": "BLOCKQUOTE",
 		"youtube": "DIV",
 		"center": "CENTER",
-		"p": "P"
+		"p": "P",
+		"icon": "I"
 	}
 	function generateElements(tags) {
 		var top = document.createElement("div");
@@ -272,11 +273,18 @@ function bbcode() {
 				top.appendChild(document.createTextNode(tag.value));
 			}else if(tag.name == "img") {
 				var image = document.createElement("img");
-				if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "img") {
+				if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "img" && tags[1].close == true) {
 					image.src = tags.shift().value;
 					tags.shift();
 				}
 				top.appendChild(image);
+			}else if(tag.name == "icon") {
+				var icon = document.createElement("i");
+				if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "icon" && tags[1].close == true) {
+					icon.classList.add("fa", "fa-fw", "fa-" + tags.shift().value);
+					tags.shift();
+				}
+				top.appendChild(icon);
 			}else if(tag.name == "hr" && tag.close == false) {
 				// hr is a self-closing p-level tag
 				var closed = closeTag("p");
