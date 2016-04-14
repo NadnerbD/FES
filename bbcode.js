@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -117,7 +117,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -223,7 +223,8 @@ function bbcode() {
 		"youtube": "DIV",
 		"center": "CENTER",
 		"p": "P",
-		"icon": "I"
+		"icon": "I",
+		"email": "A"
 	}
 	function generateElements(tags) {
 		var top = document.createElement("div");
@@ -271,14 +272,32 @@ function bbcode() {
 		for(var tag = tags.shift(); tag != undefined; tag = tags.shift()) {
 			if(tag.name == "text") {
 				top.appendChild(document.createTextNode(tag.value));
-			}else if(tag.name == "img") {
+			}else if(tag.name == "img" && tag.close == false) {
 				var image = document.createElement("img");
 				if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "img" && tags[1].close == true) {
 					image.src = tags.shift().value;
 					tags.shift();
 				}
 				top.appendChild(image);
-			}else if(tag.name == "icon") {
+			}else if(tag.name == "email" && tag.close == false) {
+				var link = document.createElement("a");
+				if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "email" && tags[1].close == true) {
+					var target = tags.shift().value;
+					link.href = "mailto:" + target;
+					link.appendChild(document.createTextNode(target));
+					tags.shift();
+				}
+				top.appendChild(link);
+			}else if(tag.name == "url" && tag.close == false && tag.value == undefined) {
+				// the special case of the url with text equal to it's value
+				var link = document.createElement("a");
+				if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "url" && tags[1].close == true) {
+					link.href = tags.shift().value;
+					link.appendChild(document.createTextNode(link.href));
+					tags.shift();
+				}
+				top.appendChild(link);
+			}else if(tag.name == "icon" && tag.close == false) {
 				var icon = document.createElement("i");
 				if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "icon" && tags[1].close == true) {
 					icon.classList.add("fa", "fa-fw", "fa-" + tags.shift().value);
