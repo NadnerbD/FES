@@ -765,7 +765,7 @@
 						}
 					}
 					function syncObjectFromStoryData(sd) {
-						return {name: sanitizeFilname(sd.title) + "." + s.download_type, url: generateDownloadUrl(sd.id), modified: sd.updated};
+						return {name: sanitizeFilname(sd.title + " by " + sd.author) + "." + s.download_type, url: generateDownloadUrl(sd.id), modified: sd.updated};
 					}
 					switch(s.files_to_sync) {
 						case "Selected":
