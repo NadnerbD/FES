@@ -29,3 +29,9 @@ span.spoiler:hover {
 	color: inherit;
 	text-shadow: inherit;
 }
+pre.code {
+	font-family: monospace;
+	border: 1px solid #ccc;
+	outline: 3px solid #eee;
+	padding: 10px;
+}
