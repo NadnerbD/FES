@@ -1050,28 +1050,31 @@
 				db.getAll("comments", function(comments) {
 					db.getAll("stories", function(stories) {
 						db.getAll("users", function(users) {
-							// fileReader is asynchronous, so we need to pre-transform our Blobs into data uris
-							var usersLoaded = 0;
-							for(var user of users) {
-								var reader = new FileReader();
-								reader.onload = function(user, reader) { return function() { userLoaded(user, reader); }; }(user, reader);
-								reader.readAsDataURL(user.avatar);
-							}
-							function userLoaded(user, reader) {
-								user.avatar = reader.result;
-								usersLoaded++;
-								if(usersLoaded == users.length) {
-									postMessage({
-										request: "WriteFile",
-										name: filePath,
-										data: JSON.stringify({
-											comments: comments,
-											stories: stories,
-											users: users
-										})
-									}, "*");
+							db.getAll("bookshelves", function(bookshelves) {
+								// fileReader is asynchronous, so we need to pre-transform our Blobs into data uris
+								var usersLoaded = 0;
+								for(var user of users) {
+									var reader = new FileReader();
+									reader.onload = function(user, reader) { return function() { userLoaded(user, reader); }; }(user, reader);
+									reader.readAsDataURL(user.avatar);
 								}
-							}
+								function userLoaded(user, reader) {
+									user.avatar = reader.result;
+									usersLoaded++;
+									if(usersLoaded == users.length) {
+										postMessage({
+											request: "WriteFile",
+											name: filePath,
+											data: JSON.stringify({
+												comments: comments,
+												stories: stories,
+												users: users,
+												bookshelves: bookshelves
+											})
+										}, "*");
+									}
+								}
+							});
 						});
 					});
 				});
@@ -1102,9 +1105,10 @@
 					db.putItems("comments", data["comments"], cb);
 					db.putItems("stories", data["stories"], cb);
 					db.putItems("users", data["users"], cb);
+					db.putItems("bookshelves", data["bookshelves"], cb);
 					function cb() {
 						count++;
-						if(count == 3) {
+						if(count == 4) {
 							console.log("load completed");
 						}
 					}
