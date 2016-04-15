@@ -210,12 +210,14 @@ function changeHeader(document) {
 		inject_css.innerHTML = "\
 		.user_toolbar > ul {\n\
 			background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.2) 100%);\n\
+			border-bottom-right-radius: 5px;\n\
+			border-bottom-left-radius: 5px;\n\
 		}\n\
 		.user_toolbar > ul > li {\n\
 			background-image: none;\n\
 			background-color: rgba(255, 255, 255, 0.2);\n\
 			text-shadow: 1px 1px rgba(255, 255, 255, 0.2);\n\
-			border-right: 1px solid rgba(0, 0, 0, 0.1);\n\
+			border-right: 1px solid rgba(0, 0, 0, 0.2);\n\
 		}\n\
 		.user_toolbar > ul > li:hover {\n\
 			background-image: none;\n\
@@ -223,7 +225,11 @@ function changeHeader(document) {
 			text-shadow: 1px 1px rgba(255, 255, 255, 0.2);\n\
 		}\n\
 		.user_toolbar > ul > li:first-of-type {\n\
-			border-left: 1px solid rgba(0, 0, 0, 0.1);\n\
+			border-left: 1px solid rgba(0, 0, 0, 0.2);\n\
+		}\n\
+		header.header {\n\
+			max-width: 1300px;\n\
+			width: 98%;\n\
 		}\n\
 		";
 		document.head.appendChild(inject_css);
