@@ -157,7 +157,76 @@ function setupMessageListener(document) {
 function changeHeader(document) {
 	// yes I'm petty
 	try {
-		document.getElementsByClassName("home_link")[0].children[0].children[0].src = "resource://fimfic-res/logo_fix.png";
+		var title_html = "\
+			<div class=\"banner-buttons\">\n\
+				<a id=\"source_link\" href=\"\">Source</a>	\n\
+				<a href=\"javascript:void(0);\" onclick=\"ResetBanner( );\">Reset Selection</a>	\n\
+				<a href=\"\">Banner Selector</a>\n\
+			</div>\n\
+			<a href=\"http://www.fimfiction.net/\" class=\"home_link\">\n\
+				<div>\n\
+					<img src=\"resource://fimfic-res/logo_fix.png\">\n\
+				</div>\n\
+			</a>\n\
+			<a href=\"http://www.fimfiction.net/\" class=\"home_link_link\"></a>\n\
+			\n\
+			<div class=\"theme_selector theme_selector_left\">\n\
+				<a href=\"javascript:void();\" onclick=\"selectPreviousTheme( );\"></a>\n\
+			</div>\n\
+			<div class=\"theme_selector theme_selector_right\">\n\
+				<a href=\"javascript:void();\" onclick=\"selectNextTheme( );\"></a>\n\
+			</div>\n\
+		";
+		var title_element = document.createElement("div");
+		title_element.className = "title";
+		title_element.id = "title";
+		title_element.style = "display: block !important;";
+		title_element.innerHTML = title_html;
+		header_element = document.querySelector("header.header");
+		header_element.insertBefore(title_element, header_element.firstChild);
+		// we also need to set a variable, and adding a script tag to the above innerHTML doesn't work
+		var inject_script = document.createElement("script");
+		inject_script.innerHTML = "\n\
+			if(getCookie(\"selected_theme\")) {\n\
+				// if there is a selected theme, find and display it\n\
+				var theme_id = getCookie(\"selected_theme\");\n\
+				for(var theme_index in banners) {\n\
+					if(banners[theme_index].id == theme_id) {\n\
+						theme = theme_index;\n\
+						selectTheme(theme);\n\
+						break;\n\
+					}\n\
+				}\n\
+			}else{\n\
+				// otherwise display a random theme\n\
+				theme = Math.floor(Math.random() * banners.length);\n\
+				selectTheme(theme);\n\
+				ResetBanner();\n\
+			}\n\
+		";
+		document.head.appendChild(inject_script);
+		// and finally some css to fix the user bar
+		var inject_css = document.createElement("style");
+		inject_css.innerHTML = "\
+		.user_toolbar > ul {\n\
+			background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.2) 100%);\n\
+		}\n\
+		.user_toolbar > ul > li {\n\
+			background-image: none;\n\
+			background-color: rgba(255, 255, 255, 0.2);\n\
+			text-shadow: 1px 1px rgba(255, 255, 255, 0.2);\n\
+			border-right: 1px solid rgba(0, 0, 0, 0.1);\n\
+		}\n\
+		.user_toolbar > ul > li:hover {\n\
+			background-image: none;\n\
+			background-color: rgba(255, 255, 255, 0.4);\n\
+			text-shadow: 1px 1px rgba(255, 255, 255, 0.2);\n\
+		}\n\
+		.user_toolbar > ul > li:first-of-type {\n\
+			border-left: 1px solid rgba(0, 0, 0, 0.1);\n\
+		}\n\
+		";
+		document.head.appendChild(inject_css);
 	} catch (e) {
 		console.log("Failed to replace header:\n" + e.message);
 		console.log(document);
