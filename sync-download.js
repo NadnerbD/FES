@@ -68,7 +68,27 @@ function syncDirectories(files, dest, source, deleteFromSource, keepOld, log) {
 				}
 			}
 		}
-		log("Sync Complete");
+		// we also look for unknown files in the destination directory
+		function isInFileList(testFileName) {
+			for(file of files) {
+				if(testFileName == file.name)
+					return true;
+			}
+			return false;
+		}
+		var dirIter = new OS.File.DirectoryIterator(dest);
+		dirIter.forEach(function (dirEntry) {
+			if(!dirEntry.isDir && !isInFileList(dirEntry.name)) {
+				log("Unknown file in destination: " + dirEntry.name);
+			}
+		}).then(function () {
+			dirIter.close();
+			log("Sync Complete");
+		},
+		function (error) {
+			dirIter.close();
+			log(error);
+		});
 	}).then(null, function(error) {
 		log(error);
 	});
