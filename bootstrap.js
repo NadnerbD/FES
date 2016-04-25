@@ -425,6 +425,10 @@ function addLinks(document, db) {
 			// we check to see if the bookshelf id is in our bookshelf menu
 			story.bookshelves[shelfInfo[1]] = true;
 		}
+		// cover for the fact that some story cards don't include character information
+		if(story.tags.character.length == 0) {
+			delete story.tags.character;
+		}
 		// finalize data
 		stories.push(story);
 		words += story.wordcount;
