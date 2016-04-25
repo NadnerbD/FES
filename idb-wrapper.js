@@ -94,7 +94,8 @@ function FFDB(name, callback, aid) {
 					// if the item exists, merge in the values from newItem
 					function recursiveMerge(source, dest) {
 						for(var key in source) {
-							if(typeof source[key] == "object" && typeof dest[key] == "object") {
+							if(Object.prototype.toString.call(source[key]) == "[object Object]"
+							&& Object.prototype.toString.call(dest[key]) == "[object Object]") {
 								recursiveMerge(source[key], dest[key]);
 							}else{
 								dest[key] = source[key];
