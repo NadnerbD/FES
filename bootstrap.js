@@ -414,8 +414,8 @@ function addLinks(document, db) {
 				down: parseInt(item.querySelector("i.fa-thumbs-down").nextSibling.data.replace(/,/g, ""))
 			},
 			tags: {
-				category: [catLink.title for(catLink of item.querySelectorAll("a.story_category"))],
-				character: [charLink.title for(charLink of item.querySelectorAll("div.character-icons a"))]
+				category: [for(catLink of item.querySelectorAll("a.story_category")) catLink.title],
+				character: [for(charLink of item.querySelectorAll("div.character-icons a")) charLink.title]
 			},
 			bookshelves: {}
 		};
@@ -516,8 +516,8 @@ function scrapeStories(document, observed) {
 				down: parseInt(item.querySelector("span.dislikes").firstChild.data.replace(/,/g, ""))
 			},
 			tags: {
-				category: [catLink.firstChild.data for(catLink of item.querySelectorAll("a.story_category"))],
-				character: [charLink.title for(charLink of item.querySelectorAll("a.character_icon"))]
+				category: [for(catLink of item.querySelectorAll("a.story_category")) catLink.firstChild.data],
+				character: [for(charLink of item.querySelectorAll("a.character_icon")) charLink.title]
 			},
 			bookshelves: {},
 			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,

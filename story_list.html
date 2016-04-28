@@ -266,7 +266,7 @@
 	<script type="text/javascript">
 		var db;
 		var charTable = {};
-		//l2 = [{tag: "a", attrs: {title: cat, className: "category " + cat.toLowerCase().replace(/ /g, "_")}, children: [cat.slice(0, 2)]} for(cat of l)]
+		//l2 = [for(cat of l) {tag: "a", attrs: {title: cat, className: "category " + cat.toLowerCase().replace(/ /g, "_")}, children: [cat.slice(0, 2)]}]
 		var catTable = {
 			"Sex": {tag: "a", attrs: {title: "Sex", className: "category sex"}, children: ["Se"]},
 			"Gore": {tag: "a", attrs: {title: "Gore", className: "category gore"}, children: ["Go"]},
@@ -545,8 +545,8 @@
 							}, 
 							children: [percentRating + "%"]
 						},
-						{tag: "td", children: [catTable[cat] for(cat of story.tags.category)]},
-						{tag: "td", children: [{tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}} for(cat of story.tags.character)]},
+						{tag: "td", children: [for(cat of story.tags.category) catTable[cat]]},
+						{tag: "td", children: [for(cat of story.tags.character) {tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}}]},
 						{tag: "td", children: story.created?story.created.toDateString().slice(4):""},
 						{tag: "td", children: story.updated?story.updated.toDateString().slice(4):""},
 						{tag: "td", 
@@ -559,7 +559,7 @@
 							]
 						},
 						{tag: "td", children: [
-								{tag: "span",
+								for(shelf of bookshelf_info) {tag: "span",
 									attrs: {
 										className: ["fa", "pe"][["font-awesome", "pony-emoji"].indexOf(shelf.icon_type)] + " bookshelf",
 										style: story.bookshelves && story.bookshelves[shelf.id]?"":"color: rgba(0, 0, 0, 0.1)",
@@ -567,7 +567,7 @@
 										shelf_id: shelf.id
 									},
 									children: [shelf.icon_data]
-								} for(shelf of bookshelf_info)
+								}
 							]
 						},
 						{tag: "td", attrs: {style: "text-align: right;"}} // this will contain the comment count
@@ -659,7 +659,7 @@
 					{name: "Destination Folder", type: "FilePath", value: ""},
 					{name: "Source Folder", type: "FilePath", value: ""},
 					{name: "Files to Sync", type: "select", value: "Selected", options: ["Selected", "Bookshelf", "Upvotes", "Downvotes"]},
-					{name: "Bookshelf", type: "select", value: "", options: [shelf.name for(shelf of bookshelf_info)]},
+					{name: "Bookshelf", type: "select", value: "", options: [for(shelf of bookshelf_info) shelf.name]},
 					{name: "Download Type", type: "select", value: "html", options: ["txt", "html", "epub"]},
 					{name: "Delete Duplicates", type: "bool", value: false},
 					{name: "Keep Old Versions", type: "bool", value: false}
