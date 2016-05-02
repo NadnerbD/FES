@@ -655,7 +655,7 @@
 				});
 			}else if(h[0] == "#sync_interface") {
 				// fetch profile data, and create it if neccessary
-				var defaultProfileSettings = JSON.stringify([
+				var defaultProfileSettings = [
 					{name: "Destination Folder", type: "FilePath", value: ""},
 					{name: "Source Folder", type: "FilePath", value: ""},
 					{name: "Files to Sync", type: "select", value: "Selected", options: ["Selected", "Bookshelf", "Upvotes", "Downvotes"]},
@@ -663,13 +663,28 @@
 					{name: "Download Type", type: "select", value: "html", options: ["txt", "html", "epub"]},
 					{name: "Delete Duplicates", type: "bool", value: false},
 					{name: "Keep Old Versions", type: "bool", value: false}
-				]);
+				];
 				var profiles = JSON.parse(localStorage.getItem("profiles"));
 				if(profiles == null) {
-					profiles = [{name: "Profile 1", settings: JSON.parse(defaultProfileSettings)}];
+					profiles = [{name: "Profile 1", settings: defaultProfileSettings}];
 					var selectedProfileIndex = 0;
 				}else{
 					var selectedProfileIndex = parseInt(localStorage.getItem("selectedProfileIndex"));
+					// the actual options for these dropdowns can change dynamically, so we set the options on select items to the default
+					function getDefaultOptions(name) {
+						for(var setting of defaultProfileSettings) {
+							if(setting.name == name) {
+								return setting.options;
+							}
+						}
+					}
+					for(var profile of profiles) {
+						for(var setting of profile.settings) {
+							if(setting.type == "select") {
+								setting.options = getDefaultOptions(setting.name);
+							}
+						}
+					}
 				}
 				// the profile editing functions
 				// might move elsewhere to avoid spaghettification
@@ -708,7 +723,7 @@
 						}else if(tabProfile.addTab) {
 							// add a new tab
 							selectedProfileIndex = profiles.length;
-							profiles.push({name: "Profile " + (profiles.length + 1), settings: JSON.parse(defaultProfileSettings)});
+							profiles.push({name: "Profile " + (profiles.length + 1), settings: defaultProfileSettings});
 							rewriteTabList();
 						}else{
 							// select the tab
@@ -858,7 +873,7 @@
 								}
 								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
 									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]}, 
-									{tag: "select", attrs: {onchange: changeSelect(setting)}, children: [for (option of setting.options) option==setting.value?{tag: "option", attrs: {selected: "selected"}, children: [option]}:{tag: "option", children: [option]}]}
+									{tag: "select", attrs: {onchange: changeSelect(setting)}, children: [for (option of setting.options) {tag: "option", attrs: option==setting.value?{selected: "selected"}:{}, children: [option]}]}
 								]});
 								break;
 							case "bool":
