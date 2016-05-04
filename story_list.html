@@ -536,6 +536,8 @@
 					story.floatRating = story.ratings.up / (story.ratings.up + story.ratings.down); // so we can sort by this
 					if(isNaN(story.floatRating)) story.floatRating = 0; // in case there are no ratings
 					var percentRating = parseInt(story.floatRating * 100);
+					// this can be empty, but it will break the display and sort, so patch it
+					if(story.tags.character == undefined) story.tags.character = [];
 					var rowStruct = {tag: "tr", children: [
 						{tag: "td", children: [{tag: "a", attrs: {href: "http://fimfiction.net/story/" + story.id}, children: [story.title]}]},
 						{tag: "td", children: [{tag: "a", attrs: {href: "http://fimfiction.net/user/" + story.author.replace(/ /g, "+")}, children: [story.author]}]},
