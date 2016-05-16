@@ -4,6 +4,9 @@ p {
 p.double {
 	margin-top: 1.5em;
 }
+p.indented {
+	text-indent: 3.0em;
+}
 hr {
 	background-color: #DDDDDD;
 	border: none;

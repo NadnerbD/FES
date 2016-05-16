@@ -168,6 +168,13 @@ function bbcode() {
 			}else if(stream.accept("\n")) {
 				if(stream.accept("\n")) {
 					this.value = "double";
+					if(stream.accept("\t")) {
+						this.value = "indented double";
+					}
+				}else{
+					if(stream.accept("\t")) {
+						this.value = "indented";
+					}
 				}
 				this.close = true;
 				this.name = "p";
@@ -338,8 +345,8 @@ function bbcode() {
 				if(isTagOpen(tag.name)) {
 					reopenNodes(closeTag(tag.name));
 				}
-				if(tag.name == "p" && tag.value == "double") {
-					top.className = "double";
+				if(tag.name == "p" && tag.value != undefined) {
+					top.className = tag.value;
 				}
 			}else{ // open a new tag
 				var element = document.createElement(tagElementNames[tag.name]);
