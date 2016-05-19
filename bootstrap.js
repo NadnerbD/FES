@@ -512,8 +512,8 @@ function scrapeStories(document, observed) {
 			author: item.querySelector(".author a").firstChild.data,
 			wordcount: parseInt(item.querySelector("div.word_count b").firstChild.data.replace(/,/g, "")),
 			ratings: {
-				up: parseInt(item.querySelector("span.likes").firstChild.data.replace(/,/g, "")),
-				down: parseInt(item.querySelector("span.dislikes").firstChild.data.replace(/,/g, ""))
+				up: parseInt((item.querySelector("span.likes").firstChild||{data:"0"}).data.replace(/,/g, "")),
+				down: parseInt((item.querySelector("span.dislikes").firstChild||{data:"0"}).data.replace(/,/g, ""))
 			},
 			tags: {
 				category: [for(catLink of item.querySelectorAll("a.story_category")) catLink.firstChild.data],
