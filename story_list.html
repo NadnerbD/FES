@@ -1079,18 +1079,22 @@
 									user.avatar = reader.result;
 									usersLoaded++;
 									if(usersLoaded == users.length) {
-										postMessage({
-											request: "WriteFile",
-											name: filePath,
-											data: JSON.stringify({
-												comments: comments,
-												stories: stories,
-												users: users,
-												bookshelves: bookshelves
-											})
-										}, "*");
+										writeBackupFile();
 									}
 								}
+								function writeBackupFile() {
+									postMessage({
+										request: "WriteFile",
+										name: filePath,
+										data: JSON.stringify({
+											comments: comments,
+											stories: stories,
+											users: users,
+											bookshelves: bookshelves
+										})
+									}, "*");
+								}
+								if(users.length == 0) writeBackupFile();
 							});
 						});
 					});

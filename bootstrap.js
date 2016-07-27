@@ -410,8 +410,8 @@ function addLinks(document, db) {
 			author: item.querySelector("span.by a").firstChild.data,
 			wordcount: parseInt(info.firstChild.data.split(" ")[0].replace(/,/g, "")),
 			ratings: {
-				up: parseInt(item.querySelector("i.fa-thumbs-up").nextSibling.data.replace(/,/g, "")),
-				down: parseInt(item.querySelector("i.fa-thumbs-down").nextSibling.data.replace(/,/g, ""))
+				up: parseInt((item.querySelector("i.fa-thumbs-up")||{nextSibling: {data: "0"}}).nextSibling.data.replace(/,/g, "")),
+				down: parseInt((item.querySelector("i.fa-thumbs-down")||{nextSibling: {data: "0"}}).nextSibling.data.replace(/,/g, ""))
 			},
 			tags: {
 				category: [for(catLink of item.querySelectorAll("a.story_category")) catLink.title],
