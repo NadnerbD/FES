@@ -61,10 +61,10 @@ pageLoadObserver.prototype = {
 
 var locs = [
 	// story-card elements can appear in a lot of places
-	[/https?:\/\/(www\.)?fimfiction\.net\/(index\.php\?view=category)|(stories)|(bookshelf)|(user).*/, linkComments],
-	[/https?:\/\/(www\.)?fimfiction\.net\/story\/.*/, watchComments],
-	[/https?:\/\/(www\.)?fimfiction\.net.*/, changeHeader],
-	[/resource:\/\/fimfic-res\/story_list\.html/, setupMessageListener]
+	[/^https?:\/\/(?:www\.)?fimfiction\.net\/(?:index\.php\?view=category|stories|bookshelf|user)/, linkComments],
+	[/^https?:\/\/(?:www\.)?fimfiction\.net\/story\//, watchComments],
+	[/^https?:\/\/(?:www\.)?fimfiction\.net/, changeHeader],
+	[/^resource:\/\/fimfic-res\/story_list\.html/, setupMessageListener]
 ];
 	
 function handleNewPage(event) {
@@ -72,7 +72,7 @@ function handleNewPage(event) {
 	for(var i in locs) {
 		// iframes for some inexplicable reason can have the URL property of their parent
 		// document, so we must check that the document is not iframe content before proceeding
-		if(locs[i][0].exec(document.URL) && !document.defaultView.frameElement) {
+		if(locs[i][0].test(document.URL) && !document.defaultView.frameElement) {
 			locs[i][1](document);
 		}
 	}
