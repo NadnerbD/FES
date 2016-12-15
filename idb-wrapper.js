@@ -1,5 +1,5 @@
 // we like our console
-if(typeof console == "undefined") var console = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {}).console;
+if(typeof console == "undefined") var console = Components.utils.import("resource://gre/modules/Console.jsm", {}).console;
 
 // sometimes, if we're running from chrome, we won't have access to the indexedDB object
 if(typeof indexedDB == "undefined") Components.utils.importGlobalProperties(["indexedDB"]);
