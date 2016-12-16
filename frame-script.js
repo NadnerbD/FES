@@ -25,6 +25,7 @@ function removeFrameListeners(message) {
 function postMessageForwarder(event) {
 	// ensure that the message actually came from an extension page
 	if(event.origin != "resource://fimfic-res") return;
+	//console.log("DEBUG: postMessage received from content at", event.origin);
 	// pass on the message to the chrome script
 	sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-request", event.data);
 }
@@ -42,6 +43,10 @@ var locs = [
 ];
 	
 function handleNewPage(event) {
+	// listen for postMessage events directed at the window
+	// we need to reapply this listener when the page is reloaded
+	content.addEventListener("message", postMessageForwarder, false, true);
+	// do further per-page init for documents that match the location list
 	var document = event.target;
 	for(var i in locs) {
 		// iframes for some inexplicable reason can have the URL property of their parent
@@ -383,8 +388,7 @@ function addLinks(document, db) {
 	';
 	// why did I do this instead of just put the resource url in the href attribute?
 	element.querySelector("a#viewStories").addEventListener("click", function(event) {
-		var win = winMed.getMostRecentWindow("navigator:browser");
-		win.gBrowser.selectedTab = win.gBrowser.addTab("resource://fimfic-res/story_list.html");
+		sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-request", {request: "AddTab", url: "resource://fimfic-res/story_list.html"});
 	}, false);
 	document.body.appendChild(element.firstElementChild);
 }

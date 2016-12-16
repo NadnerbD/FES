@@ -992,6 +992,7 @@
 		function makeBBCodeList() {
 			// generates a list of stories with comment links from the selection
 			// and puts it on the clipboard in a BBCode format
+			if(selectedRows.length < 1) return; // bail out if there is no selection
 			document.getElementById("copy_list_link").style.display = "none";
 			var completion = [0, selectedRows.length];
 			document.getElementById("transaction_status").innerHTML = "Generating list: " + completion[0] + "/" + completion[1];
@@ -1064,6 +1065,10 @@
 		}
 		function saveBackup() {
 			pickFile("Save Backup As", 1, function(filePath) {
+				if(filePath == null) {
+					console.log("No backup file location provided");
+					return;
+				}
 				db.getAll("comments", function(comments) {
 					db.getAll("stories", function(stories) {
 						db.getAll("users", function(users) {

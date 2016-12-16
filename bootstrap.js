@@ -44,9 +44,14 @@ function shutdown(data, reason) {
 }
 
 function chromeRequestListener(message) {
+	//console.log("DEBUG: chrome request", message.data);
 	switch(message.data.request) {
 		case "CopyString":
 			clipboardHelper.copyString(message.data.string);
+		break;
+		case "AddTab":
+			var win = winMed.getMostRecentWindow("navigator:browser");
+			win.gBrowser.selectedTab = win.gBrowser.addTab(message.data.url);
 		break;
 		case "PickFolder":
 			var filePicker = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
