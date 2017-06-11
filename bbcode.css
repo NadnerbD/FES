@@ -50,3 +50,18 @@ div.indent-3 {
 div.indent-4 {
 	margin-left: 16ex;
 }
+span.code-emote {
+	color: #268bd2;
+}
+span.code-quote_ref {
+	color: #2aa198;
+}
+span.code-tag {
+	color: #268bd2;
+}
+span.code-operator {
+	color: #586e75;
+}
+span.code-attr-value {
+	color: #859900;
+}

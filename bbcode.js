@@ -9,17 +9,15 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent" | "pre";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
 			close_p = "\n";
 
-		some standard bbcode tags that aren't supported by our target are "font", "code", "ul", and "ol"
+		some standard bbcode tags that aren't supported by our target are "font", "ul", and "ol"
 		
 		we place invalid tags back into the stream as text
-		extracting emotes poses a slight problem. where should they be extracted from?
-		second pass on text nodes seems like the best place.
 		
 		procedure for rewriting spans to trees
 		[i]a[b]b[u]c[/i]d[/b]e[/u]
@@ -117,7 +115,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -139,7 +137,7 @@ function bbcode() {
 		if(str.length == 0) {
 			throw "Invalid number";
 		}
-		return parseInt(str);
+		return str;
 	}
 
 	function tag(stream) {
@@ -233,7 +231,8 @@ function bbcode() {
 		"icon": "I",
 		"email": "A",
 		"code": "PRE",
-		"indent": "DIV"
+		"indent": "DIV",
+		"pre": "PRE"
 	}
 	function generateElements(tags) {
 		var top = document.createElement("div");
@@ -278,8 +277,65 @@ function bbcode() {
 			top.appendChild(node);
 			top = top.lastChild;
 		}
+		var inCodeBlock = false;
 		for(var tag = tags.shift(); tag != undefined; tag = tags.shift()) {
-			if(tag.name == "text") {
+			if(tag.name == "code" && !inCodeBlock) {
+				var closed = closeTag("p");
+				var element = document.createElement("pre");
+				element.className = "code";
+				openNode(element);
+				inCodeBlock = true;
+			}else if(tag.name == "code" && tag.close == true && inCodeBlock) {
+				closeNode();
+				openNode(document.createElement("p"));
+				reopenNodes(closed);
+				inCodeBlock = false;
+			}else if(inCodeBlock) {
+				var element;
+				if(tag.name == "text") {
+					element = document.createTextNode(tag.value);
+				}else if(tag.name == "p" && tag.close == true) {
+					element = document.createTextNode("\n" + 
+						(typeof(tag.value) == "string" ?
+							(tag.value.indexOf("double") != -1 ? "\n" : "") + 
+							(tag.value.indexOf("indented") != -1 ? "\t" : "")
+						 : "")
+					);
+				}else if(tag.name == "emote") {
+					element = document.createElement("span");
+					element.innerText = ":" + tag.value + ":";
+					element.className = "code-emote";
+				}else if(tag.name == "quote_ref") {
+					element = document.createElement("span");
+					element.innerText = ">>" + tag.value;
+					element.className = "code-quote_ref";
+				}else{
+					if(tag.value === undefined) {
+						element = document.createElement("span");
+						element.innerText = "[" + (tag.close ? "/" : "") + tag.name + "]";
+						element.className = "code-tag";
+					}else{
+						element = document.createDocumentFragment();
+						var part = document.createElement("span");
+						part.innerText = "[" + tag.name;
+						part.className = "code-tag";
+						element.appendChild(part);
+						part = document.createElement("span");
+						part.innerText = "=";
+						part.className = "code-operator";
+						element.appendChild(part);
+						part = document.createElement("span");
+						part.innerText = tag.value;
+						part.className = "code-attr-value";
+						element.appendChild(part);
+						part = document.createElement("span");
+						part.innerText = "]";
+						part.className = "code-tag";
+						element.appendChild(part);
+					}
+				}
+				top.appendChild(element);
+			}else if(tag.name == "text") {
 				top.appendChild(document.createTextNode(tag.value));
 			}else if(tag.name == "img" && tag.close == false) {
 				var image = document.createElement("img");
@@ -373,12 +429,11 @@ function bbcode() {
 					element.className = "spoiler";
 				}else if(tag.name == "quote") {
 					closed = closeTag("p");
-				}else if(tag.name == "code") {
-					closed = closeTag("p");
-					element.className = "code";
 				}else if(tag.name == "indent") {
 					closed = closeTag("p");
 					element.className = "indent-" + tag.value;
+				}else if(tag.name == "pre") {
+					closed = closeTag("p");
 				}
 				openNode(element);
 				if(tag.name == "quote" || tag.name == "code" || tag.name == "indent") {
