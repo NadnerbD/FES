@@ -38,3 +38,15 @@ pre.code {
 	outline: 3px solid #eee;
 	padding: 10px;
 }
+div.indent-1 {
+	margin-left: 4ex;
+}
+div.indent-2 {
+	margin-left: 8ex;
+}
+div.indent-3 {
+	margin-left: 12ex;
+}
+div.indent-4 {
+	margin-left: 16ex;
+}

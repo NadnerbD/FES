@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -117,7 +117,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -232,7 +232,8 @@ function bbcode() {
 		"p": "P",
 		"icon": "I",
 		"email": "A",
-		"code": "PRE"
+		"code": "PRE",
+		"indent": "DIV"
 	}
 	function generateElements(tags) {
 		var top = document.createElement("div");
@@ -375,9 +376,12 @@ function bbcode() {
 				}else if(tag.name == "code") {
 					closed = closeTag("p");
 					element.className = "code";
+				}else if(tag.name == "indent") {
+					closed = closeTag("p");
+					element.className = "indent-" + tag.value;
 				}
 				openNode(element);
-				if(tag.name == "quote" || tag.name == "code") {
+				if(tag.name == "quote" || tag.name == "code" || tag.name == "indent") {
 					openNode(document.createElement("p"));
 					reopenNodes(closed);
 				}
