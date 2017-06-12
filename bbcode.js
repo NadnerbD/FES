@@ -285,29 +285,34 @@ function bbcode() {
 			top.appendChild(node);
 			top = top.lastChild;
 		}
-		var inPreTag = false;
-		var inCodeTag = false;
+		function dumpTag(tag) {
+			top.appendChild(document.createTextNode(
+				(tag.name == "emote" ? ":" + tag.value + ":" :
+					(tag.name == "quote_ref" ? ">>" + tag.value :
+						("[" + (tag.close ? "/" : "") + tag.cname +
+						(tag.value != undefined ? "=" + tag.value : "") + "]")
+					)
+				)
+			));
+		}
 		for(var tag = tags.shift(); tag != undefined; tag = tags.shift()) {
-			if((tag.name == "code" || tag.name == "codeblock") && !tag.close && !inCodeTag) {
+			if((tag.name == "code" || tag.name == "codeblock") && !tag.close && !isTagOpen("code")) {
 				if(tag.name == "codeblock") {
-					var closed = closeTag("p");
+					var closed = closeTag("p"); // these are reopened after the code block
 					var element = document.createElement("pre");
 					openNode(element);
-					inPreTag = true;
 				}
 				var element = document.createElement("code");
 				openNode(element);
-				inCodeTag = true;
-			}else if((tag.name == "code" || (tag.name == "codeblock" && inPreTag)) && tag.close == true && inCodeTag) {
-				closeNode();
-				if(inPreTag) {
-					closeNode();
+			}else if((tag.name == "code" || (tag.name == "codeblock" && isTagOpen("pre"))) && tag.close == true && isTagOpen("code")) {
+				closeNode(); // no bbcode tags should exist within a code block, so we assume it is the top element
+				if(tag.name == "codeblock" && isTagOpen("pre")) {
+					closeNode(); // similarly, a code block is a double element, so we assume it's parent is the pre
 					openNode(document.createElement("p"));
-					inPreTag = false;
+					reopenNodes(closed); // elements that were saved before the code block are reopened here
 				}
 				reopenNodes(closed);
-				inCodeTag = false;
-			}else if(inCodeTag) {
+			}else if(isTagOpen("code")) {
 				var element;
 				if(tag.name == "text") {
 					element = document.createTextNode(tag.value);
@@ -387,7 +392,7 @@ function bbcode() {
 				}
 				top.appendChild(icon);
 			}else if(tag.name == "hr" && tag.close == false) {
-				if(inPreTag) {
+				if(isTagOpen("pre")) {
 					// block level elements are not allowed in pre tags
 					top.appendChild(document.createTextNode("[hr]"));
 				}else{
@@ -410,9 +415,9 @@ function bbcode() {
 				ref.appendChild(document.createTextNode(">>" + tag.value));
 				top.appendChild(ref);
 			}else if(tag.name == "youtube") {
-				if(inPreTag) {
+				if(isTagOpen("pre")) {
 					// block level elements are not allowed in pre tags
-					top.appendChild(document.createTextNode("[youtube=" + tag.value + "]"));
+					dumpTag(tag);
 				}else{
 					// the purpose of the container is to provide an alternate link if the embed doesn't work
 					// currently it's not actually used for anything
@@ -427,10 +432,18 @@ function bbcode() {
 				}
 			}else if(tag.close) {
 				if(isTagOpen(tag.name)) {
-					reopenNodes(closeTag(tag.name));
+					var closed = closeTag(tag.name);
+					if(tag.name == "pre") {
+						// after leaving the pre tag, return to p at the root level
+						openNode(document.createElement("p"));
+					}
+					reopenNodes(closed);
+				}else if(tag.name != "p") {
+					// if this is an orphan closing tag, throw it in the text
+					dumpTag(tag);
 				}
 				if(tag.name == "p") {
-					if(inPreTag) {
+					if(isTagOpen("pre")) {
 						top.appendChild(document.createTextNode("\n" + 
 							(typeof(tag.value) == "string" ?
 								(tag.value.indexOf("double") != -1 ? "\n" : "") + 
@@ -441,12 +454,9 @@ function bbcode() {
 						top.className = tag.value;
 					}
 				}
-				if(tag.name == "pre") {
-					inPreTag = false;
-				}
-			}else if(tag.name == "pre" && inPreTag) {
+			}else if(tag.name == "pre" && isTagOpen("pre")) {
 				// pre tags cannot be nested
-				top.appendChild(document.createTextNode("[pre]"));
+				dumpTag(tag);
 			}else{ // open a new tag
 				var element = document.createElement(tagElementNames[tag.name]);
 				var closed = [];
@@ -477,11 +487,14 @@ function bbcode() {
 					element.className = "indent-" + tag.value;
 				}else if(tag.name == "pre") {
 					closed = closeTag("p");
-					inPreTag = true;
 				}
 				openNode(element);
-				if(tag.name == "quote" || tag.name == "code" || tag.name == "indent") {
+				if(tag.name == "quote" || tag.name == "indent") {
 					openNode(document.createElement("p"));
+					reopenNodes(closed);
+				}else if(tag.name == "pre") {
+					// pre replaces the p element at the root level like the above tags, but doesn't contain p tags
+					// so we don't open one
 					reopenNodes(closed);
 				}
 			}
