@@ -32,10 +32,18 @@ span.spoiler:hover {
 	color: inherit;
 	text-shadow: inherit;
 }
-pre.code {
+:not(pre) > code {
+	font-family: monospace;
+	background: #eee;
+	padding: .1875rem;
+	border-radius: .3125rem;
+	line-height: 1.9em;
+}
+pre code {
 	font-family: monospace;
 	border: 1px solid #ccc;
 	outline: 3px solid #eee;
+	display: block;
 	padding: 10px;
 }
 div.indent-1 {

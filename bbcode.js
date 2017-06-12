@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent" | "pre";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent" | "pre" | "codeblock";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -115,7 +115,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre", "codeblock"];
 		return acceptIdentifiers(stream, tagNames);
 	}
 
@@ -230,9 +230,10 @@ function bbcode() {
 		"p": "P",
 		"icon": "I",
 		"email": "A",
-		"code": "PRE",
+		"code": "CODE",
 		"indent": "DIV",
-		"pre": "PRE"
+		"pre": "PRE",
+		"codeblock": "PRE"
 	}
 	function generateElements(tags) {
 		var top = document.createElement("div");
@@ -278,20 +279,28 @@ function bbcode() {
 			top = top.lastChild;
 		}
 		var inPreTag = false;
-		var inCodeBlock = false;
+		var inCodeTag = false;
 		for(var tag = tags.shift(); tag != undefined; tag = tags.shift()) {
-			if(tag.name == "code" && !inCodeBlock) {
-				var closed = closeTag("p");
-				var element = document.createElement("pre");
-				element.className = "code";
+			if((tag.name == "code" || tag.name == "codeblock") && !tag.close && !inCodeTag) {
+				if(tag.name == "codeblock") {
+					var closed = closeTag("p");
+					var element = document.createElement("pre");
+					openNode(element);
+					inPreTag = true;
+				}
+				var element = document.createElement("code");
 				openNode(element);
-				inCodeBlock = true;
-			}else if(tag.name == "code" && tag.close == true && inCodeBlock) {
+				inCodeTag = true;
+			}else if((tag.name == "code" || (tag.name == "codeblock" && inPreTag)) && tag.close == true && inCodeTag) {
 				closeNode();
-				openNode(document.createElement("p"));
+				if(inPreTag) {
+					closeNode();
+					openNode(document.createElement("p"));
+					inPreTag = false;
+				}
 				reopenNodes(closed);
-				inCodeBlock = false;
-			}else if(inCodeBlock) {
+				inCodeTag = false;
+			}else if(inCodeTag) {
 				var element;
 				if(tag.name == "text") {
 					element = document.createTextNode(tag.value);
