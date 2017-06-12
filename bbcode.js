@@ -277,6 +277,7 @@ function bbcode() {
 			top.appendChild(node);
 			top = top.lastChild;
 		}
+		var inPreTag = false;
 		var inCodeBlock = false;
 		for(var tag = tags.shift(); tag != undefined; tag = tags.shift()) {
 			if(tag.name == "code" && !inCodeBlock) {
@@ -402,8 +403,20 @@ function bbcode() {
 				if(isTagOpen(tag.name)) {
 					reopenNodes(closeTag(tag.name));
 				}
-				if(tag.name == "p" && tag.value != undefined) {
-					top.className = tag.value;
+				if(tag.name == "p") {
+					if(inPreTag) {
+						top.appendChild(document.createTextNode("\n" + 
+							(typeof(tag.value) == "string" ?
+								(tag.value.indexOf("double") != -1 ? "\n" : "") + 
+								(tag.value.indexOf("indented") != -1 ? "\t" : "")
+							 : "")
+						));
+					}else if(tag.value != undefined) {
+						top.className = tag.value;
+					}
+				}
+				if(tag.name == "pre") {
+					inPreTag = false;
 				}
 			}else{ // open a new tag
 				var element = document.createElement(tagElementNames[tag.name]);
@@ -434,6 +447,7 @@ function bbcode() {
 					element.className = "indent-" + tag.value;
 				}else if(tag.name == "pre") {
 					closed = closeTag("p");
+					inPreTag = true;
 				}
 				openNode(element);
 				if(tag.name == "quote" || tag.name == "code" || tag.name == "indent") {
