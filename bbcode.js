@@ -44,8 +44,8 @@ function bbcode() {
 		function get() {
 			next = string[index++];
 		}
-		this.accept = function(token) {
-			if(next == token) {
+		this.accept = function(token, caseInsensitive) {
+			if((caseInsensitive ? next.toLowerCase() : next) == token) {
 				get();
 				return true;
 			}
@@ -84,25 +84,31 @@ function bbcode() {
 		}
 	}
 
-	function acceptIdentifiers(stream, tagNames) {
+	function acceptIdentifiers(stream, tagNames, caseInsensitive) {
 		var index = 0;
+		var out = "";
 		while(true) {
 			var nextNames = [];
 			// check all names to see if they can be advanced
 			for(var tagName = 0; tagName < tagNames.length; tagName++) {
-				if(stream.peek() == tagNames[tagName][index] || index == tagNames[tagName].length) {
+				if(
+					(caseInsensitive ? stream.peek().toLowerCase() : stream.peek()) == tagNames[tagName][index] ||
+					index == tagNames[tagName].length
+				) {
 					nextNames.push(tagNames[tagName]);
 				}
 			}
 			// advance the stream
 			for(var i = 0; i < nextNames.length; i++) {
-				if(stream.accept(nextNames[i][index])) {
+				var o = stream.peek();
+				if(stream.accept(nextNames[i][index], caseInsensitive)) {
+					out += o;
 					break;
 				}
 			}
 			if(nextNames.length == 1 && nextNames[0].length == index) {
 				// if we've hit the end of a valid name, and it's the only one remaining..
-				return nextNames[0];
+				return out;
 			}else if(nextNames.length == 0) {
 				// or if we've eliminated all name candidtates
 				throw "Invalid tagName";
@@ -116,7 +122,7 @@ function bbcode() {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
 		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre", "codeblock"];
-		return acceptIdentifiers(stream, tagNames);
+		return acceptIdentifiers(stream, tagNames, true);
 	}
 
 	var emoteDict = {};
@@ -147,21 +153,21 @@ function bbcode() {
 			if(stream.accept("[")) {
 				if(stream.accept("/")) {
 					this.close = true;
-					this.name = tagName(stream);
+					this.cname = tagName(stream);
 				}else{
-					this.name = tagName(stream);
+					this.cname = tagName(stream);
 					if(stream.accept("=")) {
 						this.value = stream.accept_until(["]"]);
 					}
 				}
 				stream.expect("]");
 			}else if(stream.accept(":")) {
-				this.name = "emote";
+				this.cname = "emote";
 				this.value = emoteName(stream);
 				stream.expect(":");
 			}else if(stream.accept(">")) {
 				stream.expect(">");
-				this.name = "quote_ref";
+				this.cname = "quote_ref";
 				this.value = integerString(stream);
 			}else if(stream.accept("\n")) {
 				if(stream.accept("\n")) {
@@ -175,16 +181,17 @@ function bbcode() {
 					}
 				}
 				this.close = true;
-				this.name = "p";
+				this.cname = "p";
 			}else{
-				this.name = "text";
+				this.cname = "text";
 				this.value = stream.accept_until(["[", ":", ">", "\n"]);
 			}
 		} catch (e) {
 			// failed to parse an element, return it as text
-			this.name = "text";
+			this.cname = "text";
 			this.value = stream.from_mark();
 		}
+		this.name = this.cname.toLowerCase();
 	}
 
 	function tagList(stream) {
@@ -322,12 +329,12 @@ function bbcode() {
 				}else{
 					if(tag.value === undefined) {
 						element = document.createElement("span");
-						element.innerText = "[" + (tag.close ? "/" : "") + tag.name + "]";
+						element.innerText = "[" + (tag.close ? "/" : "") + tag.cname + "]";
 						element.className = "code-tag";
 					}else{
 						element = document.createDocumentFragment();
 						var part = document.createElement("span");
-						part.innerText = "[" + tag.name;
+						part.innerText = "[" + tag.cname;
 						part.className = "code-tag";
 						element.appendChild(part);
 						part = document.createElement("span");
