@@ -371,11 +371,16 @@ function bbcode() {
 				}
 				top.appendChild(icon);
 			}else if(tag.name == "hr" && tag.close == false) {
-				// hr is a self-closing p-level tag
-				var closed = closeTag("p");
-				top.appendChild(document.createElement("hr"));
-				openNode(document.createElement("p"));
-				reopenNodes(closed);
+				if(inPreTag) {
+					// block level elements are not allowed in pre tags
+					top.appendChild(document.createTextNode("[hr]"));
+				}else{
+					// hr is a self-closing p-level tag
+					var closed = closeTag("p");
+					top.appendChild(document.createElement("hr"));
+					openNode(document.createElement("p"));
+					reopenNodes(closed);
+				}
 			}else if(tag.name == "emote") {
 				// emotes are really simple :)
 				var emote = document.createElement("img");
@@ -389,16 +394,21 @@ function bbcode() {
 				ref.appendChild(document.createTextNode(">>" + tag.value));
 				top.appendChild(ref);
 			}else if(tag.name == "youtube") {
-				// the purpose of the container is to provide an alternate link if the embed doesn't work
-				// currently it's not actually used for anything
-				var closed = closeTag("p");
-				var container = document.createElement("div");
-				var player = document.createElement("iframe");
-				player.src = "http://www.youtube.com/embed/" + urlParams(tag.value).v;
-				container.appendChild(player);
-				top.appendChild(container);
-				openNode(document.createElement("p"));
-				reopenNodes(closed);
+				if(inPreTag) {
+					// block level elements are not allowed in pre tags
+					top.appendChild(document.createTextNode("[youtube=" + tag.value + "]"));
+				}else{
+					// the purpose of the container is to provide an alternate link if the embed doesn't work
+					// currently it's not actually used for anything
+					var closed = closeTag("p");
+					var container = document.createElement("div");
+					var player = document.createElement("iframe");
+					player.src = "http://www.youtube.com/embed/" + urlParams(tag.value).v;
+					container.appendChild(player);
+					top.appendChild(container);
+					openNode(document.createElement("p"));
+					reopenNodes(closed);
+				}
 			}else if(tag.close) {
 				if(isTagOpen(tag.name)) {
 					reopenNodes(closeTag(tag.name));
@@ -418,6 +428,9 @@ function bbcode() {
 				if(tag.name == "pre") {
 					inPreTag = false;
 				}
+			}else if(tag.name == "pre" && inPreTag) {
+				// pre tags cannot be nested
+				top.appendChild(document.createTextNode("[pre]"));
 			}else{ // open a new tag
 				var element = document.createElement(tagElementNames[tag.name]);
 				var closed = [];
