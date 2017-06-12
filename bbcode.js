@@ -471,6 +471,7 @@ function bbcode() {
 					element.className = "spoiler";
 				}else if(tag.name == "quote") {
 					closed = closeTag("p");
+					if(tag.value != undefined) element.setAttribute("data-who", tag.value);
 				}else if(tag.name == "indent") {
 					closed = closeTag("p");
 					element.className = "indent-" + tag.value;

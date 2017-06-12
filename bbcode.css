@@ -16,11 +16,29 @@ hr {
 	margin-top: 12px;
 }
 blockquote {
-	margin: 0px;
+	margin: 0.6em 0;
 	padding: 15px;
 	border: solid 1px #CCCCCC;
 	box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1);
 	background-color: #F7F7F7;
+	position: relative;
+}
+blockquote[data-who] {
+	margin-top: 1.6em;
+}
+blockquote[data-who]::before {
+	content: attr(data-who);
+	font-weight: bold;
+	display: block;
+	position: absolute;
+	bottom: 100%;
+	left: -1px;
+	background: #f7f7f7;
+	padding: 0.2em 0.7rem;
+	padding-bottom: 0px;
+	line-height: 1;
+	border: solid 1px #cccccc;
+	border-bottom: none;
 }
 span.spoiler {
 	background-color: #333333;
@@ -34,17 +52,30 @@ span.spoiler:hover {
 }
 :not(pre) > code {
 	font-family: monospace;
-	background: #eee;
+	background-color: #eee;
 	padding: .1875rem;
 	border-radius: .3125rem;
 	line-height: 1.9em;
 }
 pre code {
 	font-family: monospace;
-	border: 1px solid #ccc;
-	outline: 3px solid #eee;
+	background-color: #eee;
+	border-radius: .3125rem;
 	display: block;
 	padding: 10px;
+	position: relative;
+}
+pre code::before {
+	font-weight: bold;
+	background-color: #eee;
+	border-radius: .3125rem;
+	display: block;
+	position: absolute;
+	top: -1em;
+	right: 0px;
+	padding: 10px;
+	padding-top: 5px;
+	content: "Code";
 }
 div.indent-1 {
 	margin-left: 4ex;
