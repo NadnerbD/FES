@@ -12,8 +12,10 @@ function install(data, reason) {}
 
 function uninstall(data, reason) {}
 
+const uid = Date.now();
+
 function startup(data, reason) {
-	console.log("FES Starting");
+	console.log("FES Starting (" + uid + ")");
 	// first up, set up a resource alias for our local files
 	var alias = ioServ.newFileURI(data.installPath);
 	if(!data.installPath.isDirectory()) {
@@ -23,18 +25,20 @@ function startup(data, reason) {
 	// then import a module from our namespace
 	Components.utils.import("resource://fimfic-res/sync-download.js");
 	// set up a delayed load frame script for all content processes
-	globalMM.loadFrameScript("resource://fimfic-res/frame-script.js", true);
+	globalMM.loadFrameScript("resource://fimfic-res/frame-script.js?" + uid, true);
+	// inform the frame scripts of their uid
+	globalMM.broadcastAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:uid", {uid: uid});
 	// listen for messages requesting actions that must be performed in the chrome script
 	globalMM.addMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-request", chromeRequestListener);
 }
 
 function shutdown(data, reason) {
 	if(reason == APP_SHUTDOWN) return;
-	console.log("FES Shutting down");
+	console.log("FES Shutting down (" + uid + ")");
 	// stop loading our frame script into new tabs
 	globalMM.removeDelayedFrameScript("resource://fimfic-res/frame-script.js");
 	// send a message to frame scripts to stop watching for pageloads
-	globalMM.broadcastAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:shutdown");
+	globalMM.broadcastAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:shutdown", {uid: uid});
 	// stop listening for messages from frame scripts
 	globalMM.removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-request", chromeRequestListener);
 	// unload our module

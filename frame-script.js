@@ -1,6 +1,9 @@
 var console = Components.utils.import("resource://gre/modules/Console.jsm", {}).console;
 Components.utils.import("resource://fimfic-res/idb-wrapper.js");
 
+// listen for uid message
+addMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid", setUid);
+
 // we need to listen for a shutdown message so that we can stop handling new pages and messages
 addMessageListener("FimfictionEnhancementSuite@nadnerb.net:shutdown", removeFrameListeners);
 
@@ -13,8 +16,18 @@ addEventListener("DOMContentLoaded", handleNewPage, false);
 // listen for postMessage events directed at the window
 content.addEventListener("message", postMessageForwarder, false, true);
 
+// set our uid
+var uid;
+function setUid(message) {
+	uid = message.data.uid;
+	removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid", setUid);
+	console.log("FES: frame-script started (" + uid + ")");
+}
+
 // run when the script is shut down
 function removeFrameListeners(message) {
+	if(message.data.uid != uid) return;
+	console.log("FES: frame-script received shutdown request (" + uid + ")");
 	removeEventListener("DOMContentLoaded", handleNewPage);
 	content.removeEventListener("message", postMessageForwarder);
 	removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-response", chromeMessageForwarder);
