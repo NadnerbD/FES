@@ -367,27 +367,30 @@ function changeHeader(document) {
 				box-shadow: none;
 				border: none;
 			}
+			.user_toolbar > ul > li::before {
+				right: 0;
+				background: linear-gradient(to bottom, #ffffff00 0%, #ffffff33 50%, #ffffff00 100%);
+			}
+			.user_toolbar > ul > li::after {
+				right: -1px;
+				background: linear-gradient(to bottom, #00000000 0%, #00000033 50%, #00000000 100%);
+			}
 			.user_toolbar > ul {
-				background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.2) 100%);
-				border-bottom-right-radius: 5px;
-				border-bottom-left-radius: 5px;
+				border-radius: 0px 0px 5px 5px;
+				border: 1px solid #00000033;
+				border-top: none;
+				box-shadow: 0px 1px #ffffff33 inset;
 				text-align: center;
 				padding-left: 0px;
 				width: 100%;
 			}
 			.user_toolbar > ul > li {
-				background-image: none;
-				background-color: rgba(255, 255, 255, 0.2);
-				text-shadow: 1px 1px rgba(255, 255, 255, 0.2);
-				border-right: 1px solid rgba(0, 0, 0, 0.2);
+				text-shadow: -1px -1px #00000033;
+				color: #e0e0e0;
 			}
 			.user_toolbar > ul > li:hover {
-				background-image: none;
-				background-color: rgba(255, 255, 255, 0.4);
-				text-shadow: 1px 1px rgba(255, 255, 255, 0.2);
-			}
-			.user_toolbar > ul > li:first-of-type {
-				border-left: 1px solid rgba(0, 0, 0, 0.2);
+				text-shadow: -1px -1px #00000033;
+				background-color: #ffffff33;
 			}
 			header.header {
 				max-width: 1300px;
