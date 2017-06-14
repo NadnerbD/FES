@@ -73,81 +73,442 @@ function handleNewPage(event) {
 function changeHeader(document) {
 	// yes I'm petty
 	try {
-		var title_html = "\
-			<div class=\"banner-buttons\">\n\
-				<a id=\"source_link\" href=\"\">Source</a>	\n\
-				<a href=\"javascript:void(0);\" onclick=\"ResetBanner( );\">Reset Selection</a>	\n\
-				<a href=\"\">Banner Selector</a>\n\
-			</div>\n\
-			<a href=\"http://www.fimfiction.net/\" class=\"home_link\">\n\
-				<div>\n\
-					<img src=\"resource://fimfic-res/logo_fix.png\">\n\
-				</div>\n\
-			</a>\n\
-			<a href=\"http://www.fimfiction.net/\" class=\"home_link_link\"></a>\n\
-			\n\
-			<div class=\"theme_selector theme_selector_left\">\n\
-				<a href=\"javascript:void();\" onclick=\"selectPreviousTheme( );\"></a>\n\
-			</div>\n\
-			<div class=\"theme_selector theme_selector_right\">\n\
-				<a href=\"javascript:void();\" onclick=\"selectNextTheme( );\"></a>\n\
-			</div>\n\
-		";
-		var title_element = document.createElement("div");
-		title_element.className = "title";
-		title_element.id = "title";
-		title_element.style = "display: block !important;";
-		title_element.innerHTML = title_html;
-		header_element = document.querySelector("header.header");
-		header_element.insertBefore(title_element, header_element.firstChild);
+		// we'll be replacing it, so remove the home link
+		var home_link = document.querySelector("li#home_link");
+		home_link.parentNode.removeChild(home_link);
+		// new html to be inserted into the header
+		var title_html = `
+			<div id="title" class="title">
+				<div class="banner-buttons">
+					<a id="source_link" href="">Source</a>
+					<a href="javascript:void(0);" onclick="ResetBanner( );">Reset Selection</a>
+					<a href="">Banner Selector</a>
+				</div>
+				<a href="http://www.fimfiction.net/" class="home_link">
+					<div>
+						<img src="resource://fimfic-res/logo_fix.png">
+					</div>
+				</a>
+				<a href="http://www.fimfiction.net/" class="home_link_link"></a>
+				<div class="theme_selector theme_selector_left">
+					<a href="javascript:void();" onclick="selectPreviousTheme( );"></a>
+				</div>
+				<div class="theme_selector theme_selector_right">
+					<a href="javascript:void();" onclick="selectNextTheme( );"></a>
+				</div>
+			</div>
+		`;
+		var header_element = document.createElement("header");
+		header_element.className = "header";
+		header_element.innerHTML = title_html;
+		var user_toolbar_element = document.querySelector("nav.user_toolbar");
+		user_toolbar_element.parentNode.insertBefore(header_element, user_toolbar_element);
+		header_element.appendChild(user_toolbar_element);
 		// we also need to set a variable, and adding a script tag to the above innerHTML doesn't work
 		var inject_script = document.createElement("script");
-		inject_script.innerHTML = "\n\
-			if(getCookie(\"selected_theme\")) {\n\
-				// if there is a selected theme, find and display it\n\
-				var theme_id = getCookie(\"selected_theme\");\n\
-				for(var theme_index in banners) {\n\
-					if(banners[theme_index].id == theme_id) {\n\
-						theme = theme_index;\n\
-						selectTheme(theme);\n\
-						break;\n\
-					}\n\
-				}\n\
-			}else{\n\
-				// otherwise display a random theme\n\
-				theme = Math.floor(Math.random() * banners.length);\n\
-				selectTheme(theme);\n\
-				ResetBanner();\n\
-			}\n\
-		";
+		inject_script.innerHTML = `
+			if(getCookie("selected_theme")) {
+				// if there is a selected theme, find and display it
+				var theme_id = getCookie("selected_theme");
+				for(var theme_index in banners) {
+					if(banners[theme_index].id == theme_id) {
+						theme = theme_index;
+						selectTheme(theme);
+						break;
+					}
+				}
+			}else{
+				// otherwise display a random theme
+				theme = Math.floor(Math.random() * banners.length);
+				selectTheme(theme);
+				ResetBanner();
+			}
+			/* scripts from the fimfiction package */
+			function setCookie(a, b, c) {
+				var d = new Date;
+				d.setTime(d.getTime() + 864E5 * c);
+				b = escape(b);
+				document.cookie = a + "=" + b + (c ? ";expires=" + d.toUTCString() : "") + ";path=/"
+			}
+			function delCookie(a) {
+				document.cookie = a + "=null;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"
+			}
+			function selectNextTheme() {
+				theme++;
+				theme > banners.length - 1 && (theme = 0);
+				selectTheme(theme)
+			}
+			function selectPreviousTheme() {
+				theme--;
+				0 > theme && (theme = banners.length - 1);
+				selectTheme(theme)
+			}
+			function selectTheme(a) {
+				setCookie("selected_theme", banners[a].id, 365);
+				document.querySelector("#title a.home_link").style.backgroundImage = "url('" + banners[a].url + "')";
+				if(banners[a][2] == "") {
+					document.querySelector("#source_link").classList.add("hidden")
+				}else{
+					document.querySelector("#source_link").setAttribute("href", banners[a].source);
+					document.querySelector("#source_link").classList.remove("hidden");
+				}
+				if("colour" in banners[a]) {
+					document.querySelector(".user_toolbar > ul").style.backgroundColor = banners[a].colour;
+				}
+			}
+			function ResetBanner() {
+				delCookie("selected_theme")
+			}
+			var banners = [{
+					colour : "rgb(164, 110, 60)",
+					url : "//static.fimfiction.net/images/custom_banners/zecora.jpg?2",
+					source : "http://aeronjvl.deviantart.com/art/Hanging-by-the-Edge-327757722",
+					id : "zecora"
+				}, {
+					colour : "rgb(164, 122, 60)",
+					url : "//static.fimfiction.net/images/custom_banners/aeron_fluttershy.jpg?2",
+					source : "http://aeronjvl.deviantart.com/art/Nature-326303180",
+					id : "aeron_fluttershy"
+				}, {
+					colour : "rgb(76, 112, 126)",
+					url : "//static.fimfiction.net/images/custom_banners/aeron_philomena.jpg?2",
+					source : "http://ajvl.deviantart.com/art/Philomena-Equestria-s-Finest-Phoenix-310217164",
+					id : "aeron_philomena"
+				}, {
+					colour : "rgb(76, 126, 110)",
+					url : "//static.fimfiction.net/images/custom_banners/aeron_celestia.jpg?2",
+					source : "http://aeronjvl.deviantart.com/art/Path-to-Canterlot-340639474",
+					id : "aeron_celestia"
+				}, {
+					colour : "rgb(87, 102, 111)",
+					url : "//static.fimfiction.net/images/custom_banners/derpy_dash.jpg?2",
+					source : "http://ponykillerx.deviantart.com/art/Full-Armour-D-vs-D-288729315",
+					id : "derpy_dash"
+				}, {
+					colour : "rgb(83, 76, 121)",
+					url : "//static.fimfiction.net/images/custom_banners/ponykiller_trixie.jpg?2",
+					source : "http://ponykillerx.deviantart.com/art/No-Title-Wallpaper-Version-287646346",
+					id : "ponykiller_trixie"
+				}, {
+					colour : "rgb(140, 151, 83)",
+					url : "//static.fimfiction.net/images/custom_banners/yamio_fluttershy.jpg?2",
+					source : "http://yamio.deviantart.com/art/Fluttershy-285372865",
+					id : "yamio_fluttershy"
+				}, {
+					colour : "rgb(146, 164, 60)",
+					url : "//static.fimfiction.net/images/custom_banners/ratofdrawn_1.jpg?2",
+					source : "http://ratofdrawn.deviantart.com/art/Wet-Fun-317158001",
+					id : "ratofdrawn_1"
+				}, {
+					colour : "rgb(100, 133, 190)",
+					url : "//static.fimfiction.net/images/custom_banners/ratofdrawn_rarijack.jpg?2",
+					source : "http://ratofdrawn.deviantart.com/art/Differences-343226962",
+					id : "ratofdrawn_rarijack"
+				}, {
+					colour : "rgb(72, 60, 164)",
+					url : "//static.fimfiction.net/images/custom_banners/solar_luna.jpg?2",
+					source : "http://soapie-solar.deviantart.com/art/Chibi-Luna-Star-Fishing-340002341",
+					id : "solar_luna"
+				}, {
+					colour : "rgb(131, 164, 60)",
+					url : "//static.fimfiction.net/images/custom_banners/solar_group.jpg?2",
+					source : "http://soapie-solar.deviantart.com/art/Forest-Foundation-283012970",
+					id : "solar_group"
+				}, {
+					colour : "rgb(164, 135, 60)",
+					url : "//static.fimfiction.net/images/custom_banners/uc77_1.jpg?2",
+					source : "http://uc77.deviantart.com/art/Ponies-Dig-Giant-Robots-281071953",
+					id : "uc77_1"
+				}, {
+					colour : "rgb(77, 60, 164)",
+					url : "//static.fimfiction.net/images/custom_banners/cmaggot_fluttershy.jpg?2",
+					source : "http://cmaggot.deviantart.com/art/Dangerous-Mission-342068171",
+					id : "cmaggot_fluttershy"
+				}, {
+					colour : "rgb(164, 114, 60)",
+					url : "//static.fimfiction.net/images/custom_banners/rainbow_ss.jpg?2",
+					source : "http://derpiboo.ru/41558",
+					id : "rainbow_ss"
+				}, {
+					colour : "rgb(69, 100, 96)",
+					url : "//static.fimfiction.net/images/custom_banners/rainbow_markerpone.jpg?2",
+					source : "http://derpiboo.ru/131068",
+					id : "rainbow_markerpone"
+				}, {
+					colour : "rgb(164, 60, 152)",
+					url : "//static.fimfiction.net/images/custom_banners/rainbow_roseluck.jpg?2",
+					source : "http://derpiboo.ru/50361",
+					id : "rainbow_roseluck"
+				}, {
+					colour : "rgb(60, 114, 164)",
+					url : "//static.fimfiction.net/images/custom_banners/jj_trixie.jpg?2",
+					source : "http://johnjoseco.deviantart.com/art/Trixie-s-Life-is-so-Hard-340685374",
+					id : "jj_trixie"
+				}, {
+					colour : "rgb(60, 118, 164)",
+					url : "//static.fimfiction.net/images/custom_banners/anima_1.jpg?2",
+					source : "http://spiritto.deviantart.com/art/C-mon-lift-your-Spirit-324914801",
+					id : "anima_1"
+				}, {
+					colour : "rgb(60, 147, 164)",
+					url : "//static.fimfiction.net/images/custom_banners/mew_pinkie.jpg?2",
+					source : "http://mewball.deviantart.com/art/Reflect-338427890",
+					id : "mew_pinkie"
+				}, {
+					colour : "rgb(60, 89, 164)",
+					url : "//static.fimfiction.net/images/custom_banners/tsitra_dash.jpg?2",
+					source : "http://tsitra360.deviantart.com/art/Morning-Flight-331710988",
+					id : "tsitra_dash"
+				}, {
+					colour : "rgb(164, 127, 60)",
+					url : "//static.fimfiction.net/images/custom_banners/knifeh_scoots.jpg?2",
+					source : "http://knifeh.deviantart.com/art/Scootaloo-326771443",
+					id : "knifeh_scoots"
+				}, {
+					colour : "rgb(164, 89, 60)",
+					url : "//static.fimfiction.net/images/custom_banners/noben_celestia.jpg?2",
+					source : "http://noben.deviantart.com/art/Sunrise-in-Equestria-280309698",
+					id : "noben_celestia"
+				}, {
+					colour : "rgb(77, 60, 164)",
+					url : "//static.fimfiction.net/images/custom_banners/ep_shady_trough.jpg?2",
+					source : "http://equestria-prevails.deviantart.com/art/The-Shady-Trough-319986368",
+					id : "ep_shady_trough"
+				}, {
+					colour : "rgb(60, 85, 164)",
+					url : "//static.fimfiction.net/images/custom_banners/spittfire_1.jpg?2",
+					source : "http://spittfireart.deviantart.com/art/The-Report-Commission-340421670",
+					id : "spittfire_1"
+				}, {
+					colour : "rgb(75, 77, 85)",
+					url : "//static.fimfiction.net/images/custom_banners/blitzpony_luna.jpg?2",
+					source : "http://blitzpony.deviantart.com/art/S-hard-to-say-359899432",
+					id : "blitzpony_luna"
+				}, {
+					colour : "rgb(71, 127, 179)",
+					url : "//static.fimfiction.net/images/custom_banners/gsphere_scoots.jpg?2",
+					source : "http://lionel23.deviantart.com/art/The-Newbie-set-an-Academy-Record-356826950",
+					id : "gsphere_scoots"
+				}, {
+					colour : "rgb(112, 108, 167)",
+					url : "//static.fimfiction.net/images/custom_banners/stoic_celestia.jpg?2",
+					source : "http://thestoicmachine.deviantart.com/art/Radiant-Malevolence-213959523",
+					id : "stoic_celestia"
+				}, {
+					colour : "rgb(134, 125, 88)",
+					url : "//static.fimfiction.net/images/custom_banners/moe_canterlot.jpg?2",
+					source : "http://derpibooru.org/25",
+					id : "moe_canterlot"
+				}, {
+					colour : "rgb(119, 88, 134)",
+					url : "//static.fimfiction.net/images/custom_banners/alasou_costumes.jpg?2",
+					source : "http://alasou.deviantart.com/art/Costume-Swap-party-381670764",
+					id : "alasou_costumes"
+				}, {
+					colour : "rgb(82, 90, 143)",
+					url : "//static.fimfiction.net/images/custom_banners/pridark_luna.jpg?2",
+					source : "http://pridark.deviantart.com/art/A-Wonderful-Night-381504014",
+					id : "pridark_luna"
+				}, {
+					colour : "rgb(165, 87, 68)",
+					url : "//static.fimfiction.net/images/custom_banners/gign_flutterdash.jpg?2",
+					source : "http://gign-3208.deviantart.com/art/In-the-attic-377732207",
+					id : "gign_flutterdash"
+				}, {
+					colour : "rgb(85, 107, 128)",
+					url : "//static.fimfiction.net/images/custom_banners/goben_forest.jpg?2",
+					source : "http://noben.deviantart.com/art/Giggling-at-the-Ghosties-356451219",
+					id : "goben_forest"
+				}, {
+					colour : "rgb(104, 136, 90)",
+					url : "//static.fimfiction.net/images/custom_banners/devinian_lyra_bonbon.jpg?2",
+					source : "http://devinian.deviantart.com/art/Story-of-the-bench-373750983",
+					id : "devinian_lyra_bonbon"
+				}, {
+					colour : "rgb(116, 145, 66)",
+					url : "//static.fimfiction.net/images/custom_banners/devinian_fluttershy.jpg?2",
+					source : "http://devinian.deviantart.com/art/Picnic-with-Kindness-351639714",
+					id : "devinian_fluttershy"
+				}, {
+					colour : "rgb(69, 132, 182)",
+					url : "//static.fimfiction.net/images/custom_banners/jackalynn_pinkiedash.jpg?2",
+					source : "http://jack-a-lynn.deviantart.com/art/Following-the-Rainbow-288432950",
+					id : "jackalynn_pinkiedash"
+				}, {
+					colour : "#5e7520",
+					url : "//static.fimfiction.net/images/custom_banners/yakovlev_fluttershy.jpg?2",
+					source : "http://yakovlev-vad.deviantart.com/art/Simple-curiosity-468468925",
+					id : "yakovlev_fluttershy"
+				}, {
+					colour : "#9e75a9",
+					url : "//static.fimfiction.net/images/custom_banners/yakovlev_twilight.jpg?2",
+					source : "http://yakovlev-vad.deviantart.com/art/Time-to-wash-3-490390076",
+					id : "yakovlev_twilight"
+				}, {
+					colour : "#77599a",
+					url : "//static.fimfiction.net/images/custom_banners/mymagicdream_twilight.jpg?2",
+					source : "http://my-magic-dream.deviantart.com/art/Twilight-453477065",
+					id : "mymagicdream_twilight"
+				}
+			];
+		`;
 		document.head.appendChild(inject_script);
 		// and finally some css to fix the user bar
 		var inject_css = document.createElement("style");
-		inject_css.innerHTML = "\
-		.user_toolbar > ul {\n\
-			background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.2) 100%);\n\
-			border-bottom-right-radius: 5px;\n\
-			border-bottom-left-radius: 5px;\n\
-		}\n\
-		.user_toolbar > ul > li {\n\
-			background-image: none;\n\
-			background-color: rgba(255, 255, 255, 0.2);\n\
-			text-shadow: 1px 1px rgba(255, 255, 255, 0.2);\n\
-			border-right: 1px solid rgba(0, 0, 0, 0.2);\n\
-		}\n\
-		.user_toolbar > ul > li:hover {\n\
-			background-image: none;\n\
-			background-color: rgba(255, 255, 255, 0.4);\n\
-			text-shadow: 1px 1px rgba(255, 255, 255, 0.2);\n\
-		}\n\
-		.user_toolbar > ul > li:first-of-type {\n\
-			border-left: 1px solid rgba(0, 0, 0, 0.2);\n\
-		}\n\
-		header.header {\n\
-			max-width: 1300px;\n\
-			width: 98%;\n\
-		}\n\
-		";
+		inject_css.innerHTML = `
+			div#title {
+				height: 175px;
+				background-position: center top;
+				background-repeat: no-repeat;
+				position: relative;
+			}
+			.user_toolbar {
+				background: none;
+				box-shadow: none;
+				border: none;
+			}
+			.user_toolbar > ul {
+				background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.2) 100%);
+				border-bottom-right-radius: 5px;
+				border-bottom-left-radius: 5px;
+				text-align: center;
+				padding-left: 0px;
+				width: 100%;
+			}
+			.user_toolbar > ul > li {
+				background-image: none;
+				background-color: rgba(255, 255, 255, 0.2);
+				text-shadow: 1px 1px rgba(255, 255, 255, 0.2);
+				border-right: 1px solid rgba(0, 0, 0, 0.2);
+			}
+			.user_toolbar > ul > li:hover {
+				background-image: none;
+				background-color: rgba(255, 255, 255, 0.4);
+				text-shadow: 1px 1px rgba(255, 255, 255, 0.2);
+			}
+			.user_toolbar > ul > li:first-of-type {
+				border-left: 1px solid rgba(0, 0, 0, 0.2);
+			}
+			header.header {
+				max-width: 1300px;
+				width: 98%;
+				margin-left: auto;
+				margin-right: auto;
+				position: relative;
+			}
+			header.header .title {
+				height: 175px;
+				background-position: center top;
+				background-repeat: no-repeat;
+				position: relative;
+			}
+			header.header .home_link div {
+				position: absolute;
+				left: 50%;
+			}
+			header.header .home_link div img {
+				margin-left: -500px;
+			}
+			header.header .theme_selector {
+				width: 120px;
+				height: 100%;
+				position: absolute;
+				z-index: 11;
+				transition: background 0.3s;
+				background: transparent;
+				background: linear-gradient(to right, transparent 0%, transparent 100%);
+			}
+			header.header .theme_selector_right:hover {
+				background: transparent;
+				background: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 100%);
+			}
+			header.header .theme_selector_left:hover {
+				background: transparent;
+				background: linear-gradient(to right, rgba(0,0,0,0.3) 0%, transparent 100%);
+			}
+			header.header .theme_selector a {
+				color: #fff;
+				position: absolute;
+				height: 100%;
+				width: 60px;
+				opacity: 0;
+				text-align: center;
+				line-height: 175px;
+				text-decoration: none;
+				text-shadow: 0px 2px rgba(0,0,0,0.5),0px 0px 50px #000;
+				font-size: 32px;
+				transition: opacity 0.3s;
+			}
+			header.header:hover .theme_selector a {
+				opacity: 1;
+			}
+			header.header .theme_selector_left, header.header .theme_selector_left a {
+				left: 0px;
+			}
+			header.header .theme_selector_right, header.header .theme_selector_right a {
+				right: 0px;
+			}
+			header.header .theme_selector_right a::before {
+				font-family: "FontAwesome";
+				content: "\\f054";
+			}
+			header.header .theme_selector_left a::before {
+				font-family: "FontAwesome";
+				content: "\\f053";
+			}
+			header.header .home_link_link {
+				display: block;
+				position: absolute;
+				z-index: 10;
+				right: 0px;
+				left: 0px;
+				top: 0px;
+				bottom: 0px;
+			}
+			header.header .home_link {
+				display: block;
+				position: absolute;
+				border: 1px solid rgba(0,0,0,0.2);
+				border-top: none;
+				border-bottom: none;
+				right: 0px;
+				left: 0px;
+				top: 0px;
+				bottom: 0px;
+				background-position: -1px 0px;
+				background-position: center top;
+				overflow: hidden;
+				transition: background-image 0.15s;
+			}
+			header.header .banner-buttons {
+				position: absolute;
+				z-index: 30;
+				visibility: hidden;
+				opacity: 0;
+				transition: opacity 0.2s, visibility 0.2s;
+				right: 64px;
+				bottom: 10px;
+			}
+			header.header:hover .banner-buttons {
+				visibility: visible;
+				opacity: 1;
+			}
+			header.header .banner-buttons a {
+				background-color: rgba(0,0,0,0.7);
+				color: rgba(255,255,255,0.8);
+				font-size: 0.7em;
+				padding: 5px 10px;
+				text-decoration: none;
+				border-radius: 3px;
+				border: 1px solid rgba(0,0,0,0.3);
+				box-shadow: 0px 1px 0px rgba(255,255,255,0.2) inset;
+				font-family: "Segoe UI";
+				text-shadow: 1px 1px rgba(0,0,0,0.3);
+			}
+			header.header .banner-buttons a:hover {
+				background-color: rgba(0,0,0,0.9);
+			}
+		`;
 		document.head.appendChild(inject_css);
 	} catch (e) {
 		console.log("Failed to replace header:\n" + e.message);
