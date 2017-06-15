@@ -775,43 +775,36 @@ function scrapeStories(document, observed) {
 	// set up an observer to re-call this function if any of the stories we scrape changes it's attributes
 	if(!observed) var obs = new document.defaultView.MutationObserver(function(muts) { scrapeStories(document, true) });
 	var stories = new Array();
-	var items = document.querySelectorAll("div.story_container");
-	// the story_container element is now present on chapter pages
-	// if we're on one we need to abort because important info we want is not present
-	if(!items.length || items[0].querySelector("span.last_modified") == null) {
-		console.log("Aborting story scrape, chapter page");
-		return;
+	// get all the fullsize story elements on the page
+	var items = document.querySelectorAll("article.story_container");
+	// determine whether we can get the author of the stories
+	if(items && !items[0].querySelector(".author")) {
+		var pageAuthor = document.querySelector(".user-page-header h1 a").firstChild.data;
 	}
 	for(var i = 0; i < items.length; i++) {
 		var item = items[i];
 		var link = item.querySelector("a.story_name");
 		var story = {
-			id: link.href.split("/")[4],
+			id: item.getAttribute("data-story"),
 			title: link.firstChild.data,
-			author: item.querySelector(".author a").firstChild.data,
+			author: pageAuthor || item.querySelector(".author a").firstChild.data,
 			wordcount: parseInt(item.querySelector("div.word_count b").firstChild.data.replace(/,/g, "")),
 			ratings: {
 				up: parseInt((item.querySelector("span.likes").firstChild||{data:"0"}).data.replace(/,/g, "")),
 				down: parseInt((item.querySelector("span.dislikes").firstChild||{data:"0"}).data.replace(/,/g, ""))
 			},
 			tags: {
-				category: [for(catLink of item.querySelectorAll("a.story_category")) catLink.firstChild.data],
-				character: [for(charLink of item.querySelectorAll("a.character_icon")) charLink.title]
+				category: [for(catLink of item.querySelectorAll("a.tag-genre")) catLink.firstChild.data],
+				character: [for(charLink of item.querySelectorAll("a.tag-character")) charLink.title]
 			},
 			bookshelves: {},
 			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,
-			updated: new Date(item.querySelectorAll("span.last_modified span")[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
+			created: new Date(parseInt(item.querySelector("span.approved-date span[data-time]").getAttribute("data-time")) * 1000),
+			udpated: new Date(item.querySelector("ul.chapters > li:last-of-type span.date").childNodes[1].data.replace(/ ([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
 		};
 		// add bookshelf properties
 		for(var shelf of item.querySelectorAll("li.bookshelf")) {
-			if(!shelf.classList.contains("show-bookshelves-popup")) {
-				story.bookshelves[shelf.getAttribute("data-bookshelf")] = shelf.classList.contains("selected");
-			}
-		}
-		var creationSpans = item.querySelectorAll("span.date_approved span");
-		if(creationSpans.length) {
-			// It's possible to view stories that have not yet been approved; These will have no "creation date"
-			story.created = new Date(creationSpans[1].firstChild.data.replace(/([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"));
+			story.bookshelves[shelf.getAttribute("data-bookshelf")] = shelf.classList.contains("selected");
 		}
 		console.log(JSON.stringify(story));
 		stories.push(story);
