@@ -50,6 +50,12 @@ span.spoiler:hover {
 	color: inherit;
 	text-shadow: inherit;
 }
+em {
+	font-style: italic;
+}
+em em {
+	font-style: normal;
+}
 :not(pre) > code {
 	font-family: monospace;
 	background-color: #eee;

@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent" | "pre" | "codeblock";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent" | "pre" | "codeblock" | "sub" | "sup" | "em" | "strong";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -121,7 +121,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre", "codeblock"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre", "codeblock", "sub", "sup", "em", "strong"];
 		return acceptIdentifiers(stream, tagNames, true);
 	}
 
@@ -240,7 +240,11 @@ function bbcode() {
 		"code": "CODE",
 		"indent": "DIV",
 		"pre": "PRE",
-		"codeblock": "PRE"
+		"codeblock": "PRE",
+		"sub": "SUB",
+		"sup": "SUP",
+		"em": "EM",
+		"strong": "STRONG"
 	}
 	function generateElements(tags) {
 		var top = document.createElement("div");
