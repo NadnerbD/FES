@@ -171,17 +171,11 @@ function bbcode() {
 				this.value = integerString(stream);
 			}else if(stream.accept("\n")) {
 				if(stream.accept("\n")) {
-					this.value = "double";
-					if(stream.accept("\t")) {
-						this.value = "indented double";
-					}
+					this.cname = "p";
 				}else{
-					if(stream.accept("\t")) {
-						this.value = "indented";
-					}
+					this.cname = "br";
 				}
 				this.close = true;
-				this.cname = "p";
 			}else{
 				this.cname = "text";
 				this.value = stream.accept_until(["[", ":", ">", "\n"]);
@@ -320,13 +314,8 @@ function bbcode() {
 				var element;
 				if(tag.name == "text") {
 					element = document.createTextNode(tag.value);
-				}else if(tag.name == "p" && tag.close == true) {
-					element = document.createTextNode("\n" + 
-						(typeof(tag.value) == "string" ?
-							(tag.value.indexOf("double") != -1 ? "\n" : "") + 
-							(tag.value.indexOf("indented") != -1 ? "\t" : "")
-						 : "")
-					);
+				}else if((tag.name == "p" || tag.name == "br") && tag.close == true) {
+					element = document.createTextNode("\n" + (tag.name == "p" ? "\n" : ""));
 				}else if(tag.name == "emote") {
 					element = document.createElement("span");
 					element.innerText = ":" + tag.value + ":";
@@ -442,21 +431,16 @@ function bbcode() {
 						openNode(document.createElement("p"));
 					}
 					reopenNodes(closed);
-				}else if(tag.name != "p") {
+				}else if(tag.name != "p" && tag.name != "br") {
 					// if this is an orphan closing tag, throw it in the text
 					dumpTag(tag);
 				}
-				if(tag.name == "p") {
-					if(isTagOpen("pre")) {
-						top.appendChild(document.createTextNode("\n" + 
-							(typeof(tag.value) == "string" ?
-								(tag.value.indexOf("double") != -1 ? "\n" : "") + 
-								(tag.value.indexOf("indented") != -1 ? "\t" : "")
-							 : "")
-						));
-					}else if(tag.value != undefined) {
-						top.className = tag.value;
+				if(isTagOpen("pre")) {
+					if(tag.name == "p" || tag.name == "br") {
+						top.appendChild(document.createTextNode("\n" + (tag.name == "p" ? "\n" : "")));
 					}
+				}else if(tag.name == "br" && top.childNodes.length > 0) {
+					top.appendChild(document.createElement("br"));
 				}
 			}else if(tag.name == "pre" && isTagOpen("pre")) {
 				// pre tags cannot be nested
