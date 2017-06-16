@@ -1,0 +1,881 @@
+
+/* replace character tags with images */
+.story-tags > li a.tag-character, a.tag-character {
+	border: none !important;
+	padding: 0;
+	width: calc(1.6em + 2px);
+	line-height: calc(1.6em + 2px);
+	white-space: nowrap;
+	color: transparent;
+	background-size: contain;
+	/* for story card elements */
+	display: inline-block;
+	text-decoration: none;
+	border-radius: 0.3em;
+}
+.story-card .story-card__tags li:not([style])::before,
+.front_page .featured_box .right .featured_story .featured-story__tags li:not([style])::before {
+	content: none;
+}
+.story-card .story-card__tags li:not([style]):not(first-of-type),
+.front_page .featured_box .right .featured_story .featured-story__tags li:not([style]):not(first-of-type) {
+	margin-left: .1875rem;
+}
+
+a.tag-character[title="Twilight Sparkle"] {
+	background-image: url(resource://fimfic-res/characters/twilight_sparkle.png);
+}
+
+a.tag-character[title="Rainbow Dash"] {
+	background-image: url(resource://fimfic-res/characters/rainbow_dash.png);
+}
+
+a.tag-character[title="Pinkie Pie"] {
+	background-image: url(resource://fimfic-res/characters/pinkie_pie.png);
+}
+
+a.tag-character[title="Applejack"] {
+	background-image: url(resource://fimfic-res/characters/applejack.png);
+}
+
+a.tag-character[title="Rarity"] {
+	background-image: url(resource://fimfic-res/characters/rarity.png);
+}
+
+a.tag-character[title="Fluttershy"] {
+	background-image: url(resource://fimfic-res/characters/fluttershy.png);
+}
+
+a.tag-character[title="Spike"] {
+	background-image: url(resource://fimfic-res/characters/spike.png);
+}
+
+a.tag-character[title="Main 6"] {
+	background-image: url(resource://fimfic-res/characters/main_6.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Apple Bloom"] {
+	background-image: url(resource://fimfic-res/characters/apple_bloom.png);
+}
+
+a.tag-character[title="Scootaloo"] {
+	background-image: url(resource://fimfic-res/characters/scootaloo.png);
+}
+
+a.tag-character[title="Sweetie Belle"] {
+	background-image: url(resource://fimfic-res/characters/sweetie_belle.png);
+}
+
+a.tag-character[title="Cutie Mark Crusaders"] {
+	background-image: url(resource://fimfic-res/characters/cmc.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Babs Seed"] {
+	background-image: url(resource://fimfic-res/characters/babs_seed.png);
+}
+
+a.tag-character[title="Princess Celestia"] {
+	background-image: url(resource://fimfic-res/characters/celestia.png);
+}
+
+a.tag-character[title="Princess Luna"] {
+	background-image: url(resource://fimfic-res/characters/princess_luna.png);
+}
+
+a.tag-character[title="Nightmare Moon"] {
+	background-image: url(resource://fimfic-res/characters/nightmare_moon.png);
+}
+
+a.tag-character[title="Princess Cadance"] {
+	background-image: url(resource://fimfic-res/characters/cadance.png);
+}
+
+a.tag-character[title="Flurry Heart"] {
+	background-image: url(resource://fimfic-res/characters/flurry-heart.png);
+}
+
+a.tag-character[title="Gilda"] {
+	background-image: url(resource://fimfic-res/characters/gilda.png);
+}
+
+a.tag-character[title="Zecora"] {
+	background-image: url(resource://fimfic-res/characters/zecora.png);
+}
+
+a.tag-character[title="Trixie"] {
+	background-image: url(resource://fimfic-res/characters/trixie.png);
+}
+
+a.tag-character[title="Cherilee"] {
+	background-image: url(resource://fimfic-res/characters/cherilee.png);
+}
+
+a.tag-character[title="The Mayor"] {
+	background-image: url(resource://fimfic-res/characters/the_mayor.png);
+}
+
+a.tag-character[title="Hoity Toity"] {
+	background-image: url(resource://fimfic-res/characters/hoity_toity.png);
+}
+
+a.tag-character[title="Photo Finish"] {
+	background-image: url(resource://fimfic-res/characters/photo_finish.png);
+}
+
+a.tag-character[title="Sapphire Shores"] {
+	background-image: url(resource://fimfic-res/characters/sapphire_shores.png);
+}
+
+a.tag-character[title="Spitfire"] {
+	background-image: url(resource://fimfic-res/characters/spitfire.png);
+}
+
+a.tag-character[title="Soarin"] {
+	background-image: url(resource://fimfic-res/characters/soarin.png);
+}
+
+a.tag-character[title="Prince Blueblood"] {
+	background-image: url(resource://fimfic-res/characters/prince_blueblood.png);
+}
+
+a.tag-character[title="Little Strongheart"] {
+	background-image: url(resource://fimfic-res/characters/little_strongheart.png);
+}
+
+a.tag-character[title="Discord"] {
+	background-image: url(resource://fimfic-res/characters/discord.png);
+}
+
+a.tag-character[title="Mare Do Well"] {
+	background-image: url(resource://fimfic-res/characters/mare_do_well.png);
+}
+
+a.tag-character[title="Fancypants"] {
+	background-image: url(resource://fimfic-res/characters/fancypants.png);
+}
+
+a.tag-character[title="Daring Do"] {
+	background-image: url(resource://fimfic-res/characters/daring_do.png);
+}
+
+a.tag-character[title="Flim and Flam"] {
+	background-image: url(resource://fimfic-res/characters/flimflam.png);
+}
+
+a.tag-character[title="Cranky Doodle Donkey"] {
+	background-image: url(resource://fimfic-res/characters/cranky_doodle.png);
+}
+
+a.tag-character[title="Matilda"] {
+	background-image: url(resource://fimfic-res/characters/matilda.png);
+}
+
+a.tag-character[title="Mr. Cake"] {
+	background-image: url(resource://fimfic-res/characters/mr_cake.png);
+}
+
+a.tag-character[title="Mrs. Cake"] {
+	background-image: url(resource://fimfic-res/characters/mrs_cake.png);
+}
+
+a.tag-character[title="Iron Will"] {
+	background-image: url(resource://fimfic-res/characters/ironwill.png);
+}
+
+a.tag-character[title="Shining Armor"] {
+	background-image: url(resource://fimfic-res/characters/shining_armor.png);
+}
+
+a.tag-character[title="Wonderbolts"] {
+	background-image: url(resource://fimfic-res/characters/wonderbolts.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Diamond Dogs"] {
+	background-image: url(resource://fimfic-res/characters/diamond_dogs.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Queen Chrysalis"] {
+	background-image: url(resource://fimfic-res/characters/queen_chrysalis.png);
+}
+
+a.tag-character[title="King Sombra"] {
+	background-image: url(resource://fimfic-res/characters/king_sombra.png);
+}
+
+a.tag-character[title="Crystal Ponies"] {
+	background-image: url(resource://fimfic-res/characters/crystal_ponies.png);
+}
+
+a.tag-character[title="Lightning Dust"] {
+	background-image: url(resource://fimfic-res/characters/lightning_dust.png);
+}
+
+a.tag-character[title="Sunset Shimmer"] {
+	background-image: url(resource://fimfic-res/characters/sunset_shimmer.png);
+}
+
+a.tag-character[title="Pie Sisters"] {
+	background-image: url(resource://fimfic-res/characters/pie_sisters.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Cherry Jubilee"] {
+	background-image: url(resource://fimfic-res/characters/cherry_jubilee.png);
+}
+
+a.tag-character[title="Cake Twins"] {
+	background-image: url(resource://fimfic-res/characters/cake_twins.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Flash Sentry"] {
+	background-image: url(resource://fimfic-res/characters/flash_sentry.png);
+}
+
+a.tag-character[title="Mane-iac"] {
+	background-image: url(resource://fimfic-res/characters/mane-iac.png);
+}
+
+a.tag-character[title="Power Ponies"] {
+	background-image: url(resource://fimfic-res/characters/power_ponies.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Cheese Sandwich"] {
+	background-image: url(resource://fimfic-res/characters/cheesesandwich.png);
+}
+
+a.tag-character[title="Maud Pie"] {
+	background-image: url(resource://fimfic-res/characters/maud-pie.png);
+}
+
+a.tag-character[title="Coco Pommel"] {
+	background-image: url(resource://fimfic-res/characters/coco-pommel.png);
+}
+
+a.tag-character[title="Trenderhoof"] {
+	background-image: url(resource://fimfic-res/characters/trenderhoof.png);
+}
+
+a.tag-character[title="Breezies"] {
+	background-image: url(resource://fimfic-res/characters/breezies.png);
+}
+
+a.tag-character[title="Suri Polomare"] {
+	background-image: url(resource://fimfic-res/characters/suri-polomare.png);
+}
+
+a.tag-character[title="Ahuizotl"] {
+	background-image: url(resource://fimfic-res/characters/ahuizotl.png);
+}
+
+a.tag-character[title="Seabreeze"] {
+	background-image: url(resource://fimfic-res/characters/seabreeze.png);
+}
+
+a.tag-character[title="Fleetfoot"] {
+	background-image: url(resource://fimfic-res/characters/fleetfoot.png);
+}
+
+a.tag-character[title="Bulk Biceps"] {
+	background-image: url(resource://fimfic-res/characters/bulk-biceps.png);
+}
+
+a.tag-character[title="Tirek"] {
+	background-image: url(resource://fimfic-res/characters/tirek.png);
+}
+
+a.tag-character[title="Adagio Dazzle"] {
+	background-image: url(resource://fimfic-res/characters/adagio-dazzle.png);
+}
+
+a.tag-character[title="Sonata Dusk"] {
+	background-image: url(resource://fimfic-res/characters/sonata-dusk.png);
+}
+
+a.tag-character[title="Aria Blaze"] {
+	background-image: url(resource://fimfic-res/characters/aria-blaze.png);
+}
+
+a.tag-character[title="Ms. Harshwhinny"] {
+	background-image: url(resource://fimfic-res/characters/harshwhinny%20head.png);
+}
+
+a.tag-character[title="Starlight Glimmer"] {
+	background-image: url(resource://fimfic-res/characters/starlight-glimmer.png);
+}
+
+a.tag-character[title="Ember"] {
+	background-image: url(resource://fimfic-res/characters/ember.png);
+}
+
+a.tag-character[title="Limestone Pie"] {
+	background-image: url(resource://fimfic-res/characters/limestone-pie.png);
+}
+
+a.tag-character[title="Marble Pie"] {
+	background-image: url(resource://fimfic-res/characters/marble-pie.png);
+}
+
+a.tag-character[title="Moondancer"] {
+	background-image: url(resource://fimfic-res/characters/moondancer.png);
+}
+
+a.tag-character[title="Moonlight Raven"] {
+	background-image: url(resource://fimfic-res/characters/moonlight-raven.png);
+}
+
+a.tag-character[title="Sassy Saddles"] {
+	background-image: url(resource://fimfic-res/characters/sassy-saddles.png);
+}
+
+a.tag-character[title="Treehugger"] {
+	background-image: url(resource://fimfic-res/characters/treehugger.png);
+}
+
+a.tag-character[title="Troubleshoes"] {
+	background-image: url(resource://fimfic-res/characters/trouble-shoes.png);
+}
+
+a.tag-character[title="Wind Rider"] {
+	background-image: url(resource://fimfic-res/characters/wind-rider.png);
+}
+
+a.tag-character[title="Steven Magnet"] {
+	background-image: url(resource://fimfic-res/characters/steven-magnet.png);
+}
+
+a.tag-character[title="Tantabus"] {
+	background-image: url(resource://fimfic-res/characters/tantabus.png);
+}
+
+a.tag-character[title="The Smooze"] {
+	background-image: url(resource://fimfic-res/characters/the-smooze.png);
+}
+
+a.tag-character[title="Zephyr Breeze"] {
+	background-image: url(resource://fimfic-res/characters/zephyr-breeze.png);
+}
+
+a.tag-character[title="Vapor Trail"] {
+	background-image: url(resource://fimfic-res/characters/vapor-trail.png);
+}
+
+a.tag-character[title="Sky Stinger"] {
+	background-image: url(resource://fimfic-res/characters/sky-stinger.png);
+}
+
+a.tag-character[title="Saffron Masala"] {
+	background-image: url(resource://fimfic-res/characters/saffron-masala.png);
+}
+
+a.tag-character[title="Coriander Cumin"] {
+	background-image: url(resource://fimfic-res/characters/coriander-cumin.png);
+}
+
+a.tag-character[title="Sunburst"] {
+	background-image: url(resource://fimfic-res/characters/sunburst.png);
+}
+
+a.tag-character[title="Mr. Stripes"] {
+	background-image: url(resource://fimfic-res/characters/mr-stripes.png);
+}
+
+a.tag-character[title="Plaid Stripes"] {
+	background-image: url(resource://fimfic-res/characters/plaid-stripes.png);
+}
+
+a.tag-character[title="Thorax"] {
+	background-image: url(resource://fimfic-res/characters/thorax.png);
+}
+
+a.tag-character[title="Yaks"] {
+	background-image: url(resource://fimfic-res/characters/yaks.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Bat Pony"] {
+	background-image: url(resource://fimfic-res/characters/bat-pony.png);
+}
+
+a.tag-character[title="Griffons"] {
+	background-image: url(resource://fimfic-res/characters/griffons.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Minotaur"] {
+	background-image: url(resource://fimfic-res/characters/minotaur.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Royal Guard"] {
+	background-image: url(resource://fimfic-res/characters/royal-guard.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Zebra"] {
+	background-image: url(resource://fimfic-res/characters/zebra.png);
+}
+
+a.tag-character[title="Dragons"] {
+	background-image: url(resource://fimfic-res/characters/dragons.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Twinkleshine"] {
+	background-image: url(resource://fimfic-res/characters/twinkle-shine.png);
+}
+
+a.tag-character[title="Coloratura"] {
+	background-image: url(resource://fimfic-res/characters/coloratura.png);
+}
+
+a.tag-character[title="Gabby"] {
+	background-image: url(resource://fimfic-res/characters/gabby.png);
+}
+
+a.tag-character[title="Spoiled Rich"] {
+	background-image: url(resource://fimfic-res/characters/spoiled-rich.png);
+}
+
+a.tag-character[title="Sunshine Smiles"] {
+	background-image: url(resource://fimfic-res/characters/sunshine-smiles.png);
+}
+
+a.tag-character[title="Tender Taps"] {
+	background-image: url(resource://fimfic-res/characters/tender-taps.png);
+}
+
+a.tag-character[title="Quibble Pants"] {
+	background-image: url(resource://fimfic-res/characters/quibble-pants.png);
+}
+
+a.tag-character[title="Garble"] {
+	background-image: url(resource://fimfic-res/characters/garble.png);
+}
+
+a.tag-character[title="Double Diamond"] {
+	background-image: url(resource://fimfic-res/characters/double-diamond.png);
+}
+
+a.tag-character[title="Night Glider"] {
+	background-image: url(resource://fimfic-res/characters/night-glider.png);
+}
+
+a.tag-character[title="Sugar Belle"] {
+	background-image: url(resource://fimfic-res/characters/sugar-belle.png);
+}
+
+a.tag-character[title="Party Favor"] {
+	background-image: url(resource://fimfic-res/characters/party-favor.png);
+}
+
+a.tag-character[title="Timberwolves"] {
+	background-image: url(resource://fimfic-res/characters/timberwolves.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Svengallop"] {
+	background-image: url(resource://fimfic-res/characters/svengallop.png);
+}
+
+a.tag-character[title="Big Macintosh"] {
+	background-image: url(resource://fimfic-res/characters/big_mac.png);
+}
+
+a.tag-character[title="Granny Smith"] {
+	background-image: url(resource://fimfic-res/characters/granny_smith.png);
+}
+
+a.tag-character[title="Braeburn"] {
+	background-image: url(resource://fimfic-res/characters/braeburn.png);
+}
+
+a.tag-character[title="Diamond Tiara"] {
+	background-image: url(resource://fimfic-res/characters/diamond_tiara.png);
+}
+
+a.tag-character[title="Silver Spoon"] {
+	background-image: url(resource://fimfic-res/characters/silver_spoon.png);
+}
+
+a.tag-character[title="Twist"] {
+	background-image: url(resource://fimfic-res/characters/twist.png);
+}
+
+a.tag-character[title="Snips"] {
+	background-image: url(resource://fimfic-res/characters/snips.png);
+}
+
+a.tag-character[title="Snails"] {
+	background-image: url(resource://fimfic-res/characters/snails.png);
+}
+
+a.tag-character[title="Pipsqueak"] {
+	background-image: url(resource://fimfic-res/characters/pipsqueak.png);
+}
+
+a.tag-character[title="Featherweight"] {
+	background-image: url(resource://fimfic-res/characters/featherweight.png);
+}
+
+a.tag-character[title="Zipporwhill"] {
+	background-image: url(resource://fimfic-res/characters/zipporwhill.png);
+}
+
+a.tag-character[title="Ruby Pinch"] {
+	background-image: url(resource://fimfic-res/characters/ruby-pinch.png);
+}
+
+a.tag-character[title="Angel"] {
+	background-image: url(resource://fimfic-res/characters/angel.png);
+}
+
+a.tag-character[title="Winona"] {
+	background-image: url(resource://fimfic-res/characters/winona.png);
+}
+
+a.tag-character[title="Opalescence"] {
+	background-image: url(resource://fimfic-res/characters/opalescence.png);
+}
+
+a.tag-character[title="Gummy"] {
+	background-image: url(resource://fimfic-res/characters/gummy.png);
+}
+
+a.tag-character[title="Owlowiscious"] {
+	background-image: url(resource://fimfic-res/characters/owlowiscious.png);
+}
+
+a.tag-character[title="Philomena"] {
+	background-image: url(resource://fimfic-res/characters/philomena.png);
+}
+
+a.tag-character[title="Tank"] {
+	background-image: url(resource://fimfic-res/characters/tank.png);
+}
+
+a.tag-character[title="Pets"] {
+	background-image: url(resource://fimfic-res/characters/pets.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Derpy Hooves"] {
+	background-image: url(resource://fimfic-res/characters/derpy_hooves.png);
+}
+
+a.tag-character[title="Lyra"] {
+	background-image: url(resource://fimfic-res/characters/lyra.png);
+}
+
+a.tag-character[title="Bon-Bon"] {
+	background-image: url(resource://fimfic-res/characters/bon_bon.png);
+}
+
+a.tag-character[title="DJ P0N-3"] {
+	background-image: url(resource://fimfic-res/characters/dj_pon3.png);
+}
+
+a.tag-character[title="Caramel"] {
+	background-image: url(resource://fimfic-res/characters/caramel.png);
+}
+
+a.tag-character[title="Doctor Whooves"] {
+	background-image: url(resource://fimfic-res/characters/doctor_whooves.png);
+}
+
+a.tag-character[title="Octavia"] {
+	background-image: url(resource://fimfic-res/characters/octavia.png);
+}
+
+a.tag-character[title="Berry Punch"] {
+	background-image: url(resource://fimfic-res/characters/berry_punch.png);
+}
+
+a.tag-character[title="Carrot Top"] {
+	background-image: url(resource://fimfic-res/characters/carrot_top.png);
+}
+
+a.tag-character[title="Fleur de Lis"] {
+	background-image: url(resource://fimfic-res/characters/fleur_de_lis.png);
+}
+
+a.tag-character[title="Colgate"] {
+	background-image: url(resource://fimfic-res/characters/colgate.png);
+}
+
+a.tag-character[title="Dinky Hooves"] {
+	background-image: url(resource://fimfic-res/characters/dinky.png);
+}
+
+a.tag-character[title="Thunderlane"] {
+	background-image: url(resource://fimfic-res/characters/thunderlane.png);
+}
+
+a.tag-character[title="Flitter and Cloudchaser"] {
+	background-image: url(resource://fimfic-res/characters/flitter_and_cloudchaser.png);
+}
+
+a.tag-character[title="Rumble"] {
+	background-image: url(resource://fimfic-res/characters/rumble.png);
+}
+
+a.tag-character[title="Roseluck"] {
+	background-image: url(resource://fimfic-res/characters/roseluck.png);
+}
+
+a.tag-character[title="Changelings"] {
+	background-image: url(resource://fimfic-res/characters/changelings.png);
+}
+
+a.tag-character[title="Noteworthy"] {
+	background-image: url(resource://fimfic-res/characters/noteworthy.png);
+}
+
+a.tag-character[title="Nurse Redheart"] {
+	background-image: url(resource://fimfic-res/characters/nurse_red_heart.png);
+}
+
+a.tag-character[title="Flower Ponies"] {
+	background-image: url(resource://fimfic-res/characters/flower_ponies.png);
+	width: calc((1.6em + 2px) * 1.5);
+}
+
+a.tag-character[title="Raindrops"] {
+	background-image: url(resource://fimfic-res/characters/raindrops.png);
+}
+
+a.tag-character[title="Spa Ponies"] {
+	background-image: url(resource://fimfic-res/characters/spa_ponies.png);
+}
+
+a.tag-character[title="Sparkler"] {
+	background-image: url(resource://fimfic-res/characters/sparkler.png);
+}
+
+a.tag-character[title="Cloudkicker"] {
+	background-image: url(resource://fimfic-res/characters/cloudkicker.png);
+}
+
+a.tag-character[title="Twilight Velvet"] {
+	background-image: url(resource://fimfic-res/characters/twily%20mommy%20head.png);
+}
+
+a.tag-character[title="Night Light"] {
+	background-image: url(resource://fimfic-res/characters/twily%20daddy%20head.png);
+}
+
+a.tag-character[title="Screwball"] {
+	background-image: url(resource://fimfic-res/characters/screwball%20head.png);
+}
+
+a.tag-character[title="Blossomforth"] {
+	background-image: url(resource://fimfic-res/characters/blossomforth.png);
+}
+
+a.tag-character[title="Button Mash"] {
+	background-image: url(resource://fimfic-res/characters/button-mash.png);
+}
+
+a.tag-character[title="Cloudchaser"] {
+	background-image: url(resource://fimfic-res/characters/cloud-chaser.png);
+}
+
+a.tag-character[title="Daisy"] {
+	background-image: url(resource://fimfic-res/characters/daisy.png);
+}
+
+a.tag-character[title="Filthy Rich"] {
+	background-image: url(resource://fimfic-res/characters/filthy-rich.png);
+}
+
+a.tag-character[title="Flitter"] {
+	background-image: url(resource://fimfic-res/characters/flitter.png);
+}
+
+a.tag-character[title="Lily"] {
+	background-image: url(resource://fimfic-res/characters/lily.png);
+}
+
+a.tag-character[title="Parcel Post"] {
+	background-image: url(resource://fimfic-res/characters/parcel-post.png);
+}
+
+a.tag-character[title="Pony Joe"] {
+	background-image: url(resource://fimfic-res/characters/pony-joe.png);
+}
+
+a.tag-character[title="White Lightning"] {
+	background-image: url(resource://fimfic-res/characters/white-lightning.png);
+}
+
+a.tag-character[title="Original Character"] {
+	background-image: url(resource://fimfic-res/characters/oc.png);
+}
+
+a.tag-character[title="Other"] {
+	background-image: url(resource://fimfic-res/characters/other.png);
+}
+
+a.tag-character[title="Anon"] {
+	background-image: url(resource://fimfic-res/characters/anon.png);
+}
+
+a.tag-character[title="Self Insert"] {
+	background-image: url(resource://fimfic-res/characters/self-insert.png);
+}
+
+a.tag-character[title="Dazzlings"] {
+	background-image: url(resource://fimfic-res/characters/the-dazzlings.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Applejack (EqG)"] {
+	background-image: url(resource://fimfic-res/characters/applejack-eg.png);
+}
+
+a.tag-character[title="Dean Cadence"] {
+	background-image: url(resource://fimfic-res/characters/dean-cadance.png);
+}
+
+a.tag-character[title="Indigo Zap"] {
+	background-image: url(resource://fimfic-res/characters/indigo-zap.png);
+}
+
+a.tag-character[title="Lemon Zest"] {
+	background-image: url(resource://fimfic-res/characters/lemon-zest.png);
+}
+
+a.tag-character[title="Micro Chips"] {
+	background-image: url(resource://fimfic-res/characters/micro-chips.png);
+}
+
+a.tag-character[title="Midnight Sparkle"] {
+	background-image: url(resource://fimfic-res/characters/midnight-sparkle.png);
+}
+
+a.tag-character[title="Pinkie Pie (EqG)"] {
+	background-image: url(resource://fimfic-res/characters/pinkie-pie-eg.png);
+}
+
+a.tag-character[title="Principal Cinch"] {
+	background-image: url(resource://fimfic-res/characters/principal-cinch.png);
+}
+
+a.tag-character[title="Rainbow Dash (EqG)"] {
+	background-image: url(resource://fimfic-res/characters/rainbow-dash-eg.png);
+}
+
+a.tag-character[title="Principal Celestia"] {
+	background-image: url(resource://fimfic-res/characters/principal-celestia.png);
+}
+
+a.tag-character[title="Rarity (EqG)"] {
+	background-image: url(resource://fimfic-res/characters/rarity-eg.png);
+}
+
+a.tag-character[title="Sandalwood"] {
+	background-image: url(resource://fimfic-res/characters/sandalwood.png);
+}
+
+a.tag-character[title="Sour Sweet"] {
+	background-image: url(resource://fimfic-res/characters/sour-sweet.png);
+}
+
+a.tag-character[title="Spike (EqG)"] {
+	background-image: url(resource://fimfic-res/characters/spike-eg.png);
+}
+
+a.tag-character[title="Sugarcoat"] {
+	background-image: url(resource://fimfic-res/characters/sugarcoat.png);
+}
+
+a.tag-character[title="Sunny Flare"] {
+	background-image: url(resource://fimfic-res/characters/sunny-flare.png);
+}
+
+a.tag-character[title="Sunset Shimmer (Demon)"] {
+	background-image: url(resource://fimfic-res/characters/sunset-shimmer-demon.png);
+}
+
+a.tag-character[title="Twilight Sparkle (EqG)"] {
+	background-image: url(resource://fimfic-res/characters/twilight-sparkle-eg.png);
+}
+
+a.tag-character[title="Vice-Principal Luna"] {
+	background-image: url(resource://fimfic-res/characters/vice-principal-luna.png);
+}
+
+a.tag-character[title="Fluttershy (EqG)"] {
+	background-image: url(resource://fimfic-res/characters/fluttershy-eg.png);
+}
+
+a.tag-character[title="Main 7 (EqG)"] {
+	background-image: url(resource://fimfic-res/characters/main-7-eg.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Shadowbolts (EqG)"] {
+	background-image: url(resource://fimfic-res/characters/shadowbolts-eg.png);
+	width: calc((1.6em + 2px) * 2.0);
+}
+
+a.tag-character[title="Timber Spruce"] {
+	background-image: url(resource://fimfic-res/characters/timber-spruce.png);
+}
+
+a.tag-character[title="Gloriosa Daisy"] {
+	background-image: url(resource://fimfic-res/characters/gloriosa-daisy.png);
+}
+
+a.tag-character[title="Chancellor Puddinghead"] {
+	background-image: url(resource://fimfic-res/characters/chancellor-puddinghead.png);
+}
+
+a.tag-character[title="Clover the Clever"] {
+	background-image: url(resource://fimfic-res/characters/clover-the-clever.png);
+}
+
+a.tag-character[title="Commander Hurricane"] {
+	background-image: url(resource://fimfic-res/characters/commander-hurricane.png);
+}
+
+a.tag-character[title="Princess Platinum"] {
+	background-image: url(resource://fimfic-res/characters/princess-platinum.png);
+}
+
+a.tag-character[title="Private Pansy"] {
+	background-image: url(resource://fimfic-res/characters/private-pansy.png);
+}
+
+a.tag-character[title="Smart Cookie"] {
+	background-image: url(resource://fimfic-res/characters/smart-cookie.png);
+}
+
+a.tag-character[title="Starswirl the Bearded"] {
+	background-image: url(resource://fimfic-res/characters/starswirl-the-bearded.png);
+}
+
+a.tag-character[title="Nightmare Rarity"] {
+	background-image: url(resource://fimfic-res/characters/nightmare-rarity.png);
+}
+
+a.tag-character[title="Tiberius"] {
+	background-image: url(resource://fimfic-res/characters/tiberius.png);
+}
+
+a.tag-character[title="Princess Amore"] {
+	background-image: url(resource://fimfic-res/characters/princess-amore.png);
+}
+
+a.tag-character[title="Radiant Hope"] {
+	background-image: url(resource://fimfic-res/characters/radiant-hope.png);
+}
+
+a.tag-character[title="Twilicorn"] {
+	background-image: url(resource://fimfic-res/characters/twilicorn.png);
+}

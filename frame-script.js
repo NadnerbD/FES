@@ -513,6 +513,12 @@ function changeHeader(document) {
 			}
 		`;
 		document.head.appendChild(inject_css);
+		/* character tag replacement */
+		var char_style = document.createElement("link");
+		char_style.rel = "stylesheet";
+		char_style.type = "text/css";
+		char_style.href = "resource://fimfic-res/characters/characters.css";
+		document.head.appendChild(char_style);
 	} catch (e) {
 		console.log("Failed to replace header:\n" + e.message);
 		console.log(document);
