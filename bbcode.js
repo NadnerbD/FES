@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent" | "pre" | "codeblock" | "sub" | "sup" | "em" | "strong";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "right" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent" | "pre" | "codeblock" | "sub" | "sup" | "em" | "strong";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -121,7 +121,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre", "codeblock", "sub", "sup", "em", "strong"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "right", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre", "codeblock", "sub", "sup", "em", "strong"];
 		return acceptIdentifiers(stream, tagNames, true);
 	}
 
@@ -227,7 +227,8 @@ function bbcode() {
 		"img": "IMG",
 		"quote": "BLOCKQUOTE",
 		"youtube": "DIV",
-		"center": "CENTER",
+		"center": "DIV",
+		"right": "DIV",
 		"p": "P",
 		"icon": "I",
 		"email": "A",
@@ -294,7 +295,16 @@ function bbcode() {
 			));
 		}
 		for(var tag = tags.shift(); tag != undefined; tag = tags.shift()) {
-			if((tag.name == "code" || tag.name == "codeblock") && !tag.close && !isTagOpen("code")) {
+			if(
+				isTagOpen("pre") && !isTagOpen("code") &&
+				(
+					["hr", "codeblock", "right", "left", "indent", "youtube"].indexOf(tag.name) != -1 ||
+					(!tag.close && tag.name == "pre")
+				)
+			) {
+				// prevent block-level elements from being opened inside a pre tag
+				dumpTag(tag);
+			}else if((tag.name == "code" || tag.name == "codeblock") && !tag.close && !isTagOpen("code")) {
 				if(tag.name == "codeblock") {
 					var closed = closeTag("p"); // these are reopened after the code block
 					var element = document.createElement("pre");
@@ -385,16 +395,11 @@ function bbcode() {
 				}
 				top.appendChild(icon);
 			}else if(tag.name == "hr" && tag.close == false) {
-				if(isTagOpen("pre")) {
-					// block level elements are not allowed in pre tags
-					top.appendChild(document.createTextNode("[hr]"));
-				}else{
-					// hr is a self-closing p-level tag
-					var closed = closeTag("p");
-					top.appendChild(document.createElement("hr"));
-					openNode(document.createElement("p"));
-					reopenNodes(closed);
-				}
+				// hr is a self-closing p-level tag
+				var closed = closeTag("p");
+				top.appendChild(document.createElement("hr"));
+				openNode(document.createElement("p"));
+				reopenNodes(closed);
 			}else if(tag.name == "emote") {
 				// emotes are really simple :)
 				var emote = document.createElement("img");
@@ -408,21 +413,16 @@ function bbcode() {
 				ref.appendChild(document.createTextNode(">>" + tag.value));
 				top.appendChild(ref);
 			}else if(tag.name == "youtube") {
-				if(isTagOpen("pre")) {
-					// block level elements are not allowed in pre tags
-					dumpTag(tag);
-				}else{
-					// the purpose of the container is to provide an alternate link if the embed doesn't work
-					// currently it's not actually used for anything
-					var closed = closeTag("p");
-					var container = document.createElement("div");
-					var player = document.createElement("iframe");
-					player.src = "http://www.youtube.com/embed/" + urlParams(tag.value).v;
-					container.appendChild(player);
-					top.appendChild(container);
-					openNode(document.createElement("p"));
-					reopenNodes(closed);
-				}
+				// the purpose of the container is to provide an alternate link if the embed doesn't work
+				// currently it's not actually used for anything
+				var closed = closeTag("p");
+				var container = document.createElement("div");
+				var player = document.createElement("iframe");
+				player.src = "http://www.youtube.com/embed/" + urlParams(tag.value).v;
+				container.appendChild(player);
+				top.appendChild(container);
+				openNode(document.createElement("p"));
+				reopenNodes(closed);
 			}else if(tag.close) {
 				if(isTagOpen(tag.name)) {
 					var closed = closeTag(tag.name);
@@ -442,9 +442,6 @@ function bbcode() {
 				}else if(tag.name == "br" && top.childNodes.length > 0) {
 					top.appendChild(document.createElement("br"));
 				}
-			}else if(tag.name == "pre" && isTagOpen("pre")) {
-				// pre tags cannot be nested
-				dumpTag(tag);
 			}else{ // open a new tag
 				var element = document.createElement(tagElementNames[tag.name]);
 				var closed = [];
@@ -473,11 +470,17 @@ function bbcode() {
 				}else if(tag.name == "indent") {
 					closed = closeTag("p");
 					element.className = "indent-" + tag.value;
+				}else if(tag.name == "center") {
+					closed = closeTag("p");
+					element.className = "center";
+				}else if(tag.name == "right") {
+					closed = closeTag("p");
+					element.className = "right";
 				}else if(tag.name == "pre") {
 					closed = closeTag("p");
 				}
 				openNode(element);
-				if(tag.name == "quote" || tag.name == "indent") {
+				if(tag.name == "quote" || tag.name == "indent" || tag.name == "center" || tag.name == "right") {
 					openNode(document.createElement("p"));
 					reopenNodes(closed);
 				}else if(tag.name == "pre") {

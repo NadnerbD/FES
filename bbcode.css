@@ -81,6 +81,15 @@ pre code::before {
 	padding-top: 5px;
 	content: "Code";
 }
+div {
+	margin-top: 1.5em;
+}
+div.center {
+	text-align: center;
+}
+div.right {
+	text-align: right;
+}
 div.indent-1 {
 	margin-left: 4ex;
 }
