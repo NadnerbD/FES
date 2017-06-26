@@ -53,5 +53,5 @@ for c in d:
 		idata = ifile.read(24)
 	if is_png(idata):
 		width, height = get_image_info(idata)
-	o.write(ruleTemplate % (c[0], iname, "\n\twidth: calc((1.6em + 2px) * %r);" % (width / 32.0) if width != 32 else ""))
+	o.write(ruleTemplate % (c[0], iname, "\n\twidth: calc((1.6em + 2px) * %r) !important;" % (width / 32.0) if width != 32 else ""))
 o.close()

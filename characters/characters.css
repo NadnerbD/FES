@@ -52,7 +52,7 @@ a.tag-character[title="Spike"] {
 
 a.tag-character[title="Main 6"] {
 	background-image: url(resource://fimfic-res/characters/main_6.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Apple Bloom"] {
@@ -69,7 +69,7 @@ a.tag-character[title="Sweetie Belle"] {
 
 a.tag-character[title="Cutie Mark Crusaders"] {
 	background-image: url(resource://fimfic-res/characters/cmc.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Babs Seed"] {
@@ -190,12 +190,12 @@ a.tag-character[title="Shining Armor"] {
 
 a.tag-character[title="Wonderbolts"] {
 	background-image: url(resource://fimfic-res/characters/wonderbolts.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Diamond Dogs"] {
 	background-image: url(resource://fimfic-res/characters/diamond_dogs.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Queen Chrysalis"] {
@@ -220,7 +220,7 @@ a.tag-character[title="Sunset Shimmer"] {
 
 a.tag-character[title="Pie Sisters"] {
 	background-image: url(resource://fimfic-res/characters/pie_sisters.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Cherry Jubilee"] {
@@ -229,7 +229,7 @@ a.tag-character[title="Cherry Jubilee"] {
 
 a.tag-character[title="Cake Twins"] {
 	background-image: url(resource://fimfic-res/characters/cake_twins.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Flash Sentry"] {
@@ -242,7 +242,7 @@ a.tag-character[title="Mane-iac"] {
 
 a.tag-character[title="Power Ponies"] {
 	background-image: url(resource://fimfic-res/characters/power_ponies.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Cheese Sandwich"] {
@@ -395,7 +395,7 @@ a.tag-character[title="Thorax"] {
 
 a.tag-character[title="Yaks"] {
 	background-image: url(resource://fimfic-res/characters/yaks.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Bat Pony"] {
@@ -404,17 +404,17 @@ a.tag-character[title="Bat Pony"] {
 
 a.tag-character[title="Griffons"] {
 	background-image: url(resource://fimfic-res/characters/griffons.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Minotaur"] {
 	background-image: url(resource://fimfic-res/characters/minotaur.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Royal Guard"] {
 	background-image: url(resource://fimfic-res/characters/royal-guard.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Zebra"] {
@@ -423,7 +423,7 @@ a.tag-character[title="Zebra"] {
 
 a.tag-character[title="Dragons"] {
 	background-image: url(resource://fimfic-res/characters/dragons.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Twinkleshine"] {
@@ -476,7 +476,7 @@ a.tag-character[title="Party Favor"] {
 
 a.tag-character[title="Timberwolves"] {
 	background-image: url(resource://fimfic-res/characters/timberwolves.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Svengallop"] {
@@ -561,7 +561,7 @@ a.tag-character[title="Tank"] {
 
 a.tag-character[title="Pets"] {
 	background-image: url(resource://fimfic-res/characters/pets.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Derpy Hooves"] {
@@ -642,7 +642,7 @@ a.tag-character[title="Nurse Redheart"] {
 
 a.tag-character[title="Flower Ponies"] {
 	background-image: url(resource://fimfic-res/characters/flower_ponies.png);
-	width: calc((1.6em + 2px) * 1.5);
+	width: calc((1.6em + 2px) * 1.5) !important;
 }
 
 a.tag-character[title="Raindrops"] {
@@ -731,7 +731,7 @@ a.tag-character[title="Self Insert"] {
 
 a.tag-character[title="Dazzlings"] {
 	background-image: url(resource://fimfic-res/characters/the-dazzlings.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Applejack (EqG)"] {
@@ -816,12 +816,12 @@ a.tag-character[title="Fluttershy (EqG)"] {
 
 a.tag-character[title="Main 7 (EqG)"] {
 	background-image: url(resource://fimfic-res/characters/main-7-eg.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Shadowbolts (EqG)"] {
 	background-image: url(resource://fimfic-res/characters/shadowbolts-eg.png);
-	width: calc((1.6em + 2px) * 2.0);
+	width: calc((1.6em + 2px) * 2.0) !important;
 }
 
 a.tag-character[title="Timber Spruce"] {
