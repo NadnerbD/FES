@@ -243,6 +243,7 @@ function bbcode() {
 	}
 	function generateElements(tags) {
 		var top = document.createElement("div");
+		top.className = "bbcode";
 		openNode(document.createElement("p"));
 		function closeNode() {
 			var lastTop = top;

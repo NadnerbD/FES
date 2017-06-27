@@ -1,11 +1,11 @@
-p {
+.bbcode p {
 	margin: 0;
 	margin-top: 1.5em;
 }
-p:first-child {
+.bbcode p:first-child {
 	margin-top: 0;
 }
-hr {
+.bbcode hr {
 	background-color: #DDDDDD;
 	border: none;
 	height: 1px;
@@ -13,7 +13,7 @@ hr {
 	margin-bottom: 12px;
 	margin-top: 12px;
 }
-blockquote {
+.bbcode blockquote {
 	margin: 0.6em 0;
 	padding: 15px;
 	border: solid 1px #CCCCCC;
@@ -21,10 +21,10 @@ blockquote {
 	background-color: #F7F7F7;
 	position: relative;
 }
-blockquote[data-who] {
+.bbcode blockquote[data-who] {
 	margin-top: 1.6em;
 }
-blockquote[data-who]::before {
+.bbcode blockquote[data-who]::before {
 	content: attr(data-who);
 	font-weight: bold;
 	display: block;
@@ -38,30 +38,30 @@ blockquote[data-who]::before {
 	border: solid 1px #cccccc;
 	border-bottom: none;
 }
-span.spoiler {
+.bbcode span.spoiler {
 	background-color: #333333;
 	color: #333333;
 	text-shadow: none;
 }
-span.spoiler:hover {
+.bbcode span.spoiler:hover {
 	background-color: inherit;
 	color: inherit;
 	text-shadow: inherit;
 }
-em {
+.bbcode em {
 	font-style: italic;
 }
-em em {
+.bbcode em em {
 	font-style: normal;
 }
-:not(pre) > code {
+.bbcode :not(pre) > code {
 	font-family: monospace;
 	background-color: #eee;
 	padding: .1875rem;
 	border-radius: .3125rem;
 	line-height: 1.9em;
 }
-pre code {
+.bbcode pre code {
 	font-family: monospace;
 	background-color: #eee;
 	border-radius: .3125rem;
@@ -69,7 +69,7 @@ pre code {
 	padding: 10px;
 	position: relative;
 }
-pre code::before {
+.bbcode pre code::before {
 	font-weight: bold;
 	background-color: #eee;
 	border-radius: .3125rem;
@@ -81,39 +81,39 @@ pre code::before {
 	padding-top: 5px;
 	content: "Code";
 }
-div {
+.bbcode div {
 	margin-top: 1.5em;
 }
-div.center {
+.bbcode div.center {
 	text-align: center;
 }
-div.right {
+.bbcode div.right {
 	text-align: right;
 }
-div.indent-1 {
+.bbcode div.indent-1 {
 	margin-left: 4ex;
 }
-div.indent-2 {
+.bbcode div.indent-2 {
 	margin-left: 8ex;
 }
-div.indent-3 {
+.bbcode div.indent-3 {
 	margin-left: 12ex;
 }
-div.indent-4 {
+.bbcode div.indent-4 {
 	margin-left: 16ex;
 }
-span.code-emote {
+.bbcode span.code-emote {
 	color: #268bd2;
 }
-span.code-quote_ref {
+.bbcode span.code-quote_ref {
 	color: #2aa198;
 }
-span.code-tag {
+.bbcode span.code-tag {
 	color: #268bd2;
 }
-span.code-operator {
+.bbcode span.code-operator {
 	color: #586e75;
 }
-span.code-attr-value {
+.bbcode span.code-attr-value {
 	color: #859900;
 }
