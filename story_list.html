@@ -1069,6 +1069,7 @@
 					console.log("No backup file location provided");
 					return;
 				}
+				console.log("Saving backup to " + filePath);
 				db.getAll("comments", function(comments) {
 					db.getAll("stories", function(stories) {
 						db.getAll("users", function(users) {
@@ -1125,6 +1126,7 @@
 		}
 		function loadBackup() {
 			pickFile("Load Backup", 0, function(filePath) {
+				console.log("Loading backup from " + filePath);
 				readFile(filePath, function(data) {
 					var count = 0;
 					data = JSON.parse(data, dateAndBlobReviver);

@@ -62,6 +62,7 @@ function chromeRequestListener(message) {
 			filePicker.init(message.target.ownerDocument.defaultView, message.data.title, filePicker.modeGetFolder);
 			filePicker.open(function() {
 				message.target.messageManager.sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-response", {
+					origin: message.data.origin,
 					request: "PickedFolder",
 					title: message.data.title,
 					// file can be null if the user didn't actually pick a file
@@ -78,6 +79,7 @@ function chromeRequestListener(message) {
 			}
 			filePicker.open(function() {
 				message.target.messageManager.sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-response", {
+					origin: message.data.origin,
 					request: "PickedFile",
 					title: message.data.title,
 					// file can be null if the user didn't actually pick a file
@@ -91,6 +93,7 @@ function chromeRequestListener(message) {
 			OS.File.writeAtomic(message.data.name, dataArray, {tmpPath: message.data.name + ".tmp"}).then(
 				function () {
 					message.target.messageManager.sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-response", {
+						origin: message.data.origin,
 						request: "FileWritten",
 						name: message.data.name
 					});
@@ -102,6 +105,7 @@ function chromeRequestListener(message) {
 				function (dataArray) {
 					var decoder = new TextDecoder();
 					message.target.messageManager.sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-response", {
+						origin: message.data.origin,
 						request: "FileRead",
 						name: message.data.name,
 						data: decoder.decode(dataArray)
@@ -112,6 +116,7 @@ function chromeRequestListener(message) {
 		case "SyncFolders":
 			syncDirectories(message.data.files, message.data.dest, message.data.source, message.data.deleteFromSource, message.data.keepOld, function(logStr) {
 				message.target.messageManager.sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-response", {
+					origin: message.data.origin,
 					request: "SyncStatusLog",
 					msg: logStr
 				});

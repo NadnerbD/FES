@@ -37,15 +37,20 @@ function removeFrameListeners(message) {
 // forwards messages from extension content to the chrome script
 function postMessageForwarder(event) {
 	// ensure that the message actually came from an extension page
-	if(event.origin != "resource://fimfic-res") return;
+	if(!(event.origin == "resource://fimfic-res" || event.origin == "null")) return;
 	//console.log("DEBUG: postMessage received from content at", event.origin);
 	// pass on the message to the chrome script
-	sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-request", event.data);
+	var msg = event.data;
+	// event.origin is "null" if the message was posted from a file: uri, and returning the message requires
+	// that we post it to "*", which allows the message to be received by any tab. Use from file with extreme caution!
+	// see https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage "Using window.postMessage in extensions"
+	msg.origin = event.origin == "null" ? "*" : event.origin;
+	sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-request", msg);
 }
 
 // forwards messages from the chrome script to the extension content
 function chromeMessageForwarder(message) {
-	content.postMessage(message.data, "resource://fimfic-res");
+	content.postMessage(message.data, message.data.origin);
 }
 
 var locs = [
