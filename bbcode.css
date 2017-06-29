@@ -1,6 +1,9 @@
-.bbcode p {
+.bbcode p, .bbcode ul, .bbcode ol {
 	margin: 0;
 	margin-top: 1.5em;
+}
+.bbcode ol, .bbcode ul {
+	padding-left: 16px;
 }
 .bbcode p:first-child {
 	margin-top: 0;

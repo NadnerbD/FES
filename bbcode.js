@@ -9,7 +9,7 @@ function bbcode() {
 				generate DOM tree from tag stream
 		
 		lexing grammar:
-			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "right" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent" | "pre" | "codeblock" | "sub" | "sup" | "em" | "strong";
+			name = "b" | "i" | "u" | "s" | "size" | "color" | "url" | "img" | "quote" | "youtube" | "center" | "right" | "hr" | "spoiler" | "smcaps" | "site_url" | "icon" | "email" | "code" | "indent" | "pre" | "codeblock" | "sub" | "sup" | "em" | "strong" | "list" | "*";
 			tag = "[" ("/" name) | (name [ "=" value ]) "]";
 			emote = ":" emote_name ":";
 			quote_ref = ">>" number;
@@ -121,7 +121,7 @@ function bbcode() {
 	function tagName(stream) {
 		// this is some crazy hax. I wouldn't do this in a parser that could actually
 		// complain about invalid input
-		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "right", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre", "codeblock", "sub", "sup", "em", "strong"];
+		var tagNames = ["b", "i", "u", "s", "size", "color", "url", "img", "quote", "youtube", "center", "right", "hr", "spoiler", "smcaps", "site_url", "icon", "email", "code", "indent", "pre", "codeblock", "sub", "sup", "em", "strong", "list", "*"];
 		return acceptIdentifiers(stream, tagNames, true);
 	}
 
@@ -239,7 +239,9 @@ function bbcode() {
 		"sub": "SUB",
 		"sup": "SUP",
 		"em": "EM",
-		"strong": "STRONG"
+		"strong": "STRONG",
+		"list": ["UL", "OL"],
+		"*": "LI"
 	}
 	function generateElements(tags) {
 		var top = document.createElement("div");
@@ -252,19 +254,30 @@ function bbcode() {
 			if(lastTop.childNodes.length == 0) {
 				top.removeChild(lastTop);
 			}
+			// if the top block element ended with a br tag, remove that
+			if(lastTop.lastChild && lastTop.lastChild.nodeName == "BR" && getComputedStyle(lastTop).display != "inline") {
+				lastTop.removeChild(lastTop.lastChild);
+			}
+		}
+		function tagNodeMatch(name, node) {
+			return typeof(tagElementNames[name]) == "object" ? tagElementNames[name].indexOf(node.nodeName) != -1 : tagElementNames[name] == node.nodeName;
 		}
 		function closeTag(name) {
+			if(!isTagOpen(name)) return [];
 			var closedNodes = [];
-			while(tagElementNames[name] != top.nodeName) {
+			while(!tagNodeMatch(name, top)) {
 				closedNodes.push(top.cloneNode(false));
 				closeNode();
 			}
 			closeNode();
 			return closedNodes;
 		}
-		function isTagOpen(name) {
+		function isTagOpen(name, before) {
 			var open = top;
-			while(open.nodeName != tagElementNames[name]) {
+			while(!tagNodeMatch(name, open)) {
+				if(before && tagNodeMatch(before, open)) {
+					return false;
+				}
 				open = open.parentNode;
 				if(open == null) {
 					return false;
@@ -299,7 +312,7 @@ function bbcode() {
 			if(
 				isTagOpen("pre") && !isTagOpen("code") &&
 				(
-					["hr", "codeblock", "right", "left", "indent", "youtube"].indexOf(tag.name) != -1 ||
+					["hr", "codeblock", "right", "left", "indent", "youtube", "list"].indexOf(tag.name) != -1 ||
 					(!tag.close && tag.name == "pre")
 				)
 			) {
@@ -362,7 +375,9 @@ function bbcode() {
 				}
 				top.appendChild(element);
 			}else if(tag.name == "text") {
-				top.appendChild(document.createTextNode(tag.value));
+				if(isTagOpen("pre") || !/^[ \t\r\n]*$/.test(tag.value)) {
+					top.appendChild(document.createTextNode(tag.value));
+				}
 			}else if(tag.name == "img" && tag.close == false) {
 				var image = document.createElement("img");
 				if(tags.length >= 2 && tags[0].name == "text" && tags[1].name == "img" && tags[1].close == true) {
@@ -424,9 +439,28 @@ function bbcode() {
 				top.appendChild(container);
 				openNode(document.createElement("p"));
 				reopenNodes(closed);
+			}else if(tag.name == "list" && !tag.close) {
+				// is a block element, and does not contain a top level p
+				var closed = closeTag("p");
+				if(tag.value) {
+					var elem = document.createElement("ol");
+					elem.type = tag.value;
+				}else{
+					var elem = document.createElement("ul");
+				}
+				openNode(elem);
+				reopenNodes(closed);
+			}else if(tag.name == "*" && !tag.close && isTagOpen("list")) {
+				var closed = isTagOpen("*", "list") ? closeTag("*") : [];
+				openNode(document.createElement("li"));
+				reopenNodes(closed);
 			}else if(tag.close) {
 				if(isTagOpen(tag.name)) {
-					var closed = closeTag(tag.name);
+					if(tag.name == "list") {
+						var closed = closeTag("*").concat(closeTag("list"));
+					}else{
+						var closed = closeTag(tag.name);
+					}
 					if(tag.name == "pre") {
 						// after leaving the pre tag, return to p at the root level
 						openNode(document.createElement("p"));
