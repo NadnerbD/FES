@@ -646,23 +646,22 @@ function scrapeComments(document) {
 				});
 			});
 		}, "resource://fimfic-res/"); // this should allow our addon documents to access this database from their local scope
-	}
-	
-	// record an image in the database
-	function saveUserAvatar(name, imgSrc) {
-		console.log("Getting avatar: " + imgSrc + " for " + name);
-		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-		req.open("GET", imgSrc, true);
-		req.responseType = "blob";
-		req.onload = function() {
-			if(req.status == 200) {
-				db.putItem("users", {name: name, avatar: req.response}, function() {
-					console.log("Saved avatar for: " + name);
-					db.close();
-				});
-			}
-		};
-		req.send();
+		// record an image in the database
+		function saveUserAvatar(name, imgSrc) {
+			console.log("Getting avatar: " + imgSrc + " for " + name);
+			var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+			req.open("GET", imgSrc, true);
+			req.responseType = "blob";
+			req.onload = function() {
+				if(req.status == 200) {
+					db.putItem("users", {name: name, avatar: req.response}, function() {
+						console.log("Saved avatar for: " + name);
+						db.close();
+					});
+				}
+			};
+			req.send();
+		}
 	}
 }
 
