@@ -547,26 +547,39 @@ function scrapeComments(document) {
 	var comments = document.querySelectorAll("div#story_comments div.comment");
 	for(var i = 0; i < comments.length; i++) { 
 		var ci = comments[i];
-		// the comment will only have a textarea if we own it
-		if(ci.getElementsByTagName("textarea").length) {
+		// the comment will only have an edit button if we own it
+		if(ci.querySelectorAll(".buttons a[title=\"Edit this comment\"]").length) {
 			var likes, dislikes;
-			var likeSpan = ci.querySelector("span.comment_like_text");
+			var likeSpan = ci.querySelector("span.like-text");
 			if(likeSpan == null || likeSpan.firstChild == null) likes = 0; else likes = parseInt(likeSpan.firstChild.data.replace(/,/g, ""));
-			var dislikeSpan = ci.querySelector("span.comment_dislike_text");
+			var dislikeSpan = ci.querySelector("span.dislike-text");
 			if(dislikeSpan == null || dislikeSpan.firstChild == null) dislikes = 0; else dislikes = parseInt(dislikeSpan.firstChild.data.replace(/,/g, ""));
 			var comment = {
 				author: ci.getAttribute("data-author"),
 				id: ci.getAttribute("data-comment_id"),
 				// the old format date: ci.getElementsByTagName("span")[2].title,
 				// the fix: new Date(orig.replace(/[^ ]* ([0-9]*).. of ([^ ]*) (.*)/, "\$2 \$1 \$3"));
-				date: new Date(parseInt(ci.querySelector("span.time_offset").getAttribute("data-time")) * 1000),
-				data: ci.querySelector("textarea").value,
+				date: new Date(parseInt(ci.querySelector("div.meta span[data-time]").getAttribute("data-time")) * 1000),
 				ratings: {
 					up: likes,
 					down: dislikes
 				},
 				location: commentLocation
 			};
+			comment.data = function (comment, ci) { // initiate async loading of comment data
+				var ctype = ci.getAttribute("data-type"); // NOTE: our storage assumes this will always be the same
+				var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+				req.open("GET", document.location.origin + "/ajax/comments/" + ctype + "/" + comment.id + "/edit", true);
+				req.onload = function() {
+					var elem = document.createElement("div");
+					elem.innerHTML = JSON.parse(req.response).content;
+					comment.data = elem.querySelector("textarea").value;
+					console.log("Received data for comment " + comment.id);
+					commentLoaded();
+				}
+				req.send();
+				return null;
+			} (comment, ci);
 			if(path.length == 6) {
 				// we're on a chapter page
 				comment.chapter = parseInt(path[3]);
@@ -574,9 +587,9 @@ function scrapeComments(document) {
 				// if we're on the main page, then the comment has a chapter marker
 				// there will be no marker if there is only one chapter
 				// we can extract the chapter number from the url
-				var infoLinks = ci.querySelectorAll("div.comment_information div:first-child > a");
-				if(infoLinks.length == 3) {
-					comment.chapter = parseInt(infoLinks[2].href.split("/")[5]);
+				var infoLink = ci.querySelector("div.comment_information div.meta span.desktop > a:first-of-type");
+				if(infoLink) {
+					comment.chapter = parseInt(infoLink.href.split("/")[5]);
 				}else{
 					comment.chapter = 1;
 				}
@@ -588,9 +601,18 @@ function scrapeComments(document) {
 			}
 		}
 	}
-	
+	// check that comments are ready to be saved
+	function commentLoaded() {
+		for(var comment of commentList) {
+			if(comment.data == null) {
+				return;
+			}
+		}
+		console.log("Data loaded for " + commentList.length + " comments; saving");
+		saveComments();
+	}
 	// save our work
-	if(commentList.length) {
+	function saveComments() {
 		var firstAuthor = commentList[0].author;
 		var firstId = commentList[0].id;
 		var db = new FFDB("fimcomments-db", function() {
@@ -614,7 +636,7 @@ function scrapeComments(document) {
 				db.getItem("users", firstAuthor, function(item) {
 					if(!item) {
 						// user is not saved, save user data
-						saveUserAvatar(firstAuthor, document.querySelector("div#comment_content_" + firstId + " div.avatar img").src);
+						saveUserAvatar(firstAuthor, document.querySelector("div#comment_" + firstId + " div.author img.avatar").getAttribute("data-src"));
 					}
 				});
 			});
