@@ -784,7 +784,7 @@ function scrapeStories(document, observed) {
 	// get all the fullsize story elements on the page
 	var items = document.querySelectorAll("article.story_container");
 	// determine whether we can get the author of the stories
-	if(items && !items[0].querySelector(".author")) {
+	if(items.length && !items[0].querySelector(".author")) {
 		var pageAuthor = document.querySelector(".user-page-header h1 a").firstChild.data;
 	}
 	for(var i = 0; i < items.length; i++) {
