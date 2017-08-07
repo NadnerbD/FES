@@ -539,6 +539,15 @@ function watchComments(document) {
 	scrapeStories(document);
 }
 
+function getDateFromTag(ci) {
+	if(ci.querySelector("span[data-time]")) {
+		return new Date(parseInt(ci.querySelector("span[data-time]").getAttribute("data-time")) * 1000);
+	}else{
+		var t = /([A-z]{3})[A-z]* ([0-9]{1,2})[a-z]{2} of ([A-z]{3})[A-z]* ([0-9]*) @([0-9]*):([0-9]*)([a-z]{2})/.exec(ci.querySelector("span[title]").getAttribute("title"));
+		return new Date(t[1]+" "+t[3]+" "+t[2]+" "+t[4]+" "+(t[7]=="pm"?parseInt(t[5])+12:t[5])+":"+t[6]+":00 "+/GMT-[0-9]{4}/.exec(Date())[0]);
+	}
+}
+
 function scrapeComments(document) {
 	var path = document.location.pathname.split("/");
 	var commentLocation = path[1] + "/" + path[2];
@@ -564,14 +573,7 @@ function scrapeComments(document) {
 				id: ci.getAttribute("data-comment_id"),
 				// the old format date: ci.getElementsByTagName("span")[2].title,
 				// the fix: new Date(orig.replace(/[^ ]* ([0-9]*).. of ([^ ]*) (.*)/, "\$2 \$1 \$3"));
-				date: (function (ci) {
-					if(ci.querySelector("div.meta span[data-time]")) {
-						return new Date(parseInt(ci.querySelector("div.meta span[data-time]").getAttribute("data-time")) * 1000);
-					}else{
-						var t = /([A-z]{3})[A-z]* ([0-9]{1,2})[a-z]{2} of ([A-z]{3})[A-z]* ([0-9]*) @([0-9]*):([0-9]*)([a-z]{2})/.exec(ci.querySelector("div.meta span[title]").getAttribute("title"));
-						return new Date(t[1]+" "+t[3]+" "+t[2]+" "+t[4]+" "+(t[7]=="pm"?parseInt(t[5])+12:t[5])+":"+t[6]+":00 "+/GMT-[0-9]{4}/.exec(Date())[0]);
-					}
-				}(ci)),
+				date: getDateFromTag(ci.querySelector("div.meta")),
 				ratings: {
 					up: likes,
 					down: dislikes
@@ -838,7 +840,7 @@ function scrapeStories(document, observed) {
 			},
 			bookshelves: {},
 			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,
-			created: new Date(parseInt(item.querySelector("span.approved-date span[data-time]").getAttribute("data-time")) * 1000),
+			created: getDateFromTag(item.querySelector("span.approved-date")),
 			udpated: new Date(item.querySelector("ul.chapters > li:last-of-type span.date").childNodes[1].data.replace(/ ([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
 		};
 		// add bookshelf properties
