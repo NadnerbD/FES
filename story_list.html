@@ -765,20 +765,20 @@
 					}
 					function generateDownloadUrl(id) {
 						/* Example URLs
-						txt: https://www.fimfiction.net/download_story.php?story=221415
-						html: https://www.fimfiction.net/download_story.php?story=221415&html
-						epub: https://www.fimfiction.net/download_epub.php?story=221415
+						txt: https://www.fimfiction.net/story/download/314663/txt
+						html: https://www.fimfiction.net/story/download/314663/html
+						epub: https://www.fimfiction.net/story/download/314663/epub
 						
 						AAAARGH download_epub returns a completely different Content-Disposition filename
 						formatted in title.toLowerCase().replace(/ /g, "-") style
 						*/
 						switch(s.download_type) {
 							case "txt":
-								return "https://www.fimfiction.net/download_story.php?story=" + id;
+								return "https://www.fimfiction.net/story/download/" + id + "/txt";
 							case "html":
-								return "https://www.fimfiction.net/download_story.php?story=" + id + "&html";
+								return "https://www.fimfiction.net/story/download/" + id + "/html";
 							case "epub":
-								return "https://www.fimfiction.net/download_epub.php?story=" + id;
+								return "https://www.fimfiction.net/story/download/" + id + "/epub";
 						}
 					}
 					function syncObjectFromStoryData(sd) {
