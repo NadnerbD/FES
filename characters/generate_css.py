@@ -25,7 +25,7 @@ header = """
 	width: calc(1.6em + 2px);
 	line-height: calc(1.6em + 2px);
 	white-space: nowrap;
-	color: transparent;
+	color: transparent !important;
 	background-size: contain;
 	/* for story card elements */
 	display: inline-block;
@@ -42,7 +42,7 @@ header = """
 }
 """
 ruleTemplate = """
-a.tag-character[title="%s"] {
+a.tag-character[data-tag="%s"] {
 	background-image: url(resource://fimfic-res/characters/%s);%s
 }
 """
@@ -53,5 +53,5 @@ for c in d:
 		idata = ifile.read(24)
 	if is_png(idata):
 		width, height = get_image_info(idata)
-	o.write(ruleTemplate % (c[0], iname, "\n\twidth: calc((1.6em + 2px) * %r) !important;" % (width / 32.0) if width != 32 else ""))
+	o.write(ruleTemplate % (c[0].lower().replace(' ', '-'), iname, "\n\twidth: calc((1.6em + 2px) * %r) !important;" % (width / 32.0) if width != 32 else ""))
 o.close()
