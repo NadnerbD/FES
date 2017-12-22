@@ -879,3 +879,7 @@ a.tag-character[data-tag="radiant-hope"] {
 a.tag-character[data-tag="twilicorn"] {
 	background-image: url(resource://fimfic-res/characters/twilicorn.png);
 }
+
+a.tag-character[data-tag="tempest-shadow"] {
+	background-image: url(resource://fimfic-res/characters/tempest.png);
+}
