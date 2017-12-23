@@ -836,7 +836,7 @@ function scrapeStories(document, observed) {
 			},
 			tags: {
 				category: [for(catLink of item.querySelectorAll("a.tag-genre")) catLink.firstChild.data],
-				character: [for(charLink of item.querySelectorAll("a.tag-character")) charLink.title]
+				character: [for(charLink of item.querySelectorAll("a.tag-character")) charLink.title.split(" ( ")[0]]
 			},
 			bookshelves: {},
 			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,
