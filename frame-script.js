@@ -841,7 +841,7 @@ function scrapeStories(document, observed) {
 			bookshelves: {},
 			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,
 			created: getDateFromTag(item.querySelector("span.approved-date")),
-			udpated: new Date(item.querySelector("ul.chapters > li:last-of-type span.date").childNodes[1].data.replace(/ ([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
+			updated: new Date(item.querySelector("ul.chapters > li:last-of-type span.date").childNodes[1].data.replace(/ ([0-9]*).. ([^ ]*) (.*)/, "\$2 \$1 \$3"))
 		};
 		// add bookshelf properties
 		for(var shelf of item.querySelectorAll("li.bookshelf")) {
