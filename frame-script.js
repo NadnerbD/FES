@@ -18,8 +18,10 @@ content.addEventListener("message", postMessageForwarder, false, true);
 
 // set our uid
 var uid;
+var uuid;
 function setUid(message) {
 	uid = message.data.uid;
+	uuid = message.data.uuid;
 	removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid", setUid);
 	console.log("FES: frame-script started (" + uid + ")");
 }
@@ -91,7 +93,7 @@ function changeHeader(document) {
 				</div>
 				<a href="http://www.fimfiction.net/" class="home_link">
 					<div>
-						<img src="resource://fimfic-res/logo_fix.png">
+						<img src="moz-extension://${uuid}/logo_fix.png">
 					</div>
 				</a>
 				<a href="http://www.fimfiction.net/" class="home_link_link"></a>
@@ -114,192 +116,192 @@ function changeHeader(document) {
 		inject_script.innerHTML = `
 			var banners = [{
 					colour : "rgb(164, 110, 60)",
-					url : "resource://fimfic-res/banners/banner_images/zecora.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/zecora.jpg",
 					source : "http://aeronjvl.deviantart.com/art/Hanging-by-the-Edge-327757722",
 					id : "zecora"
 				}, {
 					colour : "rgb(164, 122, 60)",
-					url : "resource://fimfic-res/banners/banner_images/aeron_fluttershy.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/aeron_fluttershy.jpg",
 					source : "http://aeronjvl.deviantart.com/art/Nature-326303180",
 					id : "aeron_fluttershy"
 				}, {
 					colour : "rgb(76, 112, 126)",
-					url : "resource://fimfic-res/banners/banner_images/aeron_philomena.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/aeron_philomena.jpg",
 					source : "http://ajvl.deviantart.com/art/Philomena-Equestria-s-Finest-Phoenix-310217164",
 					id : "aeron_philomena"
 				}, {
 					colour : "rgb(76, 126, 110)",
-					url : "resource://fimfic-res/banners/banner_images/aeron_celestia.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/aeron_celestia.jpg",
 					source : "http://aeronjvl.deviantart.com/art/Path-to-Canterlot-340639474",
 					id : "aeron_celestia"
 				}, {
 					colour : "rgb(87, 102, 111)",
-					url : "resource://fimfic-res/banners/banner_images/derpy_dash.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/derpy_dash.jpg",
 					source : "http://ponykillerx.deviantart.com/art/Full-Armour-D-vs-D-288729315",
 					id : "derpy_dash"
 				}, {
 					colour : "rgb(83, 76, 121)",
-					url : "resource://fimfic-res/banners/banner_images/ponykiller_trixie.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/ponykiller_trixie.jpg",
 					source : "http://ponykillerx.deviantart.com/art/No-Title-Wallpaper-Version-287646346",
 					id : "ponykiller_trixie"
 				}, {
 					colour : "rgb(140, 151, 83)",
-					url : "resource://fimfic-res/banners/banner_images/yamio_fluttershy.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/yamio_fluttershy.jpg",
 					source : "http://yamio.deviantart.com/art/Fluttershy-285372865",
 					id : "yamio_fluttershy"
 				}, {
 					colour : "rgb(146, 164, 60)",
-					url : "resource://fimfic-res/banners/banner_images/ratofdrawn_1.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/ratofdrawn_1.jpg",
 					source : "http://ratofdrawn.deviantart.com/art/Wet-Fun-317158001",
 					id : "ratofdrawn_1"
 				}, {
 					colour : "rgb(100, 133, 190)",
-					url : "resource://fimfic-res/banners/banner_images/ratofdrawn_rarijack.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/ratofdrawn_rarijack.jpg",
 					source : "http://ratofdrawn.deviantart.com/art/Differences-343226962",
 					id : "ratofdrawn_rarijack"
 				}, {
 					colour : "rgb(72, 60, 164)",
-					url : "resource://fimfic-res/banners/banner_images/solar_luna.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/solar_luna.jpg",
 					source : "http://soapie-solar.deviantart.com/art/Chibi-Luna-Star-Fishing-340002341",
 					id : "solar_luna"
 				}, {
 					colour : "rgb(131, 164, 60)",
-					url : "resource://fimfic-res/banners/banner_images/solar_group.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/solar_group.jpg",
 					source : "http://soapie-solar.deviantart.com/art/Forest-Foundation-283012970",
 					id : "solar_group"
 				}, {
 					colour : "rgb(164, 135, 60)",
-					url : "resource://fimfic-res/banners/banner_images/uc77_1.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/uc77_1.jpg",
 					source : "http://uc77.deviantart.com/art/Ponies-Dig-Giant-Robots-281071953",
 					id : "uc77_1"
 				}, {
 					colour : "rgb(77, 60, 164)",
-					url : "resource://fimfic-res/banners/banner_images/cmaggot_fluttershy.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/cmaggot_fluttershy.jpg",
 					source : "http://cmaggot.deviantart.com/art/Dangerous-Mission-342068171",
 					id : "cmaggot_fluttershy"
 				}, {
 					colour : "rgb(164, 114, 60)",
-					url : "resource://fimfic-res/banners/banner_images/rainbow_ss.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/rainbow_ss.jpg",
 					source : "http://derpiboo.ru/41558",
 					id : "rainbow_ss"
 				}, {
 					colour : "rgb(69, 100, 96)",
-					url : "resource://fimfic-res/banners/banner_images/rainbow_markerpone.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/rainbow_markerpone.jpg",
 					source : "http://derpiboo.ru/131068",
 					id : "rainbow_markerpone"
 				}, {
 					colour : "rgb(164, 60, 152)",
-					url : "resource://fimfic-res/banners/banner_images/rainbow_roseluck.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/rainbow_roseluck.jpg",
 					source : "http://derpiboo.ru/50361",
 					id : "rainbow_roseluck"
 				}, {
 					colour : "rgb(60, 114, 164)",
-					url : "resource://fimfic-res/banners/banner_images/jj_trixie.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/jj_trixie.jpg",
 					source : "http://johnjoseco.deviantart.com/art/Trixie-s-Life-is-so-Hard-340685374",
 					id : "jj_trixie"
 				}, {
 					colour : "rgb(60, 118, 164)",
-					url : "resource://fimfic-res/banners/banner_images/anima_1.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/anima_1.jpg",
 					source : "http://spiritto.deviantart.com/art/C-mon-lift-your-Spirit-324914801",
 					id : "anima_1"
 				}, {
 					colour : "rgb(60, 147, 164)",
-					url : "resource://fimfic-res/banners/banner_images/mew_pinkie.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/mew_pinkie.jpg",
 					source : "http://mewball.deviantart.com/art/Reflect-338427890",
 					id : "mew_pinkie"
 				}, {
 					colour : "rgb(60, 89, 164)",
-					url : "resource://fimfic-res/banners/banner_images/tsitra_dash.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/tsitra_dash.jpg",
 					source : "http://tsitra360.deviantart.com/art/Morning-Flight-331710988",
 					id : "tsitra_dash"
 				}, {
 					colour : "rgb(164, 127, 60)",
-					url : "resource://fimfic-res/banners/banner_images/knifeh_scoots.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/knifeh_scoots.jpg",
 					source : "http://knifeh.deviantart.com/art/Scootaloo-326771443",
 					id : "knifeh_scoots"
 				}, {
 					colour : "rgb(164, 89, 60)",
-					url : "resource://fimfic-res/banners/banner_images/noben_celestia.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/noben_celestia.jpg",
 					source : "http://noben.deviantart.com/art/Sunrise-in-Equestria-280309698",
 					id : "noben_celestia"
 				}, {
 					colour : "rgb(77, 60, 164)",
-					url : "resource://fimfic-res/banners/banner_images/ep_shady_trough.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/ep_shady_trough.jpg",
 					source : "http://equestria-prevails.deviantart.com/art/The-Shady-Trough-319986368",
 					id : "ep_shady_trough"
 				}, {
 					colour : "rgb(60, 85, 164)",
-					url : "resource://fimfic-res/banners/banner_images/spittfire_1.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/spittfire_1.jpg",
 					source : "http://spittfireart.deviantart.com/art/The-Report-Commission-340421670",
 					id : "spittfire_1"
 				}, {
 					colour : "rgb(75, 77, 85)",
-					url : "resource://fimfic-res/banners/banner_images/blitzpony_luna.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/blitzpony_luna.jpg",
 					source : "http://blitzpony.deviantart.com/art/S-hard-to-say-359899432",
 					id : "blitzpony_luna"
 				}, {
 					colour : "rgb(71, 127, 179)",
-					url : "resource://fimfic-res/banners/banner_images/gsphere_scoots.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/gsphere_scoots.jpg",
 					source : "http://lionel23.deviantart.com/art/The-Newbie-set-an-Academy-Record-356826950",
 					id : "gsphere_scoots"
 				}, {
 					colour : "rgb(112, 108, 167)",
-					url : "resource://fimfic-res/banners/banner_images/stoic_celestia.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/stoic_celestia.jpg",
 					source : "http://thestoicmachine.deviantart.com/art/Radiant-Malevolence-213959523",
 					id : "stoic_celestia"
 				}, {
 					colour : "rgb(134, 125, 88)",
-					url : "resource://fimfic-res/banners/banner_images/moe_canterlot.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/moe_canterlot.jpg",
 					source : "http://derpibooru.org/25",
 					id : "moe_canterlot"
 				}, {
 					colour : "rgb(119, 88, 134)",
-					url : "resource://fimfic-res/banners/banner_images/alasou_costumes.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/alasou_costumes.jpg",
 					source : "http://alasou.deviantart.com/art/Costume-Swap-party-381670764",
 					id : "alasou_costumes"
 				}, {
 					colour : "rgb(82, 90, 143)",
-					url : "resource://fimfic-res/banners/banner_images/pridark_luna.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/pridark_luna.jpg",
 					source : "http://pridark.deviantart.com/art/A-Wonderful-Night-381504014",
 					id : "pridark_luna"
 				}, {
 					colour : "rgb(165, 87, 68)",
-					url : "resource://fimfic-res/banners/banner_images/gign_flutterdash.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/gign_flutterdash.jpg",
 					source : "http://gign-3208.deviantart.com/art/In-the-attic-377732207",
 					id : "gign_flutterdash"
 				}, {
 					colour : "rgb(85, 107, 128)",
-					url : "resource://fimfic-res/banners/banner_images/goben_forest.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/goben_forest.jpg",
 					source : "http://noben.deviantart.com/art/Giggling-at-the-Ghosties-356451219",
 					id : "goben_forest"
 				}, {
 					colour : "rgb(104, 136, 90)",
-					url : "resource://fimfic-res/banners/banner_images/devinian_lyra_bonbon.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/devinian_lyra_bonbon.jpg",
 					source : "http://devinian.deviantart.com/art/Story-of-the-bench-373750983",
 					id : "devinian_lyra_bonbon"
 				}, {
 					colour : "rgb(116, 145, 66)",
-					url : "resource://fimfic-res/banners/banner_images/devinian_fluttershy.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/devinian_fluttershy.jpg",
 					source : "http://devinian.deviantart.com/art/Picnic-with-Kindness-351639714",
 					id : "devinian_fluttershy"
 				}, {
 					colour : "rgb(69, 132, 182)",
-					url : "resource://fimfic-res/banners/banner_images/jackalynn_pinkiedash.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/jackalynn_pinkiedash.jpg",
 					source : "http://jack-a-lynn.deviantart.com/art/Following-the-Rainbow-288432950",
 					id : "jackalynn_pinkiedash"
 				}, {
 					colour : "#5e7520",
-					url : "resource://fimfic-res/banners/banner_images/yakovlev_fluttershy.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/yakovlev_fluttershy.jpg",
 					source : "http://yakovlev-vad.deviantart.com/art/Simple-curiosity-468468925",
 					id : "yakovlev_fluttershy"
 				}, {
 					colour : "#9e75a9",
-					url : "resource://fimfic-res/banners/banner_images/yakovlev_twilight.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/yakovlev_twilight.jpg",
 					source : "http://yakovlev-vad.deviantart.com/art/Time-to-wash-3-490390076",
 					id : "yakovlev_twilight"
 				}, {
 					colour : "#77599a",
-					url : "resource://fimfic-res/banners/banner_images/mymagicdream_twilight.jpg",
+					url : "moz-extension://${uuid}/banners/banner_images/mymagicdream_twilight.jpg",
 					source : "http://my-magic-dream.deviantart.com/art/Twilight-453477065",
 					id : "mymagicdream_twilight"
 				}
@@ -523,7 +525,7 @@ function changeHeader(document) {
 		var char_style = document.createElement("link");
 		char_style.rel = "stylesheet";
 		char_style.type = "text/css";
-		char_style.href = "resource://fimfic-res/characters/characters.css";
+		char_style.href = `moz-extension://${uuid}/characters/characters.css`;
 		document.head.appendChild(char_style);
 	} catch (e) {
 		console.log("Failed to replace header:\n" + e.message);

@@ -7,12 +7,15 @@ var globalMM = Components.classes["@mozilla.org/globalmessagemanager;1"].getServ
 var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"].getService(Components.interfaces.nsIClipboardHelper);
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.importGlobalProperties(["TextEncoder", "TextDecoder"]);
+Components.utils.import("resource://gre/modules/Extension.jsm");
 
 function install(data, reason) {}
 
 function uninstall(data, reason) {}
 
 const uid = Date.now();
+
+var web_ext;
 
 function startup(data, reason) {
 	console.log("FES Starting (" + uid + ")");
@@ -22,12 +25,16 @@ function startup(data, reason) {
 		alias = ioServ.newURI("jar:" + alias.spec + "!/", null, null);
 	}
 	resHandler.setSubstitution("fimfic-res", alias);
+	// create a fake WebExtension so that we can use web_accessible_resources
+	web_ext = new Extension({id: data.id, version: data.version, resourceURI: alias});
+	console.log("Starting WebExtension " + data.id + " " + data.version + " " + web_ext.uuid);
+	web_ext.startup();
 	// then import a module from our namespace
 	Components.utils.import("resource://fimfic-res/sync-download.js");
 	// set up a delayed load frame script for all content processes
 	globalMM.loadFrameScript("resource://fimfic-res/frame-script.js?" + uid, true);
 	// inform the frame scripts of their uid
-	globalMM.broadcastAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:uid", {uid: uid});
+	globalMM.broadcastAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:uid", {uid: uid, uuid: web_ext.uuid});
 	// listen for messages requesting actions that must be performed in the chrome script
 	globalMM.addMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-request", chromeRequestListener);
 }
@@ -35,6 +42,8 @@ function startup(data, reason) {
 function shutdown(data, reason) {
 	if(reason == APP_SHUTDOWN) return;
 	console.log("FES Shutting down (" + uid + ")");
+	// kill our fake WebExtension
+	web_ext.shutdown();
 	// stop loading our frame script into new tabs
 	globalMM.removeDelayedFrameScript("resource://fimfic-res/frame-script.js");
 	// send a message to frame scripts to stop watching for pageloads
