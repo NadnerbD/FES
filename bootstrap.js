@@ -33,8 +33,8 @@ function startup(data, reason) {
 	Components.utils.import("resource://fimfic-res/sync-download.js");
 	// set up a delayed load frame script for all content processes
 	globalMM.loadFrameScript("resource://fimfic-res/frame-script.js?" + uid, true);
-	// inform the frame scripts of their uid
-	globalMM.broadcastAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:uid", {uid: uid, uuid: web_ext.uuid});
+	// listen for frame scripts starting up
+	globalMM.addMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid-request", uidProvider);
 	// listen for messages requesting actions that must be performed in the chrome script
 	globalMM.addMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-request", chromeRequestListener);
 }
@@ -45,15 +45,24 @@ function shutdown(data, reason) {
 	// kill our fake WebExtension
 	web_ext.shutdown();
 	// stop loading our frame script into new tabs
-	globalMM.removeDelayedFrameScript("resource://fimfic-res/frame-script.js");
+	globalMM.removeDelayedFrameScript("resource://fimfic-res/frame-script.js?" + uid);
 	// send a message to frame scripts to stop watching for pageloads
 	globalMM.broadcastAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:shutdown", {uid: uid});
+	// stop listening for frame scripts starting up
+	globalMM.removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid-request", uidProvider);
 	// stop listening for messages from frame scripts
 	globalMM.removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-request", chromeRequestListener);
 	// unload our module
 	Components.utils.unload("resource://fimfic-res/sync-download.js");
 	// unregister our resource handler
 	resHandler.setSubstitution("fimfic-res", null);
+}
+
+function uidProvider(message) {
+	message.target.messageManager.sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:uid", {
+		uid: uid,
+		uuid: web_ext.uuid
+	});
 }
 
 function chromeRequestListener(message) {

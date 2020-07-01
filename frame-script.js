@@ -1,8 +1,9 @@
 var console = Components.utils.import("resource://gre/modules/Console.jsm", {}).console;
 Components.utils.import("resource://fimfic-res/idb-wrapper.js");
 
-// listen for uid message
+// request uid
 addMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid", setUid);
+sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:uid-request", {});
 
 // we need to listen for a shutdown message so that we can stop handling new pages and messages
 addMessageListener("FimfictionEnhancementSuite@nadnerb.net:shutdown", removeFrameListeners);
