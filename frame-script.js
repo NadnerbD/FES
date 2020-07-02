@@ -28,6 +28,8 @@ function setUid(message) {
 }
 
 // run when the script is shut down
+var story_observer;
+var comment_observer;
 function removeFrameListeners(message) {
 	if(uid != undefined && message.data.uid != uid) return;
 	console.log("FES: frame-script received shutdown request (" + uid + ")");
@@ -35,6 +37,8 @@ function removeFrameListeners(message) {
 	content.removeEventListener("message", postMessageForwarder);
 	removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-response", chromeMessageForwarder);
 	removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:shutdown", removeFrameListeners);
+	if(story_observer) story_observer.disconnect();
+	if(comment_observer) comment_observer.disconnect();
 }
 
 // forwards messages from extension content to the chrome script
@@ -529,6 +533,17 @@ function changeHeader(document) {
 		char_style.type = "text/css";
 		char_style.href = `moz-extension://${uuid}/characters/characters.css`;
 		document.head.appendChild(char_style);
+		// dynamically fix the background image urls
+		char_style.addEventListener("load", function() {
+			for(var sheet of document.styleSheets) {
+				if(sheet.href == char_style.href) {
+					for(var rule of sheet.rules) {
+						if(rule.style.backgroundImage)
+							rule.style.backgroundImage = rule.style.backgroundImage.replace("resource://fimfic-res/", `moz-extension://${uuid}/`);
+					}
+				}
+			}
+		});
 	} catch (e) {
 		console.log(`FES Failed to replace header: ${e.message} (${uid})`);
 		console.log(document);
@@ -536,9 +551,9 @@ function changeHeader(document) {
 }
 
 function watchComments(document) {
-	var obs = new document.defaultView.MutationObserver(function(muts) { scrapeComments(document); });
+	comment_observer = new document.defaultView.MutationObserver(function(muts) { scrapeComments(document); });
 	var clist = document.getElementsByClassName("comment_list")[0];
-	obs.observe(clist, {childList: true});
+	comment_observer.observe(clist, {childList: true});
 	// do an initial scrape
 	scrapeComments(document);
 	scrapeStories(document);
@@ -819,7 +834,7 @@ function addLinks(document, db) {
 function scrapeStories(document, observed) {
 	// scrapes information from full-size story boxes
 	// set up an observer to re-call this function if any of the stories we scrape changes it's attributes
-	if(!observed) var obs = new document.defaultView.MutationObserver(function(muts) { scrapeStories(document, true) });
+	if(!observed) story_observer = new document.defaultView.MutationObserver(function(muts) { scrapeStories(document, true) });
 	var stories = new Array();
 	// get all the fullsize story elements on the page
 	var items = document.querySelectorAll("article.story_container");
@@ -856,10 +871,10 @@ function scrapeStories(document, observed) {
 		stories.push(story);
 		if(!observed) {
 			for(var shelf of item.querySelectorAll("li.bookshelf")) {
-				obs.observe(shelf, {attributes: true});
+				story_observer.observe(shelf, {attributes: true});
 			}
-			obs.observe(item.querySelector("a.like_button"), {attributes: true});
-			obs.observe(item.querySelector("a.dislike_button"), {attributes: true});
+			story_observer.observe(item.querySelector("a.like_button"), {attributes: true});
+			story_observer.observe(item.querySelector("a.dislike_button"), {attributes: true});
 		}
 	}
 	if(stories.length) {
