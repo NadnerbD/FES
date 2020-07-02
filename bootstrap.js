@@ -18,7 +18,7 @@ const uid = Date.now();
 var web_ext;
 
 function startup(data, reason) {
-	console.log("FES Starting (" + uid + ")");
+	console.log("FES Revision 5 Starting (" + uid + ")");
 	// first up, set up a resource alias for our local files
 	var alias = ioServ.newFileURI(data.installPath);
 	if(!data.installPath.isDirectory()) {
@@ -31,12 +31,12 @@ function startup(data, reason) {
 	web_ext.startup();
 	// then import a module from our namespace
 	Components.utils.import("resource://fimfic-res/sync-download.js");
-	// set up a delayed load frame script for all content processes
-	globalMM.loadFrameScript("resource://fimfic-res/frame-script.js?" + uid, true);
 	// listen for frame scripts starting up
 	globalMM.addMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid-request", uidProvider);
 	// listen for messages requesting actions that must be performed in the chrome script
 	globalMM.addMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-request", chromeRequestListener);
+	// set up a delayed load frame script for all content processes (after we start listening for uid requests)
+	globalMM.loadFrameScript("resource://fimfic-res/frame-script.js?" + uid, true);
 }
 
 function shutdown(data, reason) {

@@ -8,15 +8,6 @@ sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:uid-request", {});
 // we need to listen for a shutdown message so that we can stop handling new pages and messages
 addMessageListener("FimfictionEnhancementSuite@nadnerb.net:shutdown", removeFrameListeners);
 
-// listen for incoming responses from the chrome script
-addMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-response", chromeMessageForwarder);
-
-// listen for new content being loaded in this tab
-addEventListener("DOMContentLoaded", handleNewPage, false);
-
-// listen for postMessage events directed at the window
-content.addEventListener("message", postMessageForwarder, false, true);
-
 // set our uid
 var uid;
 var uuid;
@@ -24,12 +15,21 @@ function setUid(message) {
 	uid = message.data.uid;
 	uuid = message.data.uuid;
 	removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid", setUid);
+
+	// listen for incoming responses from the chrome script
+	addMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-response", chromeMessageForwarder);
+
+	// listen for new content being loaded in this tab
+	addEventListener("DOMContentLoaded", handleNewPage, false);
+
+	// listen for postMessage events directed at the window
+	content.addEventListener("message", postMessageForwarder, false, true);
 	console.log("FES: frame-script started (" + uid + ")");
 }
 
 // run when the script is shut down
 function removeFrameListeners(message) {
-	if(message.data.uid != uid) return;
+	if(uid != undefined && message.data.uid != uid) return;
 	console.log("FES: frame-script received shutdown request (" + uid + ")");
 	removeEventListener("DOMContentLoaded", handleNewPage);
 	content.removeEventListener("message", postMessageForwarder);
@@ -79,6 +79,7 @@ function handleNewPage(event) {
 }
 
 function changeHeader(document) {
+	console.log(`FES changeHeader: uuid: ${uuid} (${uid})`);
 	// yes I'm petty
 	try {
 		// we'll be replacing it, so remove the home link
@@ -529,7 +530,7 @@ function changeHeader(document) {
 		char_style.href = `moz-extension://${uuid}/characters/characters.css`;
 		document.head.appendChild(char_style);
 	} catch (e) {
-		console.log("Failed to replace header:\n" + e.message);
+		console.log(`FES Failed to replace header: ${e.message} (${uid})`);
 		console.log(document);
 	}
 }
