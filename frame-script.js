@@ -526,6 +526,11 @@ function changeHeader(document) {
 				background-color: rgba(0,0,0,0.9);
 			}
 		`;
+		if(document.querySelector(".user-page-header, .story-page-header")) inject_css.innerHTML += `
+			.page-nav-bars {
+				background-color: #e0dcd7;
+			}
+		`;
 		document.head.appendChild(inject_css);
 		/* character tag replacement */
 		var char_style = document.createElement("link");
