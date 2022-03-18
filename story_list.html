@@ -338,7 +338,7 @@
 				invertSort = false;
 			}
 			lastSort = cat;
-			sortIndicator.firstChild.data = invertSort?"\u25BC":"\u25B2";
+			sortIndicator.firstChild.data = invertSort ? "\u25BC" : "\u25B2";
 			while(sortIndicator.childNodes.length > 1) sortIndicator.removeChild(sortIndicator.lastChild);
 			if(type) sortIndicator.appendChild(type);
 			element.appendChild(sortIndicator);
@@ -379,10 +379,10 @@
 				}
 			}else if(event.target.classList.contains("category") || event.target.classList.contains("character")) {
 				var type = event.target.classList.contains("category");
-				var col = type?document.querySelector("td#categories"):document.querySelector("td#characters");
+				var col = type ? document.querySelector("td#categories") : document.querySelector("td#characters");
 				var cat = event.target.title;
 				moveSortIndicator(cat, col, event.target.cloneNode(true));
-				sortByTag(type?"category":"character", cat, invertSort);
+				sortByTag(type ? "category" : "character", cat, invertSort);
 			}else if(event.target.classList.contains("bookshelf")) {
 				moveSortIndicator(event.target.title, document.querySelector("td#bookshelves"), event.target.cloneNode(true));
 				sortByShelf(event.target.getAttribute("shelf_id"), invertSort);
@@ -472,14 +472,14 @@
 			// sorts the table by a numeric base storyData member
 			// works for booleans and dates as well as numbers
 			// for RIL, Fav, created, and updated, we must deal with the case of an undefined value
-			sortTable(document.querySelector("table"), invert?function(a, b) {
+			sortTable(document.querySelector("table"), invert ? function(a, b) {
 				a = a.storyData[member];
 				b = b.storyData[member];
 				// sort undefined, NaN and Infinity to the end, regardless of sort order
 				if(!isFinite(a)) return 1;
 				if(!isFinite(b)) return -1;
 				return a - b;
-			}:function(b, a) {
+			} : function(b, a) {
 				a = a.storyData[member];
 				b = b.storyData[member];
 				// sort undefined, NaN and Infinity to the end, regardless of sort order
@@ -490,11 +490,11 @@
 		}
 		function sortByAlphabeticMember(member, invert) {
 			// sorts the table by a alphabetic base storyData member
-			sortTable(document.querySelector("table"), invert?function(a, b) {
+			sortTable(document.querySelector("table"), invert ? function(a, b) {
 				a = a.storyData[member].toLowerCase();
 				b = b.storyData[member].toLowerCase();
 				return a < b ? 1 : a > b ? -1 : 0;
-			}:function(b, a) {
+			} : function(b, a) {
 				a = a.storyData[member].toLowerCase();
 				b = b.storyData[member].toLowerCase();
 				return a < b ? 1 : a > b ? -1 : 0;
@@ -502,11 +502,11 @@
 		}
 		function sortByTag(type, tag, invert) {
 			// sorts the table by one of the character or category tags
-			sortTable(document.querySelector("table"), invert?function(a, b) {
+			sortTable(document.querySelector("table"), invert ? function(a, b) {
 				a = a.storyData.tags[type].indexOf(tag) != -1;
 				b = b.storyData.tags[type].indexOf(tag) != -1;
 				return a - b;
-			}:function(b, a) {
+			} : function(b, a) {
 				a = a.storyData.tags[type].indexOf(tag) != -1;
 				b = b.storyData.tags[type].indexOf(tag) != -1;
 				return a - b;
@@ -514,11 +514,11 @@
 		}
 		function sortByShelf(shelf, invert) {
 			// sorts the table by whether it is in a selected bookshelf
-			sortTable(document.querySelector("table"), invert?function(a, b) {
+			sortTable(document.querySelector("table"), invert ? function(a, b) {
 				a = a.storyData.bookshelves[shelf] == true;
 				b = b.storyData.bookshelves[shelf] == true;
 				return a - b;
-			}:function(b, a) {
+			} : function(b, a) {
 				a = a.storyData.bookshelves[shelf] == true;
 				b = b.storyData.bookshelves[shelf] == true;
 				return a - b;
@@ -545,20 +545,22 @@
 						{tag: "td", children: [{tag: "a", attrs: {href: "http://fimfiction.net/user/" + story.author.replace(/ /g, "+")}, children: [story.author]}]},
 						{tag: "td", attrs: {style: "text-align: right;"}, children: [story.wordcount.toLocaleString()]},
 						{tag: "td", attrs: {
-								style: percentRating == 0?"background-color: rgba(255, 0, 0, 0.3);":"background-image: linear-gradient(to right, rgba(0, 255, 0, 0.3) " + percentRating + "%, rgba(255, 0, 0, 0.3) " + percentRating + "%);text-align: right;"
+								style: percentRating == 0 ?
+									"background-color: rgba(255, 0, 0, 0.3);" :
+									"background-image: linear-gradient(to right, rgba(0, 255, 0, 0.3) " + percentRating + "%, rgba(255, 0, 0, 0.3) " + percentRating + "%);text-align: right;"
 							}, 
 							children: [percentRating + "%"]
 						},
 						{tag: "td", children: story.tags.category.map(cat => catTable[cat])},
 						{tag: "td", children: story.tags.character.map(cat => ({tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}}))},
-						{tag: "td", children: story.created?story.created.toDateString().slice(4):""},
-						{tag: "td", children: story.updated?story.updated.toDateString().slice(4):""},
-						{tag: "td", 
+						{tag: "td", children: story.created ? story.created.toDateString().slice(4) : ""},
+						{tag: "td", children: story.updated ? story.updated.toDateString().slice(4) : ""},
+						{tag: "td",
 							attrs: {className: "center"},
 							children: [
 								{tag: "span",
-									attrs: {className: "fa" + (story.my_rating > 0?" like":story.my_rating < 0?" dislike":"")}, 
-									children: story.my_rating > 0?"\uf164":story.my_rating < 0?"\uf165":""
+									attrs: {className: "fa" + (story.my_rating > 0 ? " like" : story.my_rating < 0 ? " dislike" : "")},
+									children: story.my_rating > 0 ? "\uf164" : story.my_rating < 0 ? "\uf165" : ""
 								}
 							]
 						},
@@ -566,7 +568,7 @@
 								shelf => ({tag: "span",
 									attrs: {
 										className: ["fa", "pe"][["font-awesome", "pony-emoji"].indexOf(shelf.icon_type)] + " bookshelf",
-										style: story.bookshelves && story.bookshelves[shelf.id]?"":"color: rgba(0, 0, 0, 0.1)",
+										style: story.bookshelves && story.bookshelves[shelf.id] ? "" : "color: rgba(0, 0, 0, 0.1)",
 										title: shelf.name,
 										shelf_id: shelf.id
 									},
@@ -598,8 +600,8 @@
 							var update = {
 								id: row.storyData.id, 
 								comment_count: items.length, 
-								oldest_comment: items.length?items[0].date:NaN, 
-								newest_comment: items.length?items[items.length - 1].date:NaN
+								oldest_comment: items.length ? items[0].date : NaN,
+								newest_comment: items.length ? items[items.length - 1].date : NaN
 							};
 							countUpdates.push(update);
 							if(countUpdatesRequired > 0 && countUpdates.length >= countUpdatesRequired) {
@@ -891,7 +893,7 @@
 								}
 								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
 									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]},
-									{tag: "input", attrs: {type: "checkbox", checked: setting.value?"checked":"", onchange: changeBool(setting)}}
+									{tag: "input", attrs: {type: "checkbox", checked: setting.value ? "checked" : "", onchange: changeBool(setting)}}
 								]});
 								break;
 						}
@@ -905,7 +907,7 @@
 						tab => ({
 							tag: "li",
 							attrs: {
-								className: profiles.indexOf(tab) == selectedProfileIndex?"selected_tab":"",
+								className: profiles.indexOf(tab) == selectedProfileIndex ? "selected_tab" : "",
 								profileIndex: profiles.indexOf(tab),
 								onclick: bindTabClick(tab)
 							},
