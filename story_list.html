@@ -266,7 +266,7 @@
 	<script type="text/javascript">
 		var db;
 		var charTable = {};
-		//l2 = [for(cat of l) {tag: "a", attrs: {title: cat, className: "category " + cat.toLowerCase().replace(/ /g, "_")}, children: [cat.slice(0, 2)]}]
+		//l2 = l.map(cat => ({tag: "a", attrs: {title: cat, className: "category " + cat.toLowerCase().replace(/ /g, "_")}, children: [cat.slice(0, 2)]}))
 		var catTable = {
 			"Sex": {tag: "a", attrs: {title: "Sex", className: "category sex"}, children: ["Se"]},
 			"Gore": {tag: "a", attrs: {title: "Gore", className: "category gore"}, children: ["Go"]},
@@ -549,8 +549,8 @@
 							}, 
 							children: [percentRating + "%"]
 						},
-						{tag: "td", children: [for(cat of story.tags.category) catTable[cat]]},
-						{tag: "td", children: [for(cat of story.tags.character) {tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}}]},
+						{tag: "td", children: story.tags.category.map(cat => catTable[cat])},
+						{tag: "td", children: story.tags.character.map(cat => ({tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}}))},
 						{tag: "td", children: story.created?story.created.toDateString().slice(4):""},
 						{tag: "td", children: story.updated?story.updated.toDateString().slice(4):""},
 						{tag: "td", 
@@ -562,8 +562,8 @@
 								}
 							]
 						},
-						{tag: "td", children: [
-								for(shelf of bookshelf_info) {tag: "span",
+						{tag: "td", children: bookshelf_info.map(
+								shelf => ({tag: "span",
 									attrs: {
 										className: ["fa", "pe"][["font-awesome", "pony-emoji"].indexOf(shelf.icon_type)] + " bookshelf",
 										style: story.bookshelves && story.bookshelves[shelf.id]?"":"color: rgba(0, 0, 0, 0.1)",
@@ -571,8 +571,8 @@
 										shelf_id: shelf.id
 									},
 									children: [shelf.icon_data]
-								}
-							]
+								})
+							)
 						},
 						{tag: "td", attrs: {style: "text-align: right;"}} // this will contain the comment count
 					]};
@@ -663,7 +663,7 @@
 					{name: "Destination Folder", type: "FilePath", value: ""},
 					{name: "Source Folder", type: "FilePath", value: ""},
 					{name: "Files to Sync", type: "select", value: "Selected", options: ["Selected", "Bookshelf", "Upvotes", "Downvotes"]},
-					{name: "Bookshelf", type: "select", value: "", options: [for(shelf of bookshelf_info) shelf.name]},
+					{name: "Bookshelf", type: "select", value: "", options: bookshelf_info.map(shelf => shelf.name)},
 					{name: "Download Type", type: "select", value: "html", options: ["txt", "html", "epub"]},
 					{name: "Delete Duplicates", type: "bool", value: false},
 					{name: "Keep Old Versions", type: "bool", value: false}
@@ -877,7 +877,10 @@
 								}
 								struct.push({tag: "div", attrs: {style: "padding-bottom: 0.5em"}, children: [
 									{tag: "label", attrs: {style: "float: left; margin-top: 1px; width: 10em;"}, children: [setting.name + ":"]}, 
-									{tag: "select", attrs: {onchange: changeSelect(setting)}, children: [for (option of setting.options) {tag: "option", attrs: option==setting.value?{selected: "selected"}:{}, children: [option]}]}
+									{tag: "select", attrs: {onchange: changeSelect(setting)}, children: setting.options.map(
+											option => ({tag: "option", attrs: option == setting.value ? {selected: "selected"} : {}, children: [option]})
+										)
+									}
 								]});
 								break;
 							case "bool":
@@ -899,8 +902,8 @@
 					)});
 				}
 				function createTabList() {
-					return createTree({tag: "ul", children: [
-						for (tab of profiles) {
+					return createTree({tag: "ul", children: profiles.map(
+						tab => ({
 							tag: "li",
 							attrs: {
 								className: profiles.indexOf(tab) == selectedProfileIndex?"selected_tab":"",
@@ -909,9 +912,9 @@
 							},
 							children: [
 								tab.name
-							].concat(profiles.length > 1?{tag: "a", attrs: {className: "fa close_button", onclick: deleteProfileTab, href: "javascript:void(0);"}}:[])
-						}
-					].concat(
+							].concat(profiles.length > 1 ? {tag: "a", attrs: {className: "fa close_button", onclick: deleteProfileTab, href: "javascript:void(0);"}} : [])
+						})
+					).concat(
 						{
 							tag: "li",
 							attrs: {

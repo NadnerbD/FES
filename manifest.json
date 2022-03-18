@@ -1,7 +1,17 @@
 {
 	"manifest_version": 2,
 	"name": "FES",
-	"version": "1.0",
+	"description": "Fimfiction Enhancement Suite, adds comment-related functionality",
+	"version": "1.6",
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "FimfictionEnhancementSuite@nadnerb.net",
+			"strict_min_version": "68.0"
+		}
+	},
+	"legacy": {
+		"type": "bootstrap"
+	},
 	"web_accessible_resources": [
 		"logo_fix.png",
 		"characters/characters.css",

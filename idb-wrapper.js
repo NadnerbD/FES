@@ -1,5 +1,5 @@
 // we like our console
-if(typeof console == "undefined") var console = Components.utils.import("resource://gre/modules/Console.jsm", {}).console;
+if(typeof console == "undefined") var console = ChromeUtils.import("resource://gre/modules/Console.jsm").console;
 
 // sometimes, if we're running from chrome, we won't have access to the indexedDB object
 if(typeof indexedDB == "undefined") Components.utils.importGlobalProperties(["indexedDB"]);
@@ -11,8 +11,7 @@ function FFDB(name, callback, aid) {
 	function openDB(name, callback, aid) {
 		if(aid) {
 			// access an arbitrary domain context!
-			var puri = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService).newURI(aid, null, null);
-			var principal = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager).getCodebasePrincipal(puri);
+			var principal = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager).createContentPrincipalFromOrigin(aid);
 			var req = indexedDB.openForPrincipal(principal, name, 2);
 		}else{
 			var req = indexedDB.open(name, 2);

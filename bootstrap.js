@@ -1,13 +1,13 @@
 // No bullshit, just what's necessary to actually make shit work
-var console = Components.utils.import("resource://gre/modules/Console.jsm", {}).console;
+var console = ChromeUtils.import("resource://gre/modules/Console.jsm").console;
 var ioServ = Components.classes["@mozilla.org/network/io-service;1"].createInstance(Components.interfaces.nsIIOService);
 var resHandler = ioServ.getProtocolHandler("resource").QueryInterface(Components.interfaces.nsIResProtocolHandler);
 var winMed = Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator);
-var globalMM = Components.classes["@mozilla.org/globalmessagemanager;1"].getService(Components.interfaces.nsIMessageListenerManager);
+var globalMM = ChromeUtils.import("resource://gre/modules/Services.jsm").Services.mm;
 var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"].getService(Components.interfaces.nsIClipboardHelper);
-Components.utils.import("resource://gre/modules/osfile.jsm");
+var Extension = ChromeUtils.import("resource://gre/modules/Extension.jsm").Extension;
+var OS = ChromeUtils.import("resource://gre/modules/osfile.jsm").OS;
 Components.utils.importGlobalProperties(["TextEncoder", "TextDecoder"]);
-Components.utils.import("resource://gre/modules/Extension.jsm");
 
 function install(data, reason) {}
 
@@ -18,19 +18,17 @@ const uid = Date.now();
 var web_ext;
 
 function startup(data, reason) {
-	console.log("FES Revision 5 Starting (" + uid + ")");
+	if(data.id.endsWith("_webext")) return;
+	console.log("FES Revision 6 Starting (" + uid + ")");
 	// first up, set up a resource alias for our local files
-	var alias = ioServ.newFileURI(data.installPath);
-	if(!data.installPath.isDirectory()) {
-		alias = ioServ.newURI("jar:" + alias.spec + "!/", null, null);
-	}
-	resHandler.setSubstitution("fimfic-res", alias);
+	resHandler.setSubstitution("fimfic-res", data.resourceURI);
 	// create a fake WebExtension so that we can use web_accessible_resources
-	web_ext = new Extension({id: data.id, version: data.version, resourceURI: alias});
-	console.log("Starting WebExtension " + data.id + " " + data.version + " " + web_ext.uuid);
+	// based on code from https://palant.info/2015/10/15/using-webextensions-apis-in-a-classic-extension/
+	web_ext = new Extension({id: data.id + "_webext", version: data.version, resourceURI: data.resourceURI});
+	console.log("Created WebExtension " + web_ext.id + " " + web_ext.version + " " + web_ext.uuid);
 	web_ext.startup();
 	// then import a module from our namespace
-	Components.utils.import("resource://fimfic-res/sync-download.js");
+	syncDirectories = ChromeUtils.import("resource://fimfic-res/sync-download.js").syncDirectories;
 	// listen for frame scripts starting up
 	globalMM.addMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid-request", uidProvider);
 	// listen for messages requesting actions that must be performed in the chrome script
@@ -52,8 +50,6 @@ function shutdown(data, reason) {
 	globalMM.removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid-request", uidProvider);
 	// stop listening for messages from frame scripts
 	globalMM.removeMessageListener("FimfictionEnhancementSuite@nadnerb.net:chrome-request", chromeRequestListener);
-	// unload our module
-	Components.utils.unload("resource://fimfic-res/sync-download.js");
 	// unregister our resource handler
 	resHandler.setSubstitution("fimfic-res", null);
 }

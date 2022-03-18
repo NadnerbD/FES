@@ -1,5 +1,5 @@
-var console = Components.utils.import("resource://gre/modules/Console.jsm", {}).console;
-Components.utils.import("resource://fimfic-res/idb-wrapper.js");
+var console = ChromeUtils.import("resource://gre/modules/Console.jsm").console;
+var FFDB = ChromeUtils.import("resource://fimfic-res/idb-wrapper.js").FFDB;
 
 // request uid
 addMessageListener("FimfictionEnhancementSuite@nadnerb.net:uid", setUid);
@@ -607,7 +607,7 @@ function scrapeComments(document) {
 			};
 			comment.data = function (comment, ci) { // initiate async loading of comment data
 				var ctype = ci.getAttribute("data-type"); // NOTE: our storage assumes this will always be the same
-				var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+				var req = new XMLHttpRequest();
 				req.open("GET", document.location.origin + "/ajax/comments/" + ctype + "/" + comment.id + "/edit", true);
 				req.onload = function() {
 					var elem = document.createElement("div");
@@ -683,7 +683,7 @@ function scrapeComments(document) {
 		// record an image in the database
 		function saveUserAvatar(name, imgSrc) {
 			console.log("Getting avatar: " + imgSrc + " for " + name);
-			var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+			var req = new XMLHttpRequest();
 			req.open("GET", imgSrc, true);
 			req.responseType = "blob";
 			req.onload = function() {
@@ -760,8 +760,8 @@ function addLinks(document, db) {
 				down: parseInt((item.querySelector("i.fa-thumbs-down")||{nextSibling: {data: "0"}}).nextSibling.data.replace(/,/g, ""))
 			},
 			tags: {
-				category: [for(catLink of item.querySelectorAll("a.story_category")) catLink.title],
-				character: [for(charLink of item.querySelectorAll("div.character-icons a")) charLink.title]
+				category: Array.from(item.querySelectorAll("a.story_category")).map(catLink => catLink.title),
+				character: Array.from(item.querySelectorAll("div.character-icons a")).map(charLink => charLink.title)
 			},
 			bookshelves: {}
 		};
@@ -860,8 +860,8 @@ function scrapeStories(document, observed) {
 				down: parseInt((item.querySelector("span.dislikes").firstChild||{data:"0"}).data.replace(/,/g, ""))
 			},
 			tags: {
-				category: [for(catLink of item.querySelectorAll("a.tag-genre")) catLink.firstChild.data],
-				character: [for(charLink of item.querySelectorAll("a.tag-character")) charLink.title.split(" ( ")[0]]
+				category: Array.from(item.querySelectorAll("a.tag-genre")).map(catLink => catLink.firstChild.data),
+				character: Array.from(item.querySelectorAll("a.tag-character")).map(charLink => charLink.title.split(" ( ")[0])
 			},
 			bookshelves: {},
 			my_rating: item.querySelector("a.like_button_selected") ? 1 : item.querySelector("a.dislike_button_selected") ? -1 : 0,
