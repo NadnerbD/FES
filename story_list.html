@@ -552,7 +552,11 @@
 							children: [percentRating + "%"]
 						},
 						{tag: "td", children: story.tags.category.map(cat => catTable[cat])},
-						{tag: "td", children: story.tags.character.map(cat => ({tag: "img", attrs: {src: charTable[cat], title: cat, className: "character"}}))},
+						{tag: "td", children: story.tags.character.map(cat => ({tag: "img", attrs: {
+							src: charTable[cat] || console.log(`${JSON.stringify(cat)} not found in charTable`),
+							title: cat,
+							className: "character"
+						}}))},
 						{tag: "td", children: story.created ? story.created.toDateString().slice(4) : ""},
 						{tag: "td", children: story.updated ? story.updated.toDateString().slice(4) : ""},
 						{tag: "td",
