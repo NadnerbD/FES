@@ -669,11 +669,10 @@
 					{name: "Keep Old Versions", type: "bool", value: false}
 				];
 				var profiles = JSON.parse(localStorage.getItem("profiles"));
+				var selectedProfileIndex = parseInt(localStorage.getItem("selectedProfileIndex")) || 0;
 				if(profiles == null) {
 					profiles = [{name: "Profile 1", settings: defaultProfileSettings}];
-					var selectedProfileIndex = 0;
 				}else{
-					var selectedProfileIndex = parseInt(localStorage.getItem("selectedProfileIndex"));
 					// the actual options for these dropdowns can change dynamically, so we set the options on select items to the default
 					function getDefaultOptions(name) {
 						for(var setting of defaultProfileSettings) {
@@ -1154,6 +1153,30 @@
 				})();
 			}, {title: "JSON File", filter: "*.json"})();
 		}
+		function loadSyncProfiles() {
+			pickFile("Load Sync Profiles", 0, function(filePath) {
+				console.log("Loading sync profiles from " + filePath);
+				readFile(filePath, function(data) {
+					data = JSON.parse(data);
+					console.log(`Loaded sync profiles: ${data.profiles.map(p => p.name).join(', ')}`);
+					localStorage.setItem("profiles", JSON.stringify(data.profiles));
+					localStorage.setItem("selectedProfileIndex", data.selectedProfileIndex);
+				})();
+			}, {title: "JSON File", filter: "*.json"})();
+		}
+		function saveSyncProfiles() {
+			pickFile("Save Sync Profiles", 1, function(filePath) {
+				console.log("Saving sync profiles to " + filePath);
+				postMessage({
+					request: "WriteFile",
+					name: filePath,
+					data: JSON.stringify({
+						"profiles": JSON.parse(localStorage.getItem("profiles")),
+						"selectedProfileIndex": parseInt(localStorage.getItem("selectedProfileIndex"))
+					}, null, "\t")
+				}, "*");
+			}, {title: "JSON File", filter: "*.json"})();
+		}
 	</script>
 </head>
 <body onload="init()">
@@ -1183,6 +1206,8 @@
 		<a style="float:right;margin-right:1em;" href="#sync_interface">Sync Stories</a>
 		<a style="float:right;margin-right:1em;" href="javascript:saveBackup()">Save Backup</a>
 		<a style="float:right;margin-right:1em;" href="javascript:loadBackup()">Load Backup</a>
+		<a style="float:right;margin-right:1em;" href="javascript:saveSyncProfiles()">Save Sync Profiles</a>
+		<a style="float:right;margin-right:1em;" href="javascript:loadSyncProfiles()">Load Sync Profiles</a>
 	</div>
 </body>
 </html>
