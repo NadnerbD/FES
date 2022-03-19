@@ -176,7 +176,7 @@ a.tag-character[data-tag="mr.-cake"], a.tag-character[href="/tag/mr.-cake"] {
 	background-image: url(resource://fimfic-res/characters/mr_cake.png);
 }
 
-a.tag-character[data-tag="mrs.-cake"], a.tag-character[href="/tag/mrs.-cake"] {
+a.tag-character[data-tag="mrs-cake"], a.tag-character[href="/tag/mrs-cake"] {
 	background-image: url(resource://fimfic-res/characters/mrs_cake.png);
 }
 
@@ -882,4 +882,20 @@ a.tag-character[data-tag="twilicorn"], a.tag-character[href="/tag/twilicorn"] {
 
 a.tag-character[data-tag="tempest-shadow"], a.tag-character[href="/tag/tempest-shadow"] {
 	background-image: url(resource://fimfic-res/characters/tempest.png);
+}
+
+a.tag-character[data-tag="raven-inkwell"], a.tag-character[href="/tag/raven-inkwell"] {
+	background-image: url(resource://fimfic-res/characters/raven-inkwell.png);
+}
+
+a.tag-character[data-tag="lemon-hearts"], a.tag-character[href="/tag/lemon-hearts"] {
+	background-image: url(resource://fimfic-res/characters/lemon-hearts.png);
+}
+
+a.tag-character[data-tag="pear-butter"], a.tag-character[href="/tag/pear-butter"] {
+	background-image: url(resource://fimfic-res/characters/pear-butter.png);
+}
+
+a.tag-character[data-tag="bright-mac"], a.tag-character[href="/tag/bright-mac"] {
+	background-image: url(resource://fimfic-res/characters/bright-mac.png);
 }
