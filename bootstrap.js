@@ -6,8 +6,7 @@ var winMed = Components.classes['@mozilla.org/appshell/window-mediator;1'].getSe
 var globalMM = ChromeUtils.import("resource://gre/modules/Services.jsm").Services.mm;
 var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"].getService(Components.interfaces.nsIClipboardHelper);
 var Extension = ChromeUtils.import("resource://gre/modules/Extension.jsm").Extension;
-var OS = ChromeUtils.import("resource://gre/modules/osfile.jsm").OS;
-Components.utils.importGlobalProperties(["TextEncoder", "TextDecoder"]);
+Components.utils.importGlobalProperties(["TextEncoder", "TextDecoder", "IOUtils"]);
 
 function install(data, reason) {}
 
@@ -104,7 +103,7 @@ function chromeRequestListener(message) {
 		case "WriteFile":
 			var encoder = new TextEncoder();
 			var dataArray = encoder.encode(message.data.data);
-			OS.File.writeAtomic(message.data.name, dataArray, {tmpPath: message.data.name + ".tmp"}).then(
+			IOUtils.write(message.data.name, dataArray, {tmpPath: message.data.name + ".tmp"}).then(
 				function () {
 					message.target.messageManager.sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-response", {
 						origin: message.data.origin,
@@ -115,7 +114,7 @@ function chromeRequestListener(message) {
 			);
 		break;
 		case "ReadFile":
-			OS.File.read(message.data.name).then(
+			IOUtils.read(message.data.name).then(
 				function (dataArray) {
 					var decoder = new TextDecoder();
 					message.target.messageManager.sendAsyncMessage("FimfictionEnhancementSuite@nadnerb.net:chrome-response", {

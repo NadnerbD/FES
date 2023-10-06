@@ -1,5 +1,5 @@
 var Downloads = ChromeUtils.import("resource://gre/modules/Downloads.jsm").Downloads;
-var OS = ChromeUtils.import("resource://gre/modules/osfile.jsm").OS;
+Components.utils.importGlobalProperties(["IOUtils"]);
 
 async function syncDirectories(files, dest, source, deleteFromSource, keepOld, log) {
 	// moves all <files> to <dest>, from <source> if available, downloading from <file.url> if not
@@ -14,12 +14,12 @@ async function syncDirectories(files, dest, source, deleteFromSource, keepOld, l
 			list.add(download);
 			download.start();
 		}
-		var destPath = OS.Path.join(dest, file.name);
-		var sourcePath = OS.Path.join(source, file.name);
+		var destPath = PathUtils.join(dest, file.name);
+		var sourcePath = PathUtils.join(source, file.name);
 		try {
-			var destInfo = await OS.File.stat(destPath);
+			var destInfo = await IOUtils.stat(destPath);
 		} catch(e) {
-			if(e instanceof OS.File.Error && e.becauseNoSuchFile) {
+			if(e instanceof DOMException && e.name == "NotFoundError") {
 				var destInfo = null;
 			}else{
 				throw e;
@@ -27,9 +27,9 @@ async function syncDirectories(files, dest, source, deleteFromSource, keepOld, l
 		}
 		if(source) {
 			try {
-				var sourceInfo = await OS.File.stat(sourcePath);
+				var sourceInfo = await IOUtils.stat(sourcePath);
 			} catch(e) {
-				if(e instanceof OS.File.Error && e.becauseNoSuchFile) {
+				if(e instanceof DOMException && e.name == "NotFoundError") {
 					var sourceInfo = null;
 				}else{
 					throw e;
@@ -46,24 +46,24 @@ async function syncDirectories(files, dest, source, deleteFromSource, keepOld, l
 		}else if(sourceInfo != null && destInfo == null) {
 			// we must move the file
 			log("File '" + file.name + "' in source. Moving.");
-			await OS.File.move(sourcePath, destPath);
+			await IOUtils.move(sourcePath, destPath);
 		}else if(sourceInfo != null && destInfo != null && deleteFromSource) {
 			// source file is a duplicate, let's delete it
 			log("Duplicate of '" + file.name + "' in source directory. Deleting.");
-			await OS.File.remove(sourcePath);
+			await IOUtils.remove(sourcePath);
 		}
-		if(destInfo != null && destInfo.lastModificationDate < file.modified) {
+		if(destInfo != null && new Date(destInfo.lastModified) < file.modified) {
 			// file is stale, redownload
 			if(keepOld) {
 				log("File '" + file.name + "' has been updated, and keepOld is set. Moving old file.");
-				await OS.File.makeDir(OS.Path.join(dest, "old"), {ignoreExisting: true});
+				await IOUtils.makeDirectory(PathUtils.join(dest, "old"), {ignoreExisting: true});
 				var num = 2;
-				var movePath = OS.Path.join(dest, "old", file.name);
-				while(await OS.File.exists(movePath)) {
-					var movePath = OS.Path.join(dest, "old", file.name + "." + num);
+				var movePath = PathUtils.join(dest, "old", file.name);
+				while(await IOUtils.exists(movePath)) {
+					var movePath = PathUtils.join(dest, "old", file.name + "." + num);
 					num++;
 				}
-				await OS.File.move(destPath, movePath);
+				await IOUtils.move(destPath, movePath);
 				log("Updated file '" + file.name + "' has been moved. Downloading.");
 				await queueDownload(file.url, destPath);
 			}else{
@@ -80,23 +80,14 @@ async function syncDirectories(files, dest, source, deleteFromSource, keepOld, l
 		}
 		return false;
 	}
-	var dirIter = new OS.File.DirectoryIterator(dest);
-	dirIter.forEach(
-		function (dirEntry) {
-			if(!dirEntry.isDir && !isInFileList(dirEntry.name)) {
-				log("Unknown file in destination: " + dirEntry.name);
-			}
+	for(const path of await IOUtils.getChildren(dest)) {
+		var { type } = await IOUtils.stat(path);
+		var filename = PathUtils.filename(path);
+		if(type != "directory" && !isInFileList(filename)) {
+			log("Unknown file in destination: " + filename);
 		}
-	).then(
-		function () {
-			dirIter.close();
-			log("Sync Complete");
-		},
-		function (error) {
-			dirIter.close();
-			log(error);
-		}
-	);
+	}
+	log("Sync Complete");
 }
 
 var EXPORTED_SYMBOLS = ["syncDirectories"];
