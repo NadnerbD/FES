@@ -18,7 +18,7 @@ var web_ext;
 
 function startup(data, reason) {
 	if(data.id.endsWith("_webext")) return;
-	console.log("FES Revision 6 Starting (" + uid + ")");
+	console.log("FES Revision 7 Starting (" + uid + ")");
 	// first up, set up a resource alias for our local files
 	resHandler.setSubstitution("fimfic-res", data.resourceURI);
 	// create a fake WebExtension so that we can use web_accessible_resources

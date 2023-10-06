@@ -1,5 +1,4 @@
 var Downloads = ChromeUtils.import("resource://gre/modules/Downloads.jsm").Downloads;
-Components.utils.importGlobalProperties(["IOUtils"]);
 
 async function syncDirectories(files, dest, source, deleteFromSource, keepOld, log) {
 	// moves all <files> to <dest>, from <source> if available, downloading from <file.url> if not
